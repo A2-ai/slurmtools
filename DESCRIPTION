@@ -1,0 +1,16 @@
+Package: slurmtools
+Title: slurm tooling 
+Version: 0.0.0.9000
+Authors@R: 
+    person("Devin", "Pastoor", , "devin@a2-ai.com", role = c("aut", "cre"))
+Description: What the package does (one paragraph).
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    brio,
+    fs,
+    processx,
+    rlang,
+    whisker
