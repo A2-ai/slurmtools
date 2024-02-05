@@ -12,7 +12,7 @@
 submit_nonmem_model <-
   function(.mod,
            partition = getOption('slurmtools.partitions'),
-           ncpu = 4,
+           ncpu = 1,
            overwrite = FALSE,
            dry_run = FALSE,
            ...,
