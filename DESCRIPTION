@@ -10,7 +10,11 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: 
     brio,
+    dplyr,
     fs,
     processx,
     rlang,
     whisker
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
