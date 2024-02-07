@@ -24,6 +24,11 @@ submit_nonmem_model <-
       rlang::abort("no partition selected")
     }
     partition <- match.arg(partition)
+    ### JENNA
+
+    check_slurm_partitions(ncpu)
+
+    ### JENNA
     if (!inherits(.mod, "bbi_nonmem_model") &&
         !fs::file_exists(.mod)) {
       stop(
