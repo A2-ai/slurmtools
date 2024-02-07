@@ -37,7 +37,8 @@ check_slurm_partitions <- function(ncpus) {
   avail_cpus <- processx::run(sinfobin, c("--format", "%P,%c"), )
   # make data frame
   avail_cpus_text <- as.character(avail_cpus)
-  avail_cpus_table <- read.delim(text = avail_cpus_text, sep = ",", skip = 1, blank.lines.skip = TRUE, col.names = c("PARTITIONS", "CPUS"))
+  avail_cpus_table <- read.delim(text = avail_cpus_text, sep = ",",
+                                 skip = 1, col.names = c("PARTITIONS", "CPUS"))
   print(avail_cpus_table)
 
   # sum available CPUs
