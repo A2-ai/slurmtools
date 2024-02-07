@@ -26,7 +26,7 @@ submit_nonmem_model <-
     partition <- match.arg(partition)
     ### JENNA
 
-    check_slurm_partitions(ncpu)
+    check_slurm_partitions(ncpu, partition)
 
     ### JENNA
     if (!inherits(.mod, "bbi_nonmem_model") &&

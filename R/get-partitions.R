@@ -28,7 +28,7 @@ get_slurm_partitions <- function() {
   process_slurm_partitions(res$stdout)
 }
 
-check_slurm_partitions <- function(ncpus) {
+check_slurm_partitions <- function(ncpus, partition) {
   sinfobin <- Sys.which("sinfo")
   if (!nzchar(sinfobin)) {
     rlang::abort("could not find sinfo binary")
@@ -41,12 +41,10 @@ check_slurm_partitions <- function(ncpus) {
                                  skip = 1, col.names = c("PARTITIONS", "CPUS"))
   print(avail_cpus_table)
 
-  # sum available CPUs
-  sum_avail_cpus <- sum(avail_cpus_table$CPUS, na.rm = TRUE)
-  print(paste("sum: ", sum_avail_cpus))
-
+  num_avail_cpus <- avail_cpus_table[avail_cpus_table$PARTITIONS == partition,]$CPUS
+  print(paste0("# of cpus in partition: ", num_avail_cpus, ", # of cups requested: ", ncpus))
   # if # requested cpus > available CPUs, throw an error
-  if(ncpus > sum_avail_cpus) {
+  if(ncpus > num_avail_cpus) {
     rlang::abort("number of requested CPUs greater than number of available CPUs")
   }
 }
