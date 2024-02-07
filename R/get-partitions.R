@@ -35,8 +35,14 @@ check_slurm_partitions <- function(ncpus, partition) {
   }
   # shell out for partitions
   avail_cpus <- processx::run(sinfobin, c("--format", "%P,%c"), )
-  # make data frame
+
+  # make shell output character
   avail_cpus_text <- as.character(avail_cpus)
+
+  # take out * char for default node
+  avail_cpus_text <- gsub('[*]', '', avail_cpus_text)
+
+  # make data frame
   avail_cpus_table <- read.delim(text = avail_cpus_text, sep = ",",
                                  skip = 1, col.names = c("PARTITIONS", "CPUS"))
 
