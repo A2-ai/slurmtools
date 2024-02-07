@@ -33,14 +33,18 @@ check_slurm_partitions <- function(ncpus) {
   if (!nzchar(sinfobin)) {
     rlang::abort("could not find sinfo binary")
   }
-
+  # shell out for partitions
   avail_cpus <- processx::run(sinfobin, c("--format", "%P,%c"), )
+  # make data frame
   avail_cpus_text <- as.character(avail_cpus)
   avail_cpus_table <- read.delim(text = avail_cpus_text, sep = ",", skip = 1, blank.lines.skip = TRUE, col.names = c("PARTITIONS", "CPUS"))
   print(avail_cpus_table)
 
+  # sum available CPUs
   sum_avail_cpus <- sum(avail_cpus_table$CPUS, na.rm = TRUE)
+  print(paste("sum: ", sum_avail_cpus))
 
+  # if # requested cpus > available CPUs, throw an error
   if(ncpus > sum_avail_cpus) {
     rlang::abort("number of requested CPUs greater than number of available CPUs")
   }
