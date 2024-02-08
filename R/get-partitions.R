@@ -52,23 +52,32 @@ process_slurm_partitions <- function(table){
 get_slurm_partitions <- function(cache = TRUE) {
   table <- if (cache) {
     if (is.null(partition_cache[["partition_by_cpu"]])) {
-      partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu()
+      partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu(cache)
     }
     partition_cache[["partition_by_cpu"]]
   } else {
-    lookup_partitions_by_cpu()
+    lookup_partitions_by_cpu(cache)
   }
 
   return(table$PARTITION)
 }
 
-partition_advice <- function(ncpus, partition) {
+partition_advice <- function(ncpus, partition, cache) {
   library(dplyr)
   library(glue)
-  table <- lookup_partitions_by_cpu()
+  table <- if (cache) {
+    if (is.null(partition_cache[["partition_by_cpu"]])) {
+      partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu(cache)
+    }
+    partition_cache[["partition_by_cpu"]]
+  } else {
+    lookup_partitions_by_cpu(cache)
+  }
+
   # take out partition (not necessary, but could help later)
-  table1 <- table[table$PARTITION != partition, ]
-  table2 <- table1 %>% filter(CPUS >= ncpus) %>%  arrange(CPUS, MEMORY)
+  # table <- table[table$PARTITION != partition, ]
+
+  table2 <- table %>% filter(CPUS >= ncpus) %>%  arrange(CPUS, MEMORY)
   list_of_partitions <- table2$PARTITION
   if(length(list_of_partitions) > 1) {
     return(glue("You might try {list_of_partitions[1]} or {list_of_partitions[2]}"))
@@ -80,14 +89,14 @@ partition_advice <- function(ncpus, partition) {
 
 }
 
-#check_slurm_partitions(3, "cpu2mem4gb")
+
 check_slurm_partitions <- function(ncpus, partition, cache = TRUE) {
   library(glue)
   # if get_slurm_partitions has already run (which it definitely has),
   # the table will be cached
   avail_cpus_table <- if (cache) {
     if (is.null(partition_cache[["partition_by_cpu"]])) {
-      partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu()
+      partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu(cache)
     }
     partition_cache[["partition_by_cpu"]]
   } else {
@@ -99,7 +108,7 @@ check_slurm_partitions <- function(ncpus, partition, cache = TRUE) {
 
   # if # requested cpus > available CPUs, throw an error
   if(ncpus > num_avail_cpus) {
-    suggestion <- partition_advice(ncpus, partition)
+    suggestion <- partition_advice(ncpus, partition, cache)
     rlang::abort(glue("number of requested CPUs ({ncpus}) greater than number of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"))
   }
 }
