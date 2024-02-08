@@ -10,11 +10,11 @@
 #' @param bbi_config_path path to bbi config file
 #' @export
 
-cache_env <- new.env(parent = emptyenv())
+
 
 submit_nonmem_model <-
   function(.mod,
-           partition = getOption('slurmtools.partitions'),
+           partition = get_slurm_partitions(),
            ncpu = 1,
            overwrite = FALSE,
            dry_run = FALSE,
@@ -30,10 +30,8 @@ submit_nonmem_model <-
 
     ### JENNA
 
-    check_var <- paste0(ncpu, "-", partition)
-    if(is.null(cache_env[[check_var]])) {
-      cache_env[[check_var]] <- check_slurm_partitions(ncpu, partition)
-    }
+    check_slurm_partitions(ncpu, partition)
+
 
     ### JENNA
 
