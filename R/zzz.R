@@ -1,4 +1,10 @@
 .onLoad <- function(libname, pkgname) {
+  ### JENNA
+  #cache_env <- new.env(parent = emptyenv())
+
+
+
+  ### JENNA
   if (is.null(getOption('slurmtools.slurm_job_template_path'))) {
     rlang::warn(
       "option('slurmtools.slurm_job_template_path') is not set. Please set it for job submission defaults to work."

@@ -9,6 +9,9 @@
 #' @param submission_root directory to track job submission scripts and output
 #' @param bbi_config_path path to bbi config file
 #' @export
+
+cache_env <- new.env(parent = emptyenv())
+
 submit_nonmem_model <-
   function(.mod,
            partition = getOption('slurmtools.partitions'),
@@ -24,11 +27,16 @@ submit_nonmem_model <-
       rlang::abort("no partition selected")
     }
     partition <- match.arg(partition)
-    ### JENNA
-
-    check_slurm_partitions(ncpu, partition)
 
     ### JENNA
+
+    check_var <- paste0(ncpu, "-", partition)
+    if(is.null(cache_env[[check_var]])) {
+      cache_env[[check_var]] <- check_slurm_partitions(ncpu, partition)
+    }
+
+    ### JENNA
+
     if (!inherits(.mod, "bbi_nonmem_model") &&
         !fs::file_exists(.mod)) {
       stop(
