@@ -2,8 +2,7 @@
 % Please edit documentation in R/get-partitions.R
 \name{check_slurm_partitions}
 \alias{check_slurm_partitions}
-\title{throws error if the number of requested CPUs exceeds
-the number of CPUs available in the requested partition}
+\title{throws error if the number of requested CPUs exceeds the number of CPUs available in the requested partition}
 \usage{
 check_slurm_partitions(ncpu, partition, cache = TRUE)
 }
@@ -15,8 +14,7 @@ check_slurm_partitions(ncpu, partition, cache = TRUE)
 \item{cache}{optional argument to forgo caching}
 }
 \description{
-throws error if the number of requested CPUs exceeds
-the number of CPUs available in the requested partition
+throws error if the number of requested CPUs exceeds the number of CPUs available in the requested partition
 }
 \examples{
 check_slurm_partitions(17, "cpu2mem4gb")

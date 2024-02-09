@@ -120,14 +120,11 @@ partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
 }
 
 
-#' throws error if the number of requested CPUs exceeds
-#' the number of CPUs available in the requested partition
+#' throws error if the number of requested CPUs exceeds the number of CPUs available in the requested partition
 #'
 #' @param ncpu number of CPUs requested by user
 #' @param partition name of partition requested by user
 #' @param cache optional argument to forgo caching
-#'
-#' @export
 #'
 #' @examples
 #' check_slurm_partitions(17, "cpu2mem4gb")
