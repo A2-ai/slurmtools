@@ -64,23 +64,21 @@ get_slurm_partitions <- function(cache = TRUE) {
 
 partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
   library(dplyr)
-  library(glue)
 
-  sorted_table <- avail_cpus_table %>% filter(CPUS >= ncpu) %>%  arrange(CPUS, MEMORY)
+  sorted_table <- avail_cpus_table %>% dplyr::filter(CPUS >= ncpu) %>%  dplyr::arrange(CPUS, MEMORY)
   list_of_partitions <- sorted_table$PARTITION
   if(length(list_of_partitions) > 1) {
-    return(glue("You might try {list_of_partitions[1]} or {list_of_partitions[2]}"))
+    return(glue::glue("You might try {list_of_partitions[1]} or {list_of_partitions[2]}"))
   } else if (length(list_of_partitions) == 1) {
-    return(glue("You might try {list_of_partitions[1]}"))
+    return(glue::glue("You might try {list_of_partitions[1]}"))
   } else {
-    return(glue("Input a smaller value for ncpu. No existing partition has {ncpu} or more CPUs per node."))
+    return(glue::glue("Input a smaller value for ncpu. No existing partition has {ncpu} or more CPUs per node."))
   }
 
 }
 
 
 check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
-  library(glue)
   # if get_slurm_partitions has already run (which it definitely has),
   # the table will be cached
   avail_cpus_table <- if (cache) {
@@ -98,7 +96,7 @@ check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
   # if # requested cpus > available CPUs, throw an error
   if(ncpu > num_avail_cpus) {
     suggestion <- partition_advice(ncpu, partition, avail_cpus_table, cache)
-    rlang::abort(glue("number of requested CPUs ({ncpu}) greater than number of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"))
+    rlang::abort(glue::glue("number of requested CPUs ({ncpu}) greater than number of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"))
   }
 }
 

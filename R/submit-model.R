@@ -9,9 +9,6 @@
 #' @param submission_root directory to track job submission scripts and output
 #' @param bbi_config_path path to bbi config file
 #' @export
-
-
-
 submit_nonmem_model <-
   function(.mod,
            partition = get_slurm_partitions(),
