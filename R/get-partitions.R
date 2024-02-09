@@ -75,9 +75,16 @@ process_slurm_partitions <- function(table){
 #'
 #' @export
 get_slurm_partitions <- function(cache = TRUE) {
+  time_since_last_cache <- if(is.null(partition_cache[["partition_by_cpu_time"]])) {
+    0
+  } else {
+    difftime(Sys.time(), partition_cache[["partition_by_cpu_time"]], units = "secs")
+  }
+
   table <- if (cache) {
-    if (is.null(partition_cache[["partition_by_cpu"]])) {
+    if (is.null(partition_cache[["partition_by_cpu"]]) || time_since_last_cache > 20) {
       partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu(cache)
+      partition_cache[["partition_by_cpu_time"]] <- Sys.time()
     }
     partition_cache[["partition_by_cpu"]]
   } else {
