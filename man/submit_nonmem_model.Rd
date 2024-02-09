@@ -6,8 +6,8 @@
 \usage{
 submit_nonmem_model(
   .mod,
-  partition = getOption("slurmtools.partitions"),
-  ncpu = 4,
+  partition = get_slurm_partitions(),
+  ncpu = 1,
   overwrite = FALSE,
   dry_run = FALSE,
   ...,
