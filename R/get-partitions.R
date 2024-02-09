@@ -62,35 +62,24 @@ get_slurm_partitions <- function(cache = TRUE) {
   return(table$PARTITION)
 }
 
-partition_advice <- function(ncpus, partition, cache) {
+partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
   library(dplyr)
   library(glue)
-  table <- if (cache) {
-    if (is.null(partition_cache[["partition_by_cpu"]])) {
-      partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu(cache)
-    }
-    partition_cache[["partition_by_cpu"]]
-  } else {
-    lookup_partitions_by_cpu(cache)
-  }
 
-  # take out partition (not necessary, but could help later)
-  # table <- table[table$PARTITION != partition, ]
-
-  table2 <- table %>% filter(CPUS >= ncpus) %>%  arrange(CPUS, MEMORY)
-  list_of_partitions <- table2$PARTITION
+  sorted_table <- avail_cpus_table %>% filter(CPUS >= ncpu) %>%  arrange(CPUS, MEMORY)
+  list_of_partitions <- sorted_table$PARTITION
   if(length(list_of_partitions) > 1) {
     return(glue("You might try {list_of_partitions[1]} or {list_of_partitions[2]}"))
   } else if (length(list_of_partitions) == 1) {
     return(glue("You might try {list_of_partitions[1]}"))
   } else {
-    return(glue("Input a smaller value for ncpu. No existing partition has {ncpus} or more CPUs per node."))
+    return(glue("Input a smaller value for ncpu. No existing partition has {ncpu} or more CPUs per node."))
   }
 
 }
 
 
-check_slurm_partitions <- function(ncpus, partition, cache = TRUE) {
+check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
   library(glue)
   # if get_slurm_partitions has already run (which it definitely has),
   # the table will be cached
@@ -107,9 +96,9 @@ check_slurm_partitions <- function(ncpus, partition, cache = TRUE) {
   num_avail_cpus <- avail_cpus_table[avail_cpus_table$PARTITION == partition,]$CPUS
 
   # if # requested cpus > available CPUs, throw an error
-  if(ncpus > num_avail_cpus) {
-    suggestion <- partition_advice(ncpus, partition, cache)
-    rlang::abort(glue("number of requested CPUs ({ncpus}) greater than number of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"))
+  if(ncpu > num_avail_cpus) {
+    suggestion <- partition_advice(ncpu, partition, avail_cpus_table, cache)
+    rlang::abort(glue("number of requested CPUs ({ncpu}) greater than number of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"))
   }
 }
 
