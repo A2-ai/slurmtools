@@ -1,3 +1,5 @@
+utils::globalVariables(c("user_name"))
+
 # Function to parse each job into a tibble row
 parse_job_to_row <- function(job) {
   tibble::tibble(

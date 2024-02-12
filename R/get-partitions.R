@@ -1,3 +1,4 @@
+utils::globalVariables(c("CPUS", "MEMORY"))
 
 partition_cache <- new.env(parent = emptyenv())
 
@@ -52,7 +53,7 @@ lookup_partitions_by_cpu <- function(cache = TRUE) {
 
 #' manipulate partition table for usability
 #'
-#' @param table
+#' @param table the table created by lookup_partitions_by_cpu
 #'
 #' @return the table such that the default partition will be first
 #'    and will have the asterisk removed
@@ -75,16 +76,9 @@ process_slurm_partitions <- function(table){
 #'
 #' @export
 get_slurm_partitions <- function(cache = TRUE) {
-  time_since_last_cache <- if(is.null(partition_cache[["partition_by_cpu_time"]])) {
-    0
-  } else {
-    difftime(Sys.time(), partition_cache[["partition_by_cpu_time"]], units = "secs")
-  }
-
   table <- if (cache) {
-    if (is.null(partition_cache[["partition_by_cpu"]]) || time_since_last_cache > 20) {
+    if (is.null(partition_cache[["partition_by_cpu"]])) {
       partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu(cache)
-      partition_cache[["partition_by_cpu_time"]] <- Sys.time()
     }
     partition_cache[["partition_by_cpu"]]
   } else {
@@ -96,7 +90,7 @@ get_slurm_partitions <- function(cache = TRUE) {
 
 #' get partition suggestions
 #'
-#' In a call to [submit_slurm_model()], if the number of requested CPUs exceeds
+#' In a call to `submit_slurm_model()`, if the number of requested CPUs exceeds
 #' the number of CPUs available in the requested partition,
 #' [check_slurm_partitions()] errors. <br />
 #' This function follows up with a message providing one or two suggestions for
@@ -112,7 +106,6 @@ get_slurm_partitions <- function(cache = TRUE) {
 #'
 #' @return string with suggestion upon [check_slurm_partitions()] error
 partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
-  library(dplyr)
 
   sorted_table <- avail_cpus_table %>% dplyr::filter(CPUS >= ncpu) %>%  dplyr::arrange(CPUS, MEMORY)
   list_of_partitions <- sorted_table$PARTITION
@@ -133,13 +126,14 @@ partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
 #' @param partition name of partition requested by user
 #' @param cache optional argument to forgo caching
 #'
-#' @examples
+#' @examples \dontrun{
 #' check_slurm_partitions(17, "cpu2mem4gb")
 #' check_slurm_partitions(3, "cpu2mem4gb")
 #' check_slurm_partitions(5, "cpu4mem32gb")
 #' check_slurm_partitions(5, "cpu4mem32gb")
 #' check_slurm_partitions(100, "cpu32mem128gb")
 #' check_slurm_partitions(2, "cpu2mem4gb")
+#' }
 check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
   # if get_slurm_partitions has already run (which it definitely has),
   # the table will be cached

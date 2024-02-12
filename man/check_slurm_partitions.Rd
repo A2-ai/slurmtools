@@ -17,10 +17,12 @@ check_slurm_partitions(ncpu, partition, cache = TRUE)
 throws error if the number of requested CPUs exceeds the number of CPUs available in the requested partition
 }
 \examples{
+\dontrun{
 check_slurm_partitions(17, "cpu2mem4gb")
 check_slurm_partitions(3, "cpu2mem4gb")
 check_slurm_partitions(5, "cpu4mem32gb")
 check_slurm_partitions(5, "cpu4mem32gb")
 check_slurm_partitions(100, "cpu32mem128gb")
 check_slurm_partitions(2, "cpu2mem4gb")
+}
 }

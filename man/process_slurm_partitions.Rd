@@ -7,7 +7,7 @@
 process_slurm_partitions(table)
 }
 \arguments{
-\item{table}{}
+\item{table}{the table created by lookup_partitions_by_cpu}
 }
 \value{
 the table such that the default partition will be first

@@ -8,6 +8,7 @@
 #' @param slurm_job_template_path path to slurm job template
 #' @param submission_root directory to track job submission scripts and output
 #' @param bbi_config_path path to bbi config file
+#' @param slurm_template_opts choose slurm template
 #' @export
 submit_nonmem_model <-
   function(.mod,
@@ -25,12 +26,7 @@ submit_nonmem_model <-
     }
     partition <- match.arg(partition)
 
-    ### JENNA
-
     check_slurm_partitions(ncpu, partition)
-
-
-    ### JENNA
 
     if (!inherits(.mod, "bbi_nonmem_model") &&
         !fs::file_exists(.mod)) {

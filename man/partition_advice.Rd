@@ -19,7 +19,7 @@ partition_advice(ncpu, partition, avail_cpus_table, cache)
 string with suggestion upon \code{\link[=check_slurm_partitions]{check_slurm_partitions()}} error
 }
 \description{
-In a call to \code{\link[=submit_slurm_model]{submit_slurm_model()}}, if the number of requested CPUs exceeds
+In a call to \code{submit_slurm_model()}, if the number of requested CPUs exceeds
 the number of CPUs available in the requested partition,
 \code{\link[=check_slurm_partitions]{check_slurm_partitions()}} errors. \if{html}{\out{<br />}}
 This function follows up with a message providing one or two suggestions for

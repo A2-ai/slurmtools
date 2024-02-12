@@ -35,6 +35,8 @@ submit_nonmem_model(
 \item{submission_root}{directory to track job submission scripts and output}
 
 \item{bbi_config_path}{path to bbi config file}
+
+\item{slurm_template_opts}{choose slurm template}
 }
 \description{
 submit a nonmem model to slurm in parallel

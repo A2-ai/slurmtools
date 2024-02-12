@@ -13,8 +13,12 @@ Imports:
     dplyr,
     fs,
     glue,
+    jsonlite,
     processx,
+    purrr,
     rlang,
+    tibble,
+    utils,
     whisker,
     withr
 Suggests: 
