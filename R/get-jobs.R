@@ -23,6 +23,9 @@ parse_jobs_json <- function(.json) {
   purrr::list_rbind(purrr::map(.json$jobs, parse_job_to_row))
 }
 
+#' get slurm jobs
+#' @param user user filter
+#' @export
 get_slurm_jobs <- function(user = NULL){
   cmd <- list(cmd = "squeue", args = "--json")
   res <- processx::run(cmd$cmd, args = cmd$args)
