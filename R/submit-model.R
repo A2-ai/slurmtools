@@ -54,6 +54,24 @@ submit_nonmem_model <-
     if (overwrite && fs::dir_exists(.mod$absolute_model_path)) {
       fs::dir_delete(.mod$absolute_model_path)
     }
+
+    config_toml_path <- paste0(.mod$absolute_model_path, ".toml")
+    if (!fs::file_exists(config_toml_path)) {
+      generate_default_watcher_config(.mod)
+    }
+
+    config <- configr::read.config(config_toml_path)
+    config$output_dir <- file.path(here::here(), config$output_dir)
+    config$watched_dir <-file.path(here::here(), config$watched_dir)
+
+    new_config_toml_path <-
+      file.path(
+        here::here(), "model", "nonmem", "submission-log",
+        paste0(config$model_number, ".toml")
+      )
+
+    write_file(rextendr::to_toml(config), new_config_toml_path)
+
     template_script <-
       withr::with_dir(dirname(.mod$absolute_model_path), {
         tmpl <- brio::read_file(slurm_job_template_path)
@@ -66,7 +84,9 @@ submit_nonmem_model <-
             job_name = sprintf("nonmem-run-%s", basename(.mod$absolute_model_path)),
             bbi_exe_path = Sys.which("bbi"),
             bbi_config_path = bbi_config_path,
-            model_path = .mod$absolute_model_path
+            model_path = .mod$absolute_model_path,
+            config_toml_path = new_config_toml_path,
+            fsmonitor_exe_path = Sys.which("fsmonitor_testing")#~/Projects/fsmonitor_testing/target/release/fsmonitor_testing"
           )
         )
       })
