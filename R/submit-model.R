@@ -1,4 +1,5 @@
 #' submit a nonmem model to slurm in parallel
+#'
 #' @param .mod a path to a model or a bbi nonmem model object
 #' @param partition name of the partition to submit the model
 #' @param ncpu number of cpus to run the model against
@@ -8,7 +9,10 @@
 #' @param slurm_job_template_path path to slurm job template
 #' @param submission_root directory to track job submission scripts and output
 #' @param bbi_config_path path to bbi config file
+#' @param log_level logging level for nmt watcher
+#' @param fsmonitor_exe_path path to fsmonitor executable
 #' @param slurm_template_opts choose slurm template
+#'
 #' @export
 submit_nonmem_model <-
   function(.mod,
@@ -20,7 +24,10 @@ submit_nonmem_model <-
            slurm_job_template_path = getOption('slurmtools.slurm_job_template_path'),
            submission_root = getOption('slurmtools.submission_root'),
            bbi_config_path = getOption('slurmtools.bbi_config_path'),
+           log_level = getOption('slurmtools.log_level'),
+           fsmonitor_exe_path = getOption('slurmtools.fsmonitor_exe_path'),
            slurm_template_opts = list()) {
+
     if (is.null(partition)) {
       rlang::abort("no partition selected")
     }
@@ -86,7 +93,8 @@ submit_nonmem_model <-
             bbi_config_path = bbi_config_path,
             model_path = .mod$absolute_model_path,
             config_toml_path = new_config_toml_path,
-            fsmonitor_exe_path = Sys.which("fsmonitor_testing")#~/Projects/fsmonitor_testing/target/release/fsmonitor_testing"
+            fsmonitor_exe_path = fsmonitor_exe_path,#"~/Projects/fsmonitor_testing/target/release/fsmonitor_testing", #Sys.which("fsmonitor_testing")#
+            log_level = log_level
           )
         )
       })
