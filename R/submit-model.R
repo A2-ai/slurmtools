@@ -21,9 +21,9 @@ submit_nonmem_model <-
            overwrite = FALSE,
            dry_run = FALSE,
            ...,
+           email = NULL,
            slurm_job_template_path = getOption('slurmtools.slurm_job_template_path'),
            submission_root = getOption('slurmtools.submission_root'),
-           bbi_config_path = getOption('slurmtools.bbi_config_path'),
            log_level = getOption('slurmtools.log_level'),
            alert_method = getOption('slurmtools.alert_method'),
            fsmonitor_exe_path = getOption('slurmtools.fsmonitor_exe_path'),
@@ -53,9 +53,6 @@ submit_nonmem_model <-
       FALSE
     }
 
-    if (!fs::is_absolute_path(bbi_config_path)) {
-      rlang::abort(sprintf("bbi_config_path must be absolute, not %s", bbi_config_path))
-    }
     if (!fs::file_exists(slurm_job_template_path)) {
       rlang::abort(sprintf("slurm job template path not valid: `%s`", slurm_job_template_path))
     }
@@ -90,13 +87,12 @@ submit_nonmem_model <-
             parallel = parallel,
             ncpu = ncpu,
             job_name = sprintf("nonmem-run-%s", basename(.mod$absolute_model_path)),
-            bbi_exe_path = Sys.which("bbi"),
-            bbi_config_path = bbi_config_path,
             model_path = .mod$absolute_model_path,
             config_toml_path = new_config_toml_path,
             fsmonitor_exe_path = fsmonitor_exe_path,#"~/Projects/fsmonitor_testing/target/release/fsmonitor_testing", #Sys.which("fsmonitor_testing")#
             log_level = log_level,
-            alert_method = alert_method
+            alert_method = alert_method,
+            email = email
           )
         )
       })
