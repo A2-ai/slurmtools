@@ -25,6 +25,7 @@ submit_nonmem_model <-
            submission_root = getOption('slurmtools.submission_root'),
            bbi_config_path = getOption('slurmtools.bbi_config_path'),
            log_level = getOption('slurmtools.log_level'),
+           alert_method = getOption('slurmtools.alert_method'),
            fsmonitor_exe_path = getOption('slurmtools.fsmonitor_exe_path'),
            slurm_template_opts = list()) {
 
@@ -94,7 +95,8 @@ submit_nonmem_model <-
             model_path = .mod$absolute_model_path,
             config_toml_path = new_config_toml_path,
             fsmonitor_exe_path = fsmonitor_exe_path,#"~/Projects/fsmonitor_testing/target/release/fsmonitor_testing", #Sys.which("fsmonitor_testing")#
-            log_level = log_level
+            log_level = log_level,
+            alert_method = alert_method
           )
         )
       })

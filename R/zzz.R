@@ -25,3 +25,9 @@ if (is.null(getOption('slurmtools.log_level'))) {
     "option('slurmtools.log_level') is not set. Please set it for job submission defaults to work."
   )
 }
+
+if (is.null(getOption('slurmtools.alert_method'))) {
+  rlang::warn(
+    "option('slurmtools.alert_method') is not set. Please set it for job submission defaults to work."
+  )
+}
