@@ -9,12 +9,6 @@
     rlang::warn("option('slurmtools.submission_root') is not set. Please set it for  job submission defaults to work.")
   }
 
-  if (is.null(getOption('slurmtools.nmm_exe_path'))) {
-    rlang::warn(
-      "option('slurmtools.fsmonitor_exe_path') is not set. Please set it for job submission defaults to work."
-    )
-  }
-
   if (is.null(getOption('slurmtools.log_level'))) {
     rlang::warn(
       "option('slurmtools.log_level') is not set. Please set it for job submission defaults to work."
