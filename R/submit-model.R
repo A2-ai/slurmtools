@@ -88,7 +88,7 @@ submit_nonmem_model <-
             job_name = sprintf("nonmem-run-%s", basename(.mod$absolute_model_path)),
             model_path = .mod$absolute_model_path,
             config_toml_path = new_config_toml_path,
-            nmm_exe_path = Sys,which("nmm"),
+            nmm_exe_path = Sys.which("nmm"),
             log_level = log_level,
             alert_method = alert_method,
             email = email
