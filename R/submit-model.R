@@ -8,9 +8,6 @@
 #' @param ... arguments to pass to processx::run
 #' @param slurm_job_template_path path to slurm job template
 #' @param submission_root directory to track job submission scripts and output
-#' @param bbi_config_path path to bbi config file
-#' @param log_level logging level for nmt watcher
-#' @param fsmonitor_exe_path path to fsmonitor executable
 #' @param slurm_template_opts choose slurm template
 #'
 #' @export
@@ -21,11 +18,8 @@ submit_nonmem_model <-
            overwrite = FALSE,
            dry_run = FALSE,
            ...,
-           email = NULL,
            slurm_job_template_path = getOption('slurmtools.slurm_job_template_path'),
            submission_root = getOption('slurmtools.submission_root'),
-           log_level = getOption('slurmtools.log_level'),
-           alert_method = getOption('slurmtools.alert_method'),
            slurm_template_opts = list()) {
 
     if (is.null(partition)) {
@@ -61,7 +55,7 @@ submit_nonmem_model <-
 
     config_toml_path <- paste0(.mod$absolute_model_path, ".toml")
     if (!fs::file_exists(config_toml_path)) {
-      generate_default_watcher_config(.mod)
+      generate_watcher_config(.mod, slurm_template_opts$watch_opts)
     }
 
     config <- configr::read.config(config_toml_path)
@@ -76,23 +70,27 @@ submit_nonmem_model <-
 
     write_file(rextendr::to_toml(config), new_config_toml_path)
 
+    default_template_list = list(
+      partition = partition,
+      parallel = parallel,
+      ncpu = ncpu,
+      job_name = sprintf("nonmem-run-%s", basename(.mod$absolute_model_path)),
+      model_path = .mod$absolute_model_path,
+      config_toml_path = new_config_toml_path,
+      nmm_exe_path = Sys.which("nmm")
+    )
+
+    template_list = c(
+      default_template_list,
+      slurm_template_opts$alert_opts,
+      slurm_template_opts$watch_opts$log_level)
+
     template_script <-
       withr::with_dir(dirname(.mod$absolute_model_path), {
         tmpl <- brio::read_file(slurm_job_template_path)
         whisker::whisker.render(
           tmpl,
-          list(
-            partition = partition,
-            parallel = parallel,
-            ncpu = ncpu,
-            job_name = sprintf("nonmem-run-%s", basename(.mod$absolute_model_path)),
-            model_path = .mod$absolute_model_path,
-            config_toml_path = new_config_toml_path,
-            nmm_exe_path = Sys.which("nmm"),
-            log_level = log_level,
-            alert_method = alert_method,
-            email = email
-          )
+          template_list
         )
       })
     script_file_path <-

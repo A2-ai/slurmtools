@@ -13,9 +13,6 @@ submit_nonmem_model(
   ...,
   slurm_job_template_path = getOption("slurmtools.slurm_job_template_path"),
   submission_root = getOption("slurmtools.submission_root"),
-  bbi_config_path = getOption("slurmtools.bbi_config_path"),
-  log_level = getOption("slurmtools.loglevel"),
-  fsmonitor_exe_path = getOption("slurmtools.fsmonitor_exe_path"),
   slurm_template_opts = list()
 )
 }
@@ -35,12 +32,6 @@ submit_nonmem_model(
 \item{slurm_job_template_path}{path to slurm job template}
 
 \item{submission_root}{directory to track job submission scripts and output}
-
-\item{bbi_config_path}{path to bbi config file}
-
-\item{log_level}{logging level for nmt watcher}
-
-\item{fsmonitor_exe_path}{path to fsmonitor executable}
 
 \item{slurm_template_opts}{choose slurm template}
 }
