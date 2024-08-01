@@ -34,12 +34,7 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
-      - name: Copy mock sinfo/sacct binary
-          run: |
-            cp inst/bin/sinfo /usr/local/bin/sinfo
-            chmod +x /usr/local/bin/sinfo
-            cp inst/bin/sacct /usr/local/bin/sacct
-            chmod +x /usr/local/bin/sacct
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
@@ -48,3 +43,8 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+          run: |
+            cp inst/bin/sinfo /usr/local/bin/sinfo
+            chmod +x /usr/local/bin/sinfo
+            cp inst/bin/sacct /usr/local/bin/sacct
+            chmod +x /usr/local/bin/sacct
