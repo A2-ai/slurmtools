@@ -35,6 +35,13 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
+      - name: Add mocked binaries to PATH
+        run: |
+          mkdir -p $HOME/bin
+          cp inst/bin/sinfo $HOME/bin/sinfo
+          cp inst/bin/sacct $HOME/bin/sacct
+          echo "$HOME/bin" >> $GITHUB_PATH
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
@@ -43,8 +50,3 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          run: |
-            cp inst/bin/sinfo /usr/local/bin/sinfo
-            chmod +x /usr/local/bin/sinfo
-            cp inst/bin/sacct /usr/local/bin/sacct
-            chmod +x /usr/local/bin/sacct
