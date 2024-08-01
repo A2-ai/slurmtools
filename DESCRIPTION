@@ -26,4 +26,7 @@ Imports:
     cli
 Suggests: 
     testthat (>= 3.0.0)
+BinaryFiles:
+    inst/bin/sinfo
+    inst/bin/sacct
 Config/testthat/edition: 3
