@@ -21,7 +21,6 @@ Imports:
     utils,
     whisker,
     withr,
-    configr,
     rextendr,
     here
 Suggests: 

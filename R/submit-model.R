@@ -55,35 +55,22 @@ submit_nonmem_model <-
 
     config_toml_path <- paste0(.mod$absolute_model_path, ".toml")
     if (!fs::file_exists(config_toml_path)) {
-      generate_watcher_config(.mod, slurm_template_opts$watch_opts)
+      rlang::abort(sprintf("config.toml file not found, please run generate_config()"))
     }
-
-    config <- configr::read.config(config_toml_path)
-    config$output_dir <- file.path(here::here(), config$output_dir)
-    config$watched_dir <-file.path(here::here(), config$watched_dir)
-
-    new_config_toml_path <-
-      file.path(
-        here::here(), "model", "nonmem", "submission-log",
-        paste0(config$model_number, ".toml")
-      )
-
-    write_file(rextendr::to_toml(config), new_config_toml_path)
 
     default_template_list = list(
       partition = partition,
       parallel = parallel,
       ncpu = ncpu,
-      job_name = sprintf("nonmem-run-%s", basename(.mod$absolute_model_path)),
+      job_name = sprintf("%s-nonmem-run", basename(.mod$absolute_model_path)),
       model_path = .mod$absolute_model_path,
-      config_toml_path = new_config_toml_path,
+      config_toml_path = config_toml_path,
       nmm_exe_path = Sys.which("nmm")
     )
 
     template_list = c(
       default_template_list,
-      slurm_template_opts$alert_opts,
-      slurm_template_opts$watch_opts$log_level)
+      slurm_template_opts)
 
     template_script <-
       withr::with_dir(dirname(.mod$absolute_model_path), {
