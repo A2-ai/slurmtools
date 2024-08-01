@@ -36,9 +36,9 @@ jobs:
           use-public-rspm: true
       - name: Copy mock sinfo/sacct binary
         run: |
-          cp /inst/bin/sinfo /usr/local/bin/sinfo
+          cp inst/bin/sinfo /usr/local/bin/sinfo
           chmod +x /usr/local/bin/sinfo
-          cp /inst/bin/sacct /usr/local/bin/sacct
+          cp inst/bin/sacct /usr/local/bin/sacct
           chmod +x /usr/local/bin/sacct
 
       - uses: r-lib/actions/setup-r-dependencies@v2
