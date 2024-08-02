@@ -38,9 +38,9 @@ jobs:
       - name: Add mocked binaries to PATH
         run: |
           gh release download "sinfo/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
-          tar -xvf $HOME/bin/sinfo_Linux_x86_64.tar.gz
+          tar -xvf /usr/local/bin/sinfo_Linux_x86_64.tar.gz
           gh release download "sacct/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
-          tar -xvf $HOME/bin/sacct_Linux_x86_64.tar.gz
+          tar -xvf /usr/local/bin/sacct_Linux_x86_64.tar.gz
 
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
