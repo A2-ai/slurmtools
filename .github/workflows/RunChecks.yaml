@@ -40,10 +40,12 @@ jobs:
           mkdir -p $HOME/.local/bin
           gh release download "sinfo/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D $HOME/.local/bin/
           tar -xvf $HOME/.local/bin/sinfo_Linux_x86_64.tar.gz
-          gh release download "sacct/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D $HOME/local/bin/
-          tar -xvf $HOME/.local/bin/sacct_Linux_x86_64.tar.gz
           chmod +x $HOME/.local/bin/sinfo
+
+          gh release download "sacct/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D $HOME/.local/bin/
+          tar -xvf $HOME/.local/bin/sacct_Linux_x86_64.tar.gz
           chmod +x $HOME/.local/bin/sacct
+
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
         env:
