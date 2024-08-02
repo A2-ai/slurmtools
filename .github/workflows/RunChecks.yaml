@@ -37,15 +37,15 @@ jobs:
 
       - name: Download mocked binaries
         run: |
-          mkdir -p $HOME/.local/bin
-            cd /tmp
-            gh release download "sinfo/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D $HOME/.local/bin/
-            tar -xvf $HOME/.local/bin/sinfo_Linux_x86_64.tar.gz
-            mv ./sinfo $HOME/.local/bin/sinfo
+          mkdir -p /usr/local/bin
+          cd /tmp
+          gh release download "sinfo/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
+          tar -xvf /usr/local/bin/sinfo_Linux_x86_64.tar.gz
+          mv ./sinfo /usr/local/bin/sinfo
 
-            gh release download "sacct/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D $HOME/.local/bin/
-            tar -xvf $HOME/.local/bin/sacct_Linux_x86_64.tar.gz
-            mv ./sacct $HOME/.local/bin/sacct
+          gh release download "sacct/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
+          tar -xvf /usr/local/bin/sacct_Linux_x86_64.tar.gz
+          mv ./sacct /usr/local/bin/sacct
 
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
