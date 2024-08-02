@@ -59,13 +59,13 @@ jobs:
           gh repo clone a2-ai-tech-training/slurm-mocks
           mv /tmp/slurm-mocks/outputs $GITHUB_WORKSPACE/
           rm -rf /tmp/slurm-mocks
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
-        env:
-          PATH: /tmp/repo/bin:${{ env.PATH }}
 
       - uses: r-lib/actions/check-r-package@v2
         with:
