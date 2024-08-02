@@ -57,7 +57,7 @@ jobs:
         run: |
           cd /tmp
           gh repo clone a2-ai-tech-training/slurm-mocks
-          mv /tmp/slurm-mocks/outputs $GITHUB_WORKSPACE/
+          mv /tmp/slurm-mocks/sinfo/outputs $GITHUB_WORKSPACE/
           rm -rf /tmp/slurm-mocks
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
