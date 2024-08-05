@@ -2,10 +2,12 @@
 #' Generates a tidyverse-esque onAttach message
 #'
 #' @return a message to display on attach
-#' @export
+#' @keywords internal
+#' @noRd
 #'
-#' @examples
+#' @examples \dontrun{
 #' slurmtools_options_message()
+#' }
 slurmtools_options_message <- function() {
   set_header <- cli::rule(
     left = cli::style_bold("Set slurmtools options")
