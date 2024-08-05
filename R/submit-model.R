@@ -55,7 +55,7 @@ submit_nonmem_model <-
 
     config_toml_path <- paste0(.mod$absolute_model_path, ".toml")
     if (!fs::file_exists(config_toml_path)) {
-      rlang::abort(sprintf("config.toml file not found, please run generate_config()"))
+      rlang::warn(sprintf("config.toml file not found, if submitting the job with nmm this is required. Please run generate_nmm_config()"))
     }
 
     default_template_list = list(
