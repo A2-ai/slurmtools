@@ -1,4 +1,5 @@
 #' submit a nonmem model to slurm in parallel
+#'
 #' @param .mod a path to a model or a bbi nonmem model object
 #' @param partition name of the partition to submit the model
 #' @param ncpu number of cpus to run the model against
@@ -7,8 +8,8 @@
 #' @param ... arguments to pass to processx::run
 #' @param slurm_job_template_path path to slurm job template
 #' @param submission_root directory to track job submission scripts and output
-#' @param bbi_config_path path to bbi config file
 #' @param slurm_template_opts choose slurm template
+#'
 #' @export
 submit_nonmem_model <-
   function(.mod,
@@ -19,8 +20,8 @@ submit_nonmem_model <-
            ...,
            slurm_job_template_path = getOption('slurmtools.slurm_job_template_path'),
            submission_root = getOption('slurmtools.submission_root'),
-           bbi_config_path = getOption('slurmtools.bbi_config_path'),
            slurm_template_opts = list()) {
+
     if (is.null(partition)) {
       rlang::abort("no partition selected")
     }
@@ -45,29 +46,38 @@ submit_nonmem_model <-
       FALSE
     }
 
-    if (!fs::is_absolute_path(bbi_config_path)) {
-      rlang::abort(sprintf("bbi_config_path must be absolute, not %s", bbi_config_path))
-    }
     if (!fs::file_exists(slurm_job_template_path)) {
       rlang::abort(sprintf("slurm job template path not valid: `%s`", slurm_job_template_path))
     }
     if (overwrite && fs::dir_exists(.mod$absolute_model_path)) {
       fs::dir_delete(.mod$absolute_model_path)
     }
+
+    config_toml_path <- paste0(.mod$absolute_model_path, ".toml")
+    if (!fs::file_exists(config_toml_path)) {
+      rlang::abort(sprintf("config.toml file not found, please run generate_config()"))
+    }
+
+    default_template_list = list(
+      partition = partition,
+      parallel = parallel,
+      ncpu = ncpu,
+      job_name = sprintf("%s-nonmem-run", basename(.mod$absolute_model_path)),
+      model_path = .mod$absolute_model_path,
+      config_toml_path = config_toml_path,
+      nmm_exe_path = Sys.which("nmm")
+    )
+
+    template_list = c(
+      default_template_list,
+      slurm_template_opts)
+
     template_script <-
       withr::with_dir(dirname(.mod$absolute_model_path), {
         tmpl <- brio::read_file(slurm_job_template_path)
         whisker::whisker.render(
           tmpl,
-          list(
-            partition = partition,
-            parallel = parallel,
-            ncpu = ncpu,
-            job_name = sprintf("nonmem-run-%s", basename(.mod$absolute_model_path)),
-            bbi_exe_path = Sys.which("bbi"),
-            bbi_config_path = bbi_config_path,
-            model_path = .mod$absolute_model_path
-          )
+          template_list
         )
       })
     script_file_path <-

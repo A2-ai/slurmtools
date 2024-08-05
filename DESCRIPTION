@@ -20,7 +20,13 @@ Imports:
     tibble,
     utils,
     whisker,
-    withr
+    withr,
+    rextendr,
+    here,
+    cli
 Suggests: 
     testthat (>= 3.0.0)
+BinaryFiles:
+    inst/bin/sinfo
+    inst/bin/sacct
 Config/testthat/edition: 3
