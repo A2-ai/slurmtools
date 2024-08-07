@@ -1,0 +1,49 @@
+#!/bin/bash
+#SBATCH --job-name="{{job_name}}"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task={{ncpu}}
+#SBATCH --partition={{partition}}
+
+unset SLURM_NODELIST
+unset SLURM_JOB_NODELIST
+unset SLURM_JOB_USER
+unset SLURM_TASKS_PER_NODE
+unset SLURM_JOB_UID
+unset SLURM_TASK_PID
+unset SLURM_LOCALID
+unset SLURM_SUBMIT_DIR
+unset SLURMD_NODENAME
+unset SLURM_NODE_ALIASES
+unset SLURM_CLUSTER_NAME
+unset SLURM_CPUS_ON_NODE
+unset SLURM_JOB_CPUS_PER_NODE
+unset SLURM_GTIDS
+unset SLURM_JOB_PARTITION
+unset SLURM_JOB_NUM_NODES
+unset SLURM_JOBID
+unset SLURM_PROCID
+unset SLURM_TOPOLOGY_ADDR
+unset SLURM_TOPOLOGY_ADDR_PATTERN
+unset SLURM_WORKING_CLUSTER
+unset SLURM_NODELIST
+unset SLURM_PRIO_PROCESS
+unset SLURM_NNODES
+unset SLURM_SUBMIT_HOST
+unset SLURM_JOB_ID
+unset SLURM_NODEID
+unset SLURM_CONF
+unset SLURM_JOB_NAME
+unset SLURM_JOB_GID
+unset SLURM_JOB_NODELIST
+
+# submit_nonmem_model uses the whisker package to populate template files
+# https://github.com/edwindj/whisker
+{{#parallel}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --parallel --threads={{ncpu}} --config {{bbi_config_path}}
+{{/parallel}}
+
+
+{{^parallel}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --config {{bbi_config_path}}
+{{/parallel}}

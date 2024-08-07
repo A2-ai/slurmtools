@@ -14,6 +14,7 @@ What the package does (one paragraph).
 Authors:
 \itemize{
   \item Jenna Elwing \email{jenna@a2-ai.com}
+  \item Matthew Smith \email{matthews@a2-ai.com}
 }
 
 }

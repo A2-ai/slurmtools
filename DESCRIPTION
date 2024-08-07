@@ -2,7 +2,8 @@ Package: slurmtools
 Title: slurm tooling 
 Version: 0.0.0.9000
 Authors@R: c(person("Devin", "Pastoor", , "devin@a2-ai.com", role = c("aut", "cre")),
-    person("Jenna", "Elwing", email = "jenna@a2-ai.com", role = "aut"))
+    person("Jenna", "Elwing", email = "jenna@a2-ai.com", role = "aut"),
+    person("Matthew", "Smith", email = "matthews@a2-ai.com", role = "aut"))
 Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Encoding: UTF-8
@@ -23,10 +24,11 @@ Imports:
     withr,
     rextendr,
     here,
-    cli
+    cli,
 Suggests: 
-    testthat (>= 3.0.0)
-BinaryFiles:
-    inst/bin/sinfo
-    inst/bin/sacct
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    bbr,
 Config/testthat/edition: 3
+VignetteBuilder: knitr

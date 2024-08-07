@@ -1,0 +1,17 @@
+clean_lvl: 1
+git: true
+local:
+  create_child_dirs: true
+mpi_exec_path: /usr/bin/mpiexec
+nmfe_options:
+  maxlim: 2
+nonmem:
+  nm751:
+    default: true
+    executable: nmfe75
+    home: /opt/nonmem/nm751
+output_dir: '{{ .Name }}'
+parallel: false
+parallel_timeout: 2147483647
+save_config: true
+threads: 4
