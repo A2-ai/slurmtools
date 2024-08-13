@@ -30,5 +30,6 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     bbr,
+    pdftools,
 Config/testthat/edition: 3
 VignetteBuilder: knitr
