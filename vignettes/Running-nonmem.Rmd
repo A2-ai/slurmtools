@@ -147,12 +147,7 @@ submission
 Notice we get a Warning about a config.toml file not being found. I'll expand on that later, but for now we see a `status` with an exit code of 0 suggesting a successful command, and the `stdout` gives us the batch job number. We can use `slurmtools::get_slurm_jobs()` to monitor the status of the job. Here, I've filtered the results to only show the job I just submitted above.
 
 ```{r}
-submitted_job_id <- submission$stdout
-submitted_job_id <- strsplit(submitted_job_id, "\n")[[1]]
-submitted_job_id <- tail(strsplit(submitted_job_id, " ")[[1]], 1)
-
-slurmtools::get_slurm_jobs() %>% 
-  dplyr::filter(job_id == submitted_job_id)
+slurmtools::get_slurm_jobs(user = 'matthews')
 ```
 
 If we look in the `slurmtools.submisstion_root` directory we can see the shell script that was generated with `submit_nonmem_model`. Here is the whisker replaced call to bbi:
@@ -240,103 +235,24 @@ curl -d "Finished model run: 1001-nonmem-run $JOBID" ntfy.sh/ntfy_demo
 
 To reiterate, this template file is run as a bash shell script so anything you can do in bash you can put into the template and pass the needed arguments and customize the behavior to your liking.
 
-## Submitting a NONMEM job with `nmm`
-
-Instead of using `bbi` we can use `nmm` (NONMEM Monitor) which currently has some additional functionality of sending slack notifications as well as gradient monitoring.
-
-We can update the template file accordingly:
-
-``` slurm-job-nmm.tmpl
-#!/bin/bash
-#SBATCH --job-name="{{job_name}}"
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task={{ncpu}}
-#SBATCH --partition={{partition}}
-
-{{nmm_exe_path}} -c {{config_toml_path}} run
-```
-
-default, `submit_nonmem_model` will provide `nmm_exe_path` and `config_toml_path` to the template. Behind the scenes `nmm_exe_path` is determined with `Sys.which("nmm")` which may or may not give you the path to the nmm binary if it is on your path or not. We can inject the `nmm_exe_path` like we did with `bbi_exe_path` and assume it's not on our path.
-
-Remember that error about the `config.toml` file not existing? Well this is the reason. This file controls what `nmm` will monitor and where to look for files and how to alert you. We'll use `generate_nmm_config()` to create this file. First we can look at the documentation to see what type of information we should pass to this function.![documentation for generate_nmm_config()](../inst/extdata/images/generate_nmm_config_help.png)
-
-```{r}
-slurmtools::generate_nmm_config(mod)
-```
-
-This generates the following toml file. Notice that alert is set to 'None', and email is empty. Since we're in vignettes we'll need to update the watched_dir and output_dir.
-
-Additionally, If we want to take advatnage of `nmm`'s slack notifications we'll have to add a few arguments to the `generate_nmm_config` function.
-
-``` 1001.toml
-model_number = '1001'
-files_to_track = [ 'lst', 'ext', 'grd' ]
-tmp_dir = '/tmp'
-watched_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem'
-output_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem/in_progress'
-poll_duration = 1
-alert = 'None'
-level = 'Debug'
-email = ''
-threads = 1
-```
-
-```{r}
-slurmtools::generate_nmm_config(
-  mod, 
-  alert = "slack", 
-  email = "matthews@a2-ai.com",
-  watched_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem",
-  output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress")
-```
-
-``` 1001.toml
-model_number = '1001'
-files_to_track = [ 'lst', 'ext', 'grd' ]
-tmp_dir = '/tmp'
-watched_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem'
-output_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress'
-poll_duration = 1
-alert = 'Slack'
-level = 'Debug'
-email = 'matthews@a2-ai.com'
-threads = 1
-```
-
-We can now run `submit_nonmem_model` and get slack notifications about our run.
-
-```{r}
-submission_nmm <- slurmtools::submit_nonmem_model(
-  mod, 
-  overwrite = TRUE,
-  slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
-  slurm_template_opts = list(nmm_exe_path = normalizePath("~/.local/bin/nmm"))
-)
-
-submission_nmm
-```
-
-With `alert = 'Slack'` and `email` set in the config.toml file `nmm` should send slack notifications directly to you when a NONMEM run starts and it will reply to that message with notifications if any gradients hit 0 and when the run finishes it checks if all -1E9 lines are present in the .ext file and gives another message about any parameters that hit 0 gradient. ![slack notifications from nmm](../inst/extdata/images/nmm_slack_notifications.png)
-
 ```{r, include = FALSE}
 #cancelling any running nonmem jobs
-submitted_job_id3 <- submission_nmm$stdout
-submitted_job_id3 <- strsplit(submitted_job_id3, "\n")[[1]]
-submitted_job_id3 <- tail(strsplit(submitted_job_id3, " ")[[1]], 1)
-
-state <- slurmtools::get_slurm_jobs() %>% 
-  dplyr::filter(job_id == submitted_job_id3) %>% 
+state <- slurmtools::get_slurm_jobs(user = "matthews") %>% 
   dplyr::pull("job_state")
 
-if (state == "COMPLETED") {
-  #removing generated files from running this vignette
-  nonmem <- file.path("model", "nonmem")
-
-  unlink(file.path(nonmem, "1001"), recursive = TRUE)
-  unlink(file.path(nonmem, "1001.yaml"))
-  unlink(file.path(nonmem, "1001.toml"))
-  unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
-  unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
+flag <- "RUNNING" %in% state
+while (flag) {
+  Sys.sleep(10)
+  flag <- "RUNNING" %in% state
 }
+
+#removing generated files from running this vignette
+nonmem <- file.path("model", "nonmem")
+
+unlink(file.path(nonmem, "1001"), recursive = TRUE)
+unlink(file.path(nonmem, "1001.yaml"))
+unlink(file.path(nonmem, "1001.toml"))
+unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
+unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```
+

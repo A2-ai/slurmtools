@@ -1,9 +1,0 @@
-time="2024-08-26T15:57:30Z" level=info msg="Successfully loaded specified configuration from /cluster-data/user-homes/wes/packages/slurmtools/vignettes/model/nonmem/bbi.yaml"
-time="2024-08-26T15:57:30Z" level=info msg="Beginning Local Path"
-time="2024-08-26T15:57:30Z" level=info msg="A total of 1 models have completed the initial preparation phase"
-time="2024-08-26T15:57:30Z" level=info msg="[1001] Beginning local work phase"
-time="2024-08-26T15:57:45Z" level=info msg="[1001] Beginning cleanup phase"
-time="2024-08-26T15:57:45Z" level=info msg="[1001] Cleanup completed"
-time="2024-08-26T15:57:45Z" level=info msg="Waiting for any post execution hooks to finish"
-time="2024-08-26T15:57:45Z" level=info msg="\r1 models completed in 15.377393219s"
-
