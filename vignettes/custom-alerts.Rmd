@@ -57,7 +57,7 @@ is the reason. This file controls what `nmm` will monitor and where to
 look for files and how to alert you. We'll use `generate_nmm_config()`
 to create this file. First we can look at the documentation to see what
 type of information we should pass to this function.![documentation for
-generate_nmm_config()](../inst/extdata/images/generate_nmm_config_help.png)
+generate_nmm_config()](data/images/generate_nmm_config_help.png)
 
 ```{r}
 mod_number <- "1001"
@@ -133,13 +133,13 @@ and it will reply to that message with notifications if any gradients
 hit 0 and when the run finishes it checks if all -1E9 lines are present
 in the .ext file and gives another message about any parameters that hit
 0 gradient.![slack notifications from
-nmm](../inst/extdata/images/nmm_slack_notifications.png)
+nmm](data/images/nmm_slack_notifications.png)
 
 ```{r, include = FALSE}
 #cancelling any running nonmem jobs
 state <- slurmtools::get_slurm_jobs(user = "matthews")
 
-if ("RUNNING" %in% state$job_state) {
+if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
   for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
     processx::run("scancel", args = paste0(job_id))
   }
@@ -154,4 +154,3 @@ unlink(file.path(nonmem, "1001.toml"))
 unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
 unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```
-

@@ -1,8 +1,8 @@
 ---
-title: "slurmtools-vignette"
+title: "Running Nonmem with slurmtools"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{slurmtools-vignette}
+  %\VignetteIndexEntry{Running Nonmem with slurmtools}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -44,7 +44,7 @@ install.packages("slurmtools")
 library(slurmtools)
 ```
 
-We are given a message when loading slurmtools that some options are not set and that default job submission will not work without them. These options are used for default arguments in the `submit_nonmem_model` function. Running `?submit_nonmem_model` we can see the documentation![Help view for submit_nonmem_model function](../inst/extdata/images/submit_nonmem_model_help.png)
+We are given a message when loading slurmtools that some options are not set and that default job submission will not work without them. These options are used for default arguments in the `submit_nonmem_model` function. Running `?submit_nonmem_model` we can see the documentation![Help view for submit_nonmem_model function](data/images/submit_nonmem_model_help.png)
 
 This function uses the inputs to populate a template Bash shell script that submits the NONMEM job to slurm. A default template file is supplied with the Project Starter and it can be modified to do additional tasks as long as they are possible within Bash.
 
@@ -210,9 +210,9 @@ submission_ntfy <- slurmtools::submit_nonmem_model(
 submission_ntfy
 ```
 
-We again get a 0 exit code status and now instead of using `slurmtools::get_slurm_jobs()` to monitor the job, we can rely on the new notifications we just set up. ![NONMEM job starting ntfy alert](../inst/extdata/images/ntfy_starting.png)
+We again get a 0 exit code status and now instead of using `slurmtools::get_slurm_jobs()` to monitor the job, we can rely on the new notifications we just set up. ![NONMEM job starting ntfy alert](data/images/ntfy_starting.png)
 
-and when the run finished we get another notification: ![NONMEM Job finished ntfy alert](../inst/extdata/images/ntfy_finished.png)
+and when the run finished we get another notification: ![NONMEM Job finished ntfy alert](data/images/ntfy_finished.png)
 
 Note that the run number will match the run specified in `submission$stdout`. We can see the new shell script this updated template file generated
 
@@ -239,7 +239,7 @@ To reiterate, this template file is run as a bash shell script so anything you c
 #cancelling any running nonmem jobs
 state <- slurmtools::get_slurm_jobs(user = "matthews")
 
-if ("RUNNING" %in% state$job_state) {
+if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
   for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
     processx::run("scancel", args = paste0(job_id))
   }
