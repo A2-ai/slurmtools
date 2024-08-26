@@ -134,3 +134,24 @@ hit 0 and when the run finishes it checks if all -1E9 lines are present
 in the .ext file and gives another message about any parameters that hit
 0 gradient.![slack notifications from
 nmm](../inst/extdata/images/nmm_slack_notifications.png)
+
+```{r, include = FALSE}
+#cancelling any running nonmem jobs
+state <- slurmtools::get_slurm_jobs(user = "matthews")
+
+if ("RUNNING" %in% state$job_state) {
+  for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
+    processx::run("scancel", args = paste0(job_id))
+  }
+}
+
+#removing generated files from running this vignette
+nonmem <- file.path("model", "nonmem")
+
+unlink(file.path(nonmem, "1001"), recursive = TRUE)
+unlink(file.path(nonmem, "1001.yaml"))
+unlink(file.path(nonmem, "1001.toml"))
+unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
+unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
+```
+
