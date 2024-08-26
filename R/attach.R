@@ -1,4 +1,3 @@
-
 #' Generates a tidyverse-esque onAttach message
 #'
 #' @return a message to display on attach

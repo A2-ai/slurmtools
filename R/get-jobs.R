@@ -2,15 +2,33 @@ utils::globalVariables(c("user_name"))
 
 # Function to parse each job into a tibble row
 parse_job_to_row <- function(job) {
+  # check options for squeue version
+  # alter parsing based on result
+
+  if (getOption("squeue.version") > package_version("23.02.4")){
+    submit_time = job$submit_time$number
+    start_time = job$start_time$number
+    ### This is "hacky", it looks like for configuring model the list is 3 {"Running", "Configuring", "Power_up_node"}
+    if (length(job$job_state) > 1){
+      job_state = job$job_state[[2]]
+    } else {
+      job_state = job$job_state[[1]]
+    }
+  } else {
+    submit_time = job$submit_time
+    start_time = job$start_time
+    job_state = job$job_state
+  }
+
   tibble::tibble(
     job_id = job$job_id,
-    job_state = job$job_state,
+    job_state = job_state,
     cpus = job$cpus$number,
     partition = job$partition,
     standard_input = job$standard_input,
     standard_output = job$standard_output,
-    submit_time = job$submit_time,
-    start_time = job$start_time,
+    submit_time = submit_time,
+    start_time = start_time,
     user_name = job$user_name,
     current_working_directory = job$current_working_directory
   )
