@@ -1,0 +1,37 @@
+{
+    "bbi_version": "v3.3.0",
+    "model_name": "1001.mod",
+    "original_model": "1001.mod",
+    "model_path": "/cluster-data/user-homes/wes/packages/slurmtools/vignettes/model/nonmem/1001.mod",
+    "data_path": "../../../data/derived/PK_Data_v01.csv",
+    "data_md5": "29f1770829f958bc7efa1bc6b59db421",
+    "model_md5": "bf98e4c3c4e2edfd1ba03168d63821fe",
+    "model_filename": "1001",
+    "model_extension": "mod",
+    "original_path": "/cluster-data/user-homes/wes/packages/slurmtools/vignettes/model/nonmem",
+    "output_dir": "/cluster-data/user-homes/wes/packages/slurmtools/vignettes/model/nonmem/1001",
+    "configuration": {
+        "clean_lvl": 1,
+        "git": true,
+        "save_config": true,
+        "output_dir": "{{ .Name }}",
+        "threads": 4,
+        "local": {
+            "create_child_dirs": true
+        },
+        "nonmem": {
+            "nm751": {
+                "home": "/opt/nonmem/nm751",
+                "executable": "nmfe75",
+                "default": true
+            }
+        },
+        "parallel": false,
+        "nmfe_options": {
+            "maxlim": 2
+        },
+        "mpi_exec_path": "/usr/bin/mpiexec",
+        "parallel_timeout": 2147483647
+    },
+    "error": null
+}

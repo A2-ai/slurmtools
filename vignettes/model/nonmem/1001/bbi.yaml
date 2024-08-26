@@ -1,0 +1,38 @@
+nm_version: ""
+overwrite: false
+clean_lvl: 1
+copy_lvl: 0
+git: true
+bbi_binary: ""
+save_config: true
+output_dir: '{{ .Name }}'
+threads: 4
+debug: false
+local:
+  create_child_dirs: true
+nonmem:
+  nm751:
+    home: /opt/nonmem/nm751
+    executable: nmfe75
+    nmqual: false
+    default: true
+parallel: false
+delay: 0
+nmqual: false
+json: false
+log_file: ""
+nmfe_options:
+  license_file: ""
+  prsame: false
+  background: false
+  prcompile: false
+  prdefault: false
+  tprdefault: false
+  nobuild: false
+  maxlim: 2
+mpi_exec_path: /usr/bin/mpiexec
+parallel_timeout: 2147483647
+parafile: ""
+post_work_executable: ""
+additional_post_work_envs: []
+grid_name_prefix: ""
