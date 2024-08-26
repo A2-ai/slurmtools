@@ -2,6 +2,8 @@ utils::globalVariables(c("user_name"))
 
 # Function to parse each job into a tibble row
 parse_job_to_row <- function(job) {
+  # check options for squeue version
+  # alter parsing based on result
   tibble::tibble(
     job_id = job$job_id,
     job_state = job$job_state,
