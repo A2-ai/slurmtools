@@ -8,7 +8,12 @@ parse_job_to_row <- function(job) {
   if (getOption("squeue.version") > package_version("23.02.4")){
     submit_time = job$submit_time$number
     start_time = job$start_time$number
-    job_state = job$job_state[[1]] ### Is the first entry for sure what we want?
+    ### This is "hacky", it looks like for configuring model the list is 3 {"Running", "Configuring", "Power_up_node"}
+    if (length(job$job_state) > 1){
+      job_state = job$job_state[[2]]
+    } else {
+      job_state = job$job_state[[1]]
+    }
   } else {
     submit_time = job$submit_time
     start_time = job$start_time

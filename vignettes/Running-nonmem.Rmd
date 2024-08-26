@@ -237,13 +237,12 @@ To reiterate, this template file is run as a bash shell script so anything you c
 
 ```{r, include = FALSE}
 #cancelling any running nonmem jobs
-state <- slurmtools::get_slurm_jobs(user = "matthews") %>% 
-  dplyr::pull("job_state")
+state <- slurmtools::get_slurm_jobs(user = "matthews")
 
-flag <- "RUNNING" %in% state
-while (flag) {
-  Sys.sleep(10)
-  flag <- "RUNNING" %in% state
+if ("RUNNING" %in% state$job_state) {
+  for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
+    processx::run("scancel", args = paste0(job_id))
+  }
 }
 
 #removing generated files from running this vignette
@@ -255,4 +254,3 @@ unlink(file.path(nonmem, "1001.toml"))
 unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
 unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```
-
