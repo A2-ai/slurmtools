@@ -5,15 +5,25 @@ parse_job_to_row <- function(job) {
   # check options for squeue version
   # alter parsing based on result
 
+  if (getOption("squeue.version") > package_version("23.02.4")){
+    submit_time = job$submit_time$number
+    start_time = job$start_time$number
+    job_state = job$job_state[[1]] ### Is the first entry for sure what we want?
+  } else {
+    submit_time = job$submit_time
+    start_time = job$start_time
+    job_state = job$job_state
+  }
+
   tibble::tibble(
     job_id = job$job_id,
-    job_state = job$job_state,
+    job_state = job_state,
     cpus = job$cpus$number,
     partition = job$partition,
     standard_input = job$standard_input,
     standard_output = job$standard_output,
-    submit_time = job$submit_time,
-    start_time = job$start_time,
+    submit_time = submit_time,
+    start_time = start_time,
     user_name = job$user_name,
     current_working_directory = job$current_working_directory
   )
