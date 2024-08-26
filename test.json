@@ -1,0 +1,2332 @@
+{
+  "jobs": [
+    {
+      "account": "",
+      "accrue_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695179
+      },
+      "admin_comment": "",
+      "allocating_node": "ip-10-2-40-93",
+      "array_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_id": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "array_max_tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_string": "",
+      "association_id": 0,
+      "batch_features": "",
+      "batch_flag": true,
+      "batch_host": "cpu2mem4gb-dy-c7i-large-1",
+      "flags": [
+        "EXACT_TASK_COUNT_REQUESTED",
+        "EXACT_CPU_COUNT_REQUESTED",
+        "USING_DEFAULT_ACCOUNT",
+        "USING_DEFAULT_QOS",
+        "USING_DEFAULT_WCKEY",
+        "BACKFILL_ATTEMPTED"
+      ],
+      "burst_buffer": "",
+      "burst_buffer_state": "",
+      "cluster": "a2aiclustermattsmith",
+      "cluster_features": "",
+      "command": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/1001.sh",
+      "comment": "",
+      "container": "",
+      "container_id": "",
+      "contiguous": false,
+      "core_spec": 0,
+      "thread_spec": 32766,
+      "cores_per_socket": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "billable_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 1.0
+      },
+      "cpus_per_task": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "cpu_frequency_minimum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_maximum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_governor": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus_per_tres": "",
+      "cron": "",
+      "deadline": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "delay_boot": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "dependency": "",
+      "derived_exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "eligible_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695179
+      },
+      "end_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695519
+      },
+      "excluded_nodes": "",
+      "exit_code": {
+        "status": [
+          "ERROR"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 1
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "extra": "",
+      "failed_node": "",
+      "features": "",
+      "federation_origin": "",
+      "federation_siblings_active": "",
+      "federation_siblings_viable": "",
+      "gres_detail": [
+      ],
+      "group_id": 870201162,
+      "group_name": "datascience",
+      "het_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "het_job_id_set": "",
+      "het_job_offset": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "job_id": 1,
+      "job_resources": {
+        "nodes": "cpu2mem4gb-dy-c7i-large-1",
+        "allocated_cores": 0,
+        "allocated_cpus": 1,
+        "allocated_hosts": 1,
+        "allocated_nodes": [
+          {
+            "sockets": {
+              "0": {
+                "cores": {
+                  "0": "allocated"
+                }
+              }
+            },
+            "nodename": "cpu2mem4gb-dy-c7i-large-1",
+            "cpus_used": 0,
+            "memory_used": 0,
+            "memory_allocated": 0
+          }
+        ]
+      },
+      "job_size_str": [
+      ],
+      "job_state": [
+        "FAILED"
+      ],
+      "last_sched_evaluation": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695179
+      },
+      "licenses": "",
+      "mail_type": [
+      ],
+      "mail_user": "matthews",
+      "max_cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "max_nodes": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "mcs_label": "",
+      "memory_per_tres": "",
+      "name": "1001-nonmem-run",
+      "network": "",
+      "nodes": "cpu2mem4gb-dy-c7i-large-1",
+      "nice": 0,
+      "tasks_per_core": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_socket": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_board": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "node_count": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "partition": "cpu2mem4gb",
+      "prefer": "",
+      "memory_per_cpu": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "memory_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "minimum_cpus_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "minimum_tmp_disk_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "power": {
+        "flags": [
+        ]
+      },
+      "preempt_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "preemptable_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "pre_sus_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "hold": false,
+      "priority": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "profile": [
+        "NOT_SET"
+      ],
+      "qos": "normal",
+      "reboot": false,
+      "required_nodes": "",
+      "minimum_switches": 0,
+      "requeue": true,
+      "resize_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "restart_cnt": 0,
+      "resv_name": "",
+      "scheduled_nodes": "",
+      "selinux_context": "",
+      "shared": [
+      ],
+      "exclusive": [
+      ],
+      "oversubscribe": true,
+      "show_flags": [
+        "DETAIL",
+        "LOCAL"
+      ],
+      "sockets_per_board": 0,
+      "sockets_per_node": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "start_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695516
+      },
+      "state_description": "",
+      "state_reason": "NonZeroExitCode",
+      "standard_error": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-1.out",
+      "standard_input": "\/dev\/null",
+      "standard_output": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-1.out",
+      "submit_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695179
+      },
+      "suspend_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "system_comment": "",
+      "time_limit": {
+        "set": true,
+        "infinite": false,
+        "number": 525600
+      },
+      "time_minimum": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "threads_per_core": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "tres_bind": "",
+      "tres_freq": "",
+      "tres_per_job": "",
+      "tres_per_node": "",
+      "tres_per_socket": "",
+      "tres_per_task": "cpu:1",
+      "tres_req_str": "cpu=1,mem=3891M,node=1,billing=1",
+      "tres_alloc_str": "cpu=1,node=1,billing=1",
+      "user_id": 870262609,
+      "user_name": "matthews",
+      "maximum_switch_wait_time": 0,
+      "wckey": "",
+      "current_working_directory": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log"
+    },
+    {
+      "account": "",
+      "accrue_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695218
+      },
+      "admin_comment": "",
+      "allocating_node": "ip-10-2-40-93",
+      "array_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_id": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "array_max_tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_string": "",
+      "association_id": 0,
+      "batch_features": "",
+      "batch_flag": true,
+      "batch_host": "cpu2mem4gb-dy-c7i-large-1",
+      "flags": [
+        "EXACT_TASK_COUNT_REQUESTED",
+        "EXACT_CPU_COUNT_REQUESTED",
+        "USING_DEFAULT_ACCOUNT",
+        "USING_DEFAULT_QOS",
+        "USING_DEFAULT_WCKEY"
+      ],
+      "burst_buffer": "",
+      "burst_buffer_state": "",
+      "cluster": "a2aiclustermattsmith",
+      "cluster_features": "",
+      "command": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/1001.sh",
+      "comment": "",
+      "container": "",
+      "container_id": "",
+      "contiguous": false,
+      "core_spec": 0,
+      "thread_spec": 32766,
+      "cores_per_socket": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "billable_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 1.0
+      },
+      "cpus_per_task": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "cpu_frequency_minimum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_maximum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_governor": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus_per_tres": "",
+      "cron": "",
+      "deadline": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "delay_boot": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "dependency": "",
+      "derived_exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "eligible_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695218
+      },
+      "end_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695518
+      },
+      "excluded_nodes": "",
+      "exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "extra": "",
+      "failed_node": "",
+      "features": "",
+      "federation_origin": "",
+      "federation_siblings_active": "",
+      "federation_siblings_viable": "",
+      "gres_detail": [
+      ],
+      "group_id": 870201162,
+      "group_name": "datascience",
+      "het_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "het_job_id_set": "",
+      "het_job_offset": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "job_id": 2,
+      "job_resources": {
+        "nodes": "cpu2mem4gb-dy-c7i-large-1",
+        "allocated_cores": 0,
+        "allocated_cpus": 1,
+        "allocated_hosts": 1,
+        "allocated_nodes": [
+          {
+            "sockets": {
+              "1": {
+                "cores": {
+                  "0": "allocated"
+                }
+              }
+            },
+            "nodename": "cpu2mem4gb-dy-c7i-large-1",
+            "cpus_used": 0,
+            "memory_used": 0,
+            "memory_allocated": 0
+          }
+        ]
+      },
+      "job_size_str": [
+      ],
+      "job_state": [
+        "COMPLETED"
+      ],
+      "last_sched_evaluation": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695219
+      },
+      "licenses": "",
+      "mail_type": [
+      ],
+      "mail_user": "matthews",
+      "max_cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "max_nodes": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "mcs_label": "",
+      "memory_per_tres": "",
+      "name": "1001-nonmem-run",
+      "network": "",
+      "nodes": "cpu2mem4gb-dy-c7i-large-1",
+      "nice": 0,
+      "tasks_per_core": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_socket": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_board": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "node_count": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "partition": "cpu2mem4gb",
+      "prefer": "",
+      "memory_per_cpu": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "memory_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "minimum_cpus_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "minimum_tmp_disk_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "power": {
+        "flags": [
+        ]
+      },
+      "preempt_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "preemptable_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "pre_sus_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "hold": false,
+      "priority": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "profile": [
+        "NOT_SET"
+      ],
+      "qos": "normal",
+      "reboot": false,
+      "required_nodes": "",
+      "minimum_switches": 0,
+      "requeue": true,
+      "resize_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "restart_cnt": 0,
+      "resv_name": "",
+      "scheduled_nodes": "",
+      "selinux_context": "",
+      "shared": [
+      ],
+      "exclusive": [
+      ],
+      "oversubscribe": true,
+      "show_flags": [
+        "DETAIL",
+        "LOCAL"
+      ],
+      "sockets_per_board": 0,
+      "sockets_per_node": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "start_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695516
+      },
+      "state_description": "",
+      "state_reason": "None",
+      "standard_error": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-2.out",
+      "standard_input": "\/dev\/null",
+      "standard_output": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-2.out",
+      "submit_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695218
+      },
+      "suspend_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "system_comment": "",
+      "time_limit": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "time_minimum": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "threads_per_core": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "tres_bind": "",
+      "tres_freq": "",
+      "tres_per_job": "",
+      "tres_per_node": "",
+      "tres_per_socket": "",
+      "tres_per_task": "cpu:1",
+      "tres_req_str": "cpu=1,mem=3891M,node=1,billing=1",
+      "tres_alloc_str": "cpu=1,node=1,billing=1",
+      "user_id": 870262609,
+      "user_name": "matthews",
+      "maximum_switch_wait_time": 0,
+      "wckey": "",
+      "current_working_directory": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log"
+    },
+    {
+      "account": "",
+      "accrue_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695294
+      },
+      "admin_comment": "",
+      "allocating_node": "ip-10-2-40-93",
+      "array_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_id": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "array_max_tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_string": "",
+      "association_id": 0,
+      "batch_features": "",
+      "batch_flag": true,
+      "batch_host": "cpu2mem4gb-dy-c7i-large-2",
+      "flags": [
+        "EXACT_TASK_COUNT_REQUESTED",
+        "EXACT_CPU_COUNT_REQUESTED",
+        "JOB_WAS_RUNNING",
+        "USING_DEFAULT_ACCOUNT",
+        "USING_DEFAULT_QOS",
+        "USING_DEFAULT_WCKEY"
+      ],
+      "burst_buffer": "",
+      "burst_buffer_state": "",
+      "cluster": "a2aiclustermattsmith",
+      "cluster_features": "",
+      "command": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/1001.sh",
+      "comment": "",
+      "container": "",
+      "container_id": "",
+      "contiguous": false,
+      "core_spec": 0,
+      "thread_spec": 32766,
+      "cores_per_socket": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "billable_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 1.0
+      },
+      "cpus_per_task": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "cpu_frequency_minimum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_maximum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_governor": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus_per_tres": "",
+      "cron": "",
+      "deadline": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "delay_boot": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "dependency": "",
+      "derived_exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "eligible_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695294
+      },
+      "end_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1756231295
+      },
+      "excluded_nodes": "",
+      "exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "extra": "",
+      "failed_node": "",
+      "features": "",
+      "federation_origin": "",
+      "federation_siblings_active": "",
+      "federation_siblings_viable": "",
+      "gres_detail": [
+      ],
+      "group_id": 870201162,
+      "group_name": "datascience",
+      "het_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "het_job_id_set": "",
+      "het_job_offset": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "job_id": 3,
+      "job_resources": {
+        "nodes": "cpu2mem4gb-dy-c7i-large-2",
+        "allocated_cores": 0,
+        "allocated_cpus": 1,
+        "allocated_hosts": 1,
+        "allocated_nodes": [
+          {
+            "sockets": {
+              "0": {
+                "cores": {
+                  "0": "allocated"
+                }
+              }
+            },
+            "nodename": "cpu2mem4gb-dy-c7i-large-2",
+            "cpus_used": 0,
+            "memory_used": 0,
+            "memory_allocated": 0
+          }
+        ]
+      },
+      "job_size_str": [
+      ],
+      "job_state": [
+        "RUNNING",
+        "CONFIGURING",
+        "POWER_UP_NODE"
+      ],
+      "last_sched_evaluation": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695295
+      },
+      "licenses": "",
+      "mail_type": [
+      ],
+      "mail_user": "matthews",
+      "max_cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "max_nodes": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "mcs_label": "",
+      "memory_per_tres": "",
+      "name": "1001-nonmem-run",
+      "network": "",
+      "nodes": "cpu2mem4gb-dy-c7i-large-2",
+      "nice": 0,
+      "tasks_per_core": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_socket": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_board": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "node_count": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "partition": "cpu2mem4gb",
+      "prefer": "",
+      "memory_per_cpu": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "memory_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "minimum_cpus_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "minimum_tmp_disk_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "power": {
+        "flags": [
+        ]
+      },
+      "preempt_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "preemptable_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "pre_sus_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "hold": false,
+      "priority": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "profile": [
+        "NOT_SET"
+      ],
+      "qos": "normal",
+      "reboot": false,
+      "required_nodes": "",
+      "minimum_switches": 0,
+      "requeue": true,
+      "resize_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "restart_cnt": 0,
+      "resv_name": "",
+      "scheduled_nodes": "",
+      "selinux_context": "",
+      "shared": [
+      ],
+      "exclusive": [
+      ],
+      "oversubscribe": true,
+      "show_flags": [
+        "DETAIL",
+        "LOCAL"
+      ],
+      "sockets_per_board": 0,
+      "sockets_per_node": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "start_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695295
+      },
+      "state_description": "",
+      "state_reason": "None",
+      "standard_error": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-3.out",
+      "standard_input": "\/dev\/null",
+      "standard_output": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-3.out",
+      "submit_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695294
+      },
+      "suspend_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "system_comment": "",
+      "time_limit": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "time_minimum": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "threads_per_core": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "tres_bind": "",
+      "tres_freq": "",
+      "tres_per_job": "",
+      "tres_per_node": "",
+      "tres_per_socket": "",
+      "tres_per_task": "cpu:1",
+      "tres_req_str": "cpu=1,mem=3891M,node=1,billing=1",
+      "tres_alloc_str": "cpu=1,node=1,billing=1",
+      "user_id": 870262609,
+      "user_name": "matthews",
+      "maximum_switch_wait_time": 0,
+      "wckey": "",
+      "current_working_directory": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log"
+    },
+    {
+      "account": "",
+      "accrue_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695295
+      },
+      "admin_comment": "",
+      "allocating_node": "ip-10-2-40-93",
+      "array_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_id": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "array_max_tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_string": "",
+      "association_id": 0,
+      "batch_features": "",
+      "batch_flag": true,
+      "batch_host": "cpu2mem4gb-dy-c7i-large-2",
+      "flags": [
+        "EXACT_TASK_COUNT_REQUESTED",
+        "EXACT_CPU_COUNT_REQUESTED",
+        "JOB_WAS_RUNNING",
+        "USING_DEFAULT_ACCOUNT",
+        "USING_DEFAULT_QOS",
+        "USING_DEFAULT_WCKEY",
+        "BACKFILL_ATTEMPTED"
+      ],
+      "burst_buffer": "",
+      "burst_buffer_state": "",
+      "cluster": "a2aiclustermattsmith",
+      "cluster_features": "",
+      "command": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/1001.sh",
+      "comment": "",
+      "container": "",
+      "container_id": "",
+      "contiguous": false,
+      "core_spec": 0,
+      "thread_spec": 32766,
+      "cores_per_socket": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "billable_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 1.0
+      },
+      "cpus_per_task": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "cpu_frequency_minimum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_maximum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_governor": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus_per_tres": "",
+      "cron": "",
+      "deadline": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "delay_boot": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "dependency": "",
+      "derived_exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "eligible_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695295
+      },
+      "end_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1756231295
+      },
+      "excluded_nodes": "",
+      "exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "extra": "",
+      "failed_node": "",
+      "features": "",
+      "federation_origin": "",
+      "federation_siblings_active": "",
+      "federation_siblings_viable": "",
+      "gres_detail": [
+      ],
+      "group_id": 870201162,
+      "group_name": "datascience",
+      "het_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "het_job_id_set": "",
+      "het_job_offset": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "job_id": 4,
+      "job_resources": {
+        "nodes": "cpu2mem4gb-dy-c7i-large-2",
+        "allocated_cores": 0,
+        "allocated_cpus": 1,
+        "allocated_hosts": 1,
+        "allocated_nodes": [
+          {
+            "sockets": {
+              "1": {
+                "cores": {
+                  "0": "allocated"
+                }
+              }
+            },
+            "nodename": "cpu2mem4gb-dy-c7i-large-2",
+            "cpus_used": 0,
+            "memory_used": 0,
+            "memory_allocated": 0
+          }
+        ]
+      },
+      "job_size_str": [
+      ],
+      "job_state": [
+        "RUNNING",
+        "CONFIGURING",
+        "POWER_UP_NODE"
+      ],
+      "last_sched_evaluation": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695295
+      },
+      "licenses": "",
+      "mail_type": [
+      ],
+      "mail_user": "matthews",
+      "max_cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "max_nodes": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "mcs_label": "",
+      "memory_per_tres": "",
+      "name": "1001-nonmem-run",
+      "network": "",
+      "nodes": "cpu2mem4gb-dy-c7i-large-2",
+      "nice": 0,
+      "tasks_per_core": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_socket": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_board": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "node_count": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "partition": "cpu2mem4gb",
+      "prefer": "",
+      "memory_per_cpu": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "memory_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "minimum_cpus_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "minimum_tmp_disk_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "power": {
+        "flags": [
+        ]
+      },
+      "preempt_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "preemptable_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "pre_sus_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "hold": false,
+      "priority": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "profile": [
+        "NOT_SET"
+      ],
+      "qos": "normal",
+      "reboot": false,
+      "required_nodes": "",
+      "minimum_switches": 0,
+      "requeue": true,
+      "resize_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "restart_cnt": 0,
+      "resv_name": "",
+      "scheduled_nodes": "",
+      "selinux_context": "",
+      "shared": [
+      ],
+      "exclusive": [
+      ],
+      "oversubscribe": true,
+      "show_flags": [
+        "DETAIL",
+        "LOCAL"
+      ],
+      "sockets_per_board": 0,
+      "sockets_per_node": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "start_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695295
+      },
+      "state_description": "",
+      "state_reason": "None",
+      "standard_error": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-4.out",
+      "standard_input": "\/dev\/null",
+      "standard_output": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-4.out",
+      "submit_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695295
+      },
+      "suspend_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "system_comment": "",
+      "time_limit": {
+        "set": true,
+        "infinite": false,
+        "number": 525600
+      },
+      "time_minimum": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "threads_per_core": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "tres_bind": "",
+      "tres_freq": "",
+      "tres_per_job": "",
+      "tres_per_node": "",
+      "tres_per_socket": "",
+      "tres_per_task": "cpu:1",
+      "tres_req_str": "cpu=1,mem=3891M,node=1,billing=1",
+      "tres_alloc_str": "cpu=1,node=1,billing=1",
+      "user_id": 870262609,
+      "user_name": "matthews",
+      "maximum_switch_wait_time": 0,
+      "wckey": "",
+      "current_working_directory": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log"
+    },
+    {
+      "account": "",
+      "accrue_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "admin_comment": "",
+      "allocating_node": "ip-10-2-40-93",
+      "array_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_id": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "array_max_tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_string": "",
+      "association_id": 0,
+      "batch_features": "",
+      "batch_flag": true,
+      "batch_host": "cpu2mem4gb-dy-c7i-large-3",
+      "flags": [
+        "EXACT_TASK_COUNT_REQUESTED",
+        "EXACT_CPU_COUNT_REQUESTED",
+        "JOB_WAS_RUNNING",
+        "USING_DEFAULT_ACCOUNT",
+        "USING_DEFAULT_QOS",
+        "USING_DEFAULT_WCKEY",
+        "BACKFILL_ATTEMPTED"
+      ],
+      "burst_buffer": "",
+      "burst_buffer_state": "",
+      "cluster": "a2aiclustermattsmith",
+      "cluster_features": "",
+      "command": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/1001.sh",
+      "comment": "",
+      "container": "",
+      "container_id": "",
+      "contiguous": false,
+      "core_spec": 0,
+      "thread_spec": 32766,
+      "cores_per_socket": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "billable_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 1.0
+      },
+      "cpus_per_task": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "cpu_frequency_minimum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_maximum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_governor": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus_per_tres": "",
+      "cron": "",
+      "deadline": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "delay_boot": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "dependency": "",
+      "derived_exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "eligible_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "end_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1756231361
+      },
+      "excluded_nodes": "",
+      "exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "extra": "",
+      "failed_node": "",
+      "features": "",
+      "federation_origin": "",
+      "federation_siblings_active": "",
+      "federation_siblings_viable": "",
+      "gres_detail": [
+      ],
+      "group_id": 870201162,
+      "group_name": "datascience",
+      "het_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "het_job_id_set": "",
+      "het_job_offset": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "job_id": 5,
+      "job_resources": {
+        "nodes": "cpu2mem4gb-dy-c7i-large-3",
+        "allocated_cores": 0,
+        "allocated_cpus": 1,
+        "allocated_hosts": 1,
+        "allocated_nodes": [
+          {
+            "sockets": {
+              "0": {
+                "cores": {
+                  "0": "allocated"
+                }
+              }
+            },
+            "nodename": "cpu2mem4gb-dy-c7i-large-3",
+            "cpus_used": 0,
+            "memory_used": 0,
+            "memory_allocated": 0
+          }
+        ]
+      },
+      "job_size_str": [
+      ],
+      "job_state": [
+        "RUNNING",
+        "CONFIGURING",
+        "POWER_UP_NODE"
+      ],
+      "last_sched_evaluation": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "licenses": "",
+      "mail_type": [
+      ],
+      "mail_user": "matthews",
+      "max_cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "max_nodes": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "mcs_label": "",
+      "memory_per_tres": "",
+      "name": "1001-nonmem-run",
+      "network": "",
+      "nodes": "cpu2mem4gb-dy-c7i-large-3",
+      "nice": 0,
+      "tasks_per_core": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_socket": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_board": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "node_count": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "partition": "cpu2mem4gb",
+      "prefer": "",
+      "memory_per_cpu": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "memory_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "minimum_cpus_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "minimum_tmp_disk_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "power": {
+        "flags": [
+        ]
+      },
+      "preempt_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "preemptable_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "pre_sus_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "hold": false,
+      "priority": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "profile": [
+        "NOT_SET"
+      ],
+      "qos": "normal",
+      "reboot": false,
+      "required_nodes": "",
+      "minimum_switches": 0,
+      "requeue": true,
+      "resize_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "restart_cnt": 0,
+      "resv_name": "",
+      "scheduled_nodes": "",
+      "selinux_context": "",
+      "shared": [
+      ],
+      "exclusive": [
+      ],
+      "oversubscribe": true,
+      "show_flags": [
+        "DETAIL",
+        "LOCAL"
+      ],
+      "sockets_per_board": 0,
+      "sockets_per_node": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "start_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "state_description": "",
+      "state_reason": "None",
+      "standard_error": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-5.out",
+      "standard_input": "\/dev\/null",
+      "standard_output": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-5.out",
+      "submit_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "suspend_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "system_comment": "",
+      "time_limit": {
+        "set": true,
+        "infinite": false,
+        "number": 525600
+      },
+      "time_minimum": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "threads_per_core": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "tres_bind": "",
+      "tres_freq": "",
+      "tres_per_job": "",
+      "tres_per_node": "",
+      "tres_per_socket": "",
+      "tres_per_task": "cpu:1",
+      "tres_req_str": "cpu=1,mem=3891M,node=1,billing=1",
+      "tres_alloc_str": "cpu=1,node=1,billing=1",
+      "user_id": 870262609,
+      "user_name": "matthews",
+      "maximum_switch_wait_time": 0,
+      "wckey": "",
+      "current_working_directory": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log"
+    },
+    {
+      "account": "",
+      "accrue_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "admin_comment": "",
+      "allocating_node": "ip-10-2-40-93",
+      "array_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_id": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "array_max_tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "array_task_string": "",
+      "association_id": 0,
+      "batch_features": "",
+      "batch_flag": true,
+      "batch_host": "cpu2mem4gb-dy-c7i-large-3",
+      "flags": [
+        "EXACT_TASK_COUNT_REQUESTED",
+        "EXACT_CPU_COUNT_REQUESTED",
+        "JOB_WAS_RUNNING",
+        "USING_DEFAULT_ACCOUNT",
+        "USING_DEFAULT_QOS",
+        "USING_DEFAULT_WCKEY"
+      ],
+      "burst_buffer": "",
+      "burst_buffer_state": "",
+      "cluster": "a2aiclustermattsmith",
+      "cluster_features": "",
+      "command": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/1001.sh",
+      "comment": "",
+      "container": "",
+      "container_id": "",
+      "contiguous": false,
+      "core_spec": 0,
+      "thread_spec": 32766,
+      "cores_per_socket": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "billable_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 1.0
+      },
+      "cpus_per_task": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "cpu_frequency_minimum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_maximum": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpu_frequency_governor": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus_per_tres": "",
+      "cron": "",
+      "deadline": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "delay_boot": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "dependency": "",
+      "derived_exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "eligible_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "end_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1756231361
+      },
+      "excluded_nodes": "",
+      "exit_code": {
+        "status": [
+          "SUCCESS"
+        ],
+        "return_code": {
+          "set": true,
+          "infinite": false,
+          "number": 0
+        },
+        "signal": {
+          "id": {
+            "set": false,
+            "infinite": false,
+            "number": 0
+          },
+          "name": ""
+        }
+      },
+      "extra": "",
+      "failed_node": "",
+      "features": "",
+      "federation_origin": "",
+      "federation_siblings_active": "",
+      "federation_siblings_viable": "",
+      "gres_detail": [
+      ],
+      "group_id": 870201162,
+      "group_name": "datascience",
+      "het_job_id": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "het_job_id_set": "",
+      "het_job_offset": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "job_id": 6,
+      "job_resources": {
+        "nodes": "cpu2mem4gb-dy-c7i-large-3",
+        "allocated_cores": 0,
+        "allocated_cpus": 1,
+        "allocated_hosts": 1,
+        "allocated_nodes": [
+          {
+            "sockets": {
+              "1": {
+                "cores": {
+                  "0": "allocated"
+                }
+              }
+            },
+            "nodename": "cpu2mem4gb-dy-c7i-large-3",
+            "cpus_used": 0,
+            "memory_used": 0,
+            "memory_allocated": 0
+          }
+        ]
+      },
+      "job_size_str": [
+      ],
+      "job_state": [
+        "RUNNING",
+        "CONFIGURING",
+        "POWER_UP_NODE"
+      ],
+      "last_sched_evaluation": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "licenses": "",
+      "mail_type": [
+      ],
+      "mail_user": "matthews",
+      "max_cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "max_nodes": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "mcs_label": "",
+      "memory_per_tres": "",
+      "name": "1001-nonmem-run",
+      "network": "",
+      "nodes": "cpu2mem4gb-dy-c7i-large-3",
+      "nice": 0,
+      "tasks_per_core": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_tres": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "tasks_per_socket": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "tasks_per_board": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "cpus": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "node_count": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "tasks": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "partition": "cpu2mem4gb",
+      "prefer": "",
+      "memory_per_cpu": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "memory_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "minimum_cpus_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "minimum_tmp_disk_per_node": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "power": {
+        "flags": [
+        ]
+      },
+      "preempt_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "preemptable_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "pre_sus_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "hold": false,
+      "priority": {
+        "set": true,
+        "infinite": false,
+        "number": 1
+      },
+      "profile": [
+        "NOT_SET"
+      ],
+      "qos": "normal",
+      "reboot": false,
+      "required_nodes": "",
+      "minimum_switches": 0,
+      "requeue": true,
+      "resize_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "restart_cnt": 0,
+      "resv_name": "",
+      "scheduled_nodes": "",
+      "selinux_context": "",
+      "shared": [
+      ],
+      "exclusive": [
+      ],
+      "oversubscribe": true,
+      "show_flags": [
+        "DETAIL",
+        "LOCAL"
+      ],
+      "sockets_per_board": 0,
+      "sockets_per_node": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "start_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "state_description": "",
+      "state_reason": "None",
+      "standard_error": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-6.out",
+      "standard_input": "\/dev\/null",
+      "standard_output": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log\/slurm-6.out",
+      "submit_time": {
+        "set": true,
+        "infinite": false,
+        "number": 1724695361
+      },
+      "suspend_time": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "system_comment": "",
+      "time_limit": {
+        "set": false,
+        "infinite": true,
+        "number": 0
+      },
+      "time_minimum": {
+        "set": true,
+        "infinite": false,
+        "number": 0
+      },
+      "threads_per_core": {
+        "set": false,
+        "infinite": false,
+        "number": 0
+      },
+      "tres_bind": "",
+      "tres_freq": "",
+      "tres_per_job": "",
+      "tres_per_node": "",
+      "tres_per_socket": "",
+      "tres_per_task": "cpu:1",
+      "tres_req_str": "cpu=1,mem=3891M,node=1,billing=1",
+      "tres_alloc_str": "cpu=1,node=1,billing=1",
+      "user_id": 870262609,
+      "user_name": "matthews",
+      "maximum_switch_wait_time": 0,
+      "wckey": "",
+      "current_working_directory": "\/cluster-data\/user-homes\/matthews\/Packages\/slurmtools\/vignettes\/model\/nonmem\/submission-log"
+    }
+  ],
+  "last_backfill": {
+    "set": true,
+    "infinite": false,
+    "number": 1724695361
+  },
+  "last_update": {
+    "set": true,
+    "infinite": false,
+    "number": 1724695519
+  },
+  "meta": {
+    "plugin": {
+      "type": "",
+      "name": "",
+      "data_parser": "data_parser\/v0.0.40",
+      "accounting_storage": "accounting_storage\/slurmdbd"
+    },
+    "client": {
+      "source": "\/dev\/pts\/0",
+      "user": "matthews",
+      "group": "datascience"
+    },
+    "command": [
+      "squeue"
+    ],
+    "slurm": {
+      "version": {
+        "major": "23",
+        "micro": "7",
+        "minor": "11"
+      },
+      "release": "23.11.7",
+      "cluster": "a2aiclustermattsmith"
+    }
+  },
+  "errors": [
+  ],
+  "warnings": [
+  ]
+}
