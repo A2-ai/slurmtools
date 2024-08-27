@@ -1,0 +1,37 @@
+20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="Successfully loaded default configuration from /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml"
+20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="Beginning Local Path"
+20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="A total of 1 models have completed the initial preparation phase"
+20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="[1001] Beginning local work phase"
+20:12:55 [DEBUG] (3) nmm::alerter::alert: Failed to read ext file: "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.ext", Not enough lines
+20:12:55 [DEBUG] (3) nmm::alerter::alert: Failed to read grd file: "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd", Not enough lines
+20:12:58 [INFO] OMEGA(2,1) has 0 value
+20:12:58 [INFO] SIGMA(2,1) has 0 value
+20:13:00 [INFO] SIGMA(2,1) has 0 value
+20:13:00 [INFO] OMEGA(2,1) has 0 value
+20:13:04 [INFO] SIGMA(2,1) has 0 value
+20:13:04 [INFO] OMEGA(2,1) has 0 value
+20:13:04 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd" has 0 gradient for parameter: GRD(6) 
+20:13:07 [INFO] OMEGA(2,1) has 0 value
+20:13:07 [INFO] SIGMA(2,1) has 0 value
+20:13:07 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd" has 0 gradient for parameter: GRD(6) 
+20:13:09 [INFO] OMEGA(1,1) has 0 value
+20:13:09 [INFO] THETA2 has 0 value
+20:13:09 [INFO] OMEGA(2,1) has 0 value
+20:13:09 [INFO] SIGMA(2,1) has 0 value
+20:13:09 [INFO] OBJ has 0 value
+20:13:09 [INFO] THETA1 has 0 value
+20:13:09 [INFO] SIGMA(2,2) has 0 value
+20:13:09 [INFO] OMEGA(2,2) has 0 value
+20:13:09 [INFO] SIGMA(1,1) has 0 value
+20:13:09 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd" has 0 gradient for parameter: GRD(6) 
+20:13:10 [INFO] bbi log: time="2024-08-27T20:13:10Z" level=info msg="[1001] Beginning cleanup phase"
+20:13:11 [INFO] bbi log: time="2024-08-27T20:13:11Z" level=info msg="[1001] Cleanup completed"
+20:13:11 [INFO] bbi log: time="2024-08-27T20:13:11Z" level=info msg="Waiting for any post execution hooks to finish"
+20:13:11 [INFO] bbi log: time="2024-08-27T20:13:11Z" level=info msg="\r1 models completed in 34.734352056s"
+20:13:11 [DEBUG] (7) nmm::core::log: bbi log: 
+20:13:16 [INFO] removed files: 
+	"/tmp/PK_Data_v01_1001.csv"
+	"/tmp/1001.mod"
+20:13:16 [INFO] Received Exit code: exit status: 0
+20:13:16 [WARN] 1001.ext: Missing ext final output lines. Observed lines were: [-1000000000.0, -1000000004.0, -1000000006.0, -1000000007.0]
+20:13:16 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd": The following parameters hit zero gradient through the run: ["GRD(6)"]

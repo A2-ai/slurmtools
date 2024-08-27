@@ -15,7 +15,8 @@ generate_nmm_config(
   alert = "None",
   level = "Debug",
   email = "",
-  threads = 1
+  threads = 1,
+  topic = ""
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ generate_nmm_config(
 \item{email}{if alert is set to Slack, this should be the email associated with slack to get messages sent directly to you.}
 
 \item{threads}{number of threads if running a parallel job. Default is 1}
+
+\item{topic}{the ntfy.sh topic to send alerts to.}
 }
 \value{
 none

@@ -13,6 +13,7 @@ submit_nonmem_model(
   ...,
   slurm_job_template_path = getOption("slurmtools.slurm_job_template_path"),
   submission_root = getOption("slurmtools.submission_root"),
+  bbi_config_path = getOption("slurmtools.bbi_config_path"),
   slurm_template_opts = list()
 )
 }
@@ -32,6 +33,8 @@ submit_nonmem_model(
 \item{slurm_job_template_path}{path to slurm job template}
 
 \item{submission_root}{directory to track job submission scripts and output}
+
+\item{bbi_config_path}{path to bbi.yaml file for bbi configuration}
 
 \item{slurm_template_opts}{choose slurm template}
 }
