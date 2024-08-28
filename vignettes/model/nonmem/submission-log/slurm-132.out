@@ -1,3 +1,0 @@
-thread 'main' panicked at src/cmd/run.rs:54:90:
-called `Result::unwrap()` on an `Err` value: Failed to find slack_notifier!: CannotFindBinaryPath
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

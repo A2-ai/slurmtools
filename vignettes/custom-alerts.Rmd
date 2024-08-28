@@ -130,7 +130,7 @@ topic = ''
 ```
 
 We can now run `submit_nonmem_model` and get essentially the same
-behavior as running with `bbi`.
+behavior as running with `bbi`. On linux `~/.local/bin/` will be on your path so saving binaries there is a good approach.
 
 ```{r}
 submission_nmm <- slurmtools::submit_nonmem_model( 
@@ -138,7 +138,7 @@ submission_nmm <- slurmtools::submit_nonmem_model(
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
   slurm_template_opts = list(
-    nmm_exe_path = normalizePath("~/.local/bin/nmm-x86_64-unknown-linux-gnu/nmm"))
+    nmm_exe_path = normalizePath("~/.local/bin/nmm"))
 )
 
 submission_nmm

@@ -47,21 +47,31 @@ if (file.exists(file.path(nonmem, paste0(mod_number, ".yaml")))) {
 }
 ```
 
-**Need to download slack_notifier and get on path**
-
 # Cut me some Slack
 
 There is also functionality to pair `nmm` with
-[slack_notifier](https://github.com/a2-ai/slack_notifier) and get
-messages sent directly to you via a slack bot. This requires an
-additional `slack_notifier/config.yaml` file that contains the slack bot
-OAuth token like so:
+[slack_notifier](https://github.com/A2-ai/slack_notifier/releases/) and
+get messages sent directly to you via a slack bot. This requires you to
+download the slack_notifier binaries and added them to your path so
+`nmm` can find it. You can download the latest release and extract the
+binary and again save it to `~/.local/bin`.
 
-``` slack_notifier/config.yaml
-SLACK_OAUTH_TOKEN: "supersecretslackoauthtoken"
+```{r}
+Sys.which("slack_notifier")
 ```
 
-Again, we need to update the `1001.toml` file to get slack notifications
+slack_notifier requires an additional `slack_notifier/config.yaml` file
+that contains the slack bot OAuth token which is found from
+[[[https://api.slack.com/apps/\\\\](https://api.slack.com/apps/\\){.uri}]([https://api.slack.com/apps/\\](https://api.slack.com/apps/\){.uri}){.uri}\<YOUR
+APP ID\> /oauth?].
+
+``` slack_notifier/config.yaml
+SLACK_OAUTH_TOKEN: "encrypted(Bot User OAuth Token)"
+```
+
+Again, we need to update the `1001.toml` file to get slack
+notifications. We need to set `alert = "slack"` and provide the `email`
+associated with the slack account in `generate_nmm_config`.
 
 ```{r}
 slurmtools::generate_nmm_config( 
@@ -101,10 +111,14 @@ submission_nmm <- slurmtools::submit_nonmem_model(
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
   slurm_template_opts = list(
-    nmm_exe_path = normalizePath("~/.local/bin/nmm-x86_64-unknown-linux-gnu/nmm"))
+    nmm_exe_path = normalizePath("~/.local/bin/nmm"))
 )
 
 submission_nmm
+```
+
+```{r}
+slurmtools::get_slurm_jobs()
 ```
 
 ![nmm slack alerts](data/images/nmm_slack_notifications.png)
