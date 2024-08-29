@@ -8,6 +8,7 @@
 #' @param ... arguments to pass to processx::run
 #' @param slurm_job_template_path path to slurm job template
 #' @param submission_root directory to track job submission scripts and output
+#' @param bbi_config_path path to bbi.yaml file for bbi configuration
 #' @param slurm_template_opts choose slurm template
 #'
 #' @export
@@ -20,6 +21,7 @@ submit_nonmem_model <-
            ...,
            slurm_job_template_path = getOption('slurmtools.slurm_job_template_path'),
            submission_root = getOption('slurmtools.submission_root'),
+           bbi_config_path = getOption('slurmtools.bbi_config_path'),
            slurm_template_opts = list()) {
 
     if (is.null(partition)) {
@@ -58,14 +60,27 @@ submit_nonmem_model <-
       rlang::warn(sprintf("config.toml file not found, if submitting the job with nmm this is required. Please run generate_nmm_config()"))
     }
 
+    if (is.null(slurm_template_opts$nmm_exe_path)) {
+      nmm_exe_path <- Sys.which("nmm")
+    } else {
+      nmm_exe_path <- slurm_template_opts$nmm_exe_path
+    }
+    if (is.null(slurm_template_opts$bbi_exe_path)) {
+      bbi_exe_path <- Sys.which("bbi")
+    } else {
+      bbi_exe_path <- slurm_template_opts$bbi_exe_path
+    }
+
     default_template_list = list(
       partition = partition,
       parallel = parallel,
       ncpu = ncpu,
       job_name = sprintf("%s-nonmem-run", basename(.mod$absolute_model_path)),
+      bbi_exe_path = bbi_exe_path,
+      bbi_config_path = bbi_config_path,
       model_path = .mod$absolute_model_path,
       config_toml_path = config_toml_path,
-      nmm_exe_path = Sys.which("nmm")
+      nmm_exe_path = nmm_exe_path
     )
 
     template_list = c(

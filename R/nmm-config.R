@@ -11,6 +11,7 @@
 #' @param level What level to log at. Default is info. Available options are Trace, Debug, Info, Warn, Fatal
 #' @param email if alert is set to Slack, this should be the email associated with slack to get messages sent directly to you.
 #' @param threads number of threads if running a parallel job. Default is 1
+#' @param topic the ntfy.sh topic to send alerts to.
 #'
 #' @return none
 #' @keywords internal
@@ -30,7 +31,8 @@ generate_nmm_config <- function(
     alert = "None",
     level = "Debug",
     email = "",
-    threads = 1
+    threads = 1,
+    topic = ""
 ) {
   if (model_number == "") {
     model_number <- basename(.mod$absolute_model_path)
@@ -60,7 +62,8 @@ generate_nmm_config <- function(
     alert = alert,
     level = level,
     email = email,
-    threads = threads
+    threads = threads,
+    topic = topic
   )
 
   config_toml_path <- paste0(.mod$absolute_model_path, ".toml")

@@ -44,7 +44,9 @@ install.packages("slurmtools")
 library(slurmtools)
 ```
 
-We are given a message when loading slurmtools that some options are not set and that default job submission will not work without them. These options are used for default arguments in the `submit_nonmem_model` function. Running `?submit_nonmem_model` we can see the documentation![Help view for submit_nonmem_model function](data/images/submit_nonmem_model_help.png)
+We are given a message when loading slurmtools that some options are not set and that default job submission will not work without them. These options are used for default arguments in the `submit_nonmem_model` function. Running `?submit_nonmem_model` we can see the documentation
+
+![Help view for `submit_nonmem_model` function](data/images/submit_nonmem_model_help.png)
 
 This function uses the inputs to populate a template Bash shell script that submits the NONMEM job to slurm. A default template file is supplied with the Project Starter and it can be modified to do additional tasks as long as they are possible within Bash.
 
@@ -56,6 +58,8 @@ list(
   parallel = parallel,
   ncpu = ncpu,
   job_name = sprintf("%s-nonmem-run", basename(.mod$absolute_model_path)),
+  bbi_exe_path = Sys.which("bbi"),
+  bbi_config_path = bbi_config_path,
   model_path = .mod$absolute_model_path,
   config_toml_path = config_toml_path,
   nmm_exe_path = Sys.which("nmm")
@@ -70,6 +74,10 @@ list(
 
 -   `job_name` is created from the `.mod` argument supplied to `submit_nonmem_model`
 
+-   `bbi_exe_path` is determined via \`Sys.which("bbi")
+
+-   `bbi_config_path` is determined via getOption("slurmtools.bbi_config_path")
+
 -   `model_path` is determined from the `.mod` argument supplied to `submit_nonmem_model`
 
 -   `config_toml_path` is determined from the `.mod` argument supplied to `submit_nonmem_model` and is requried to use `nmm` (NONMEM monitor)
@@ -80,7 +88,7 @@ If you need to feed more arguments to the template you simply supply them in the
 
 ## Submitting a NONMEM job with `bbi`
 
-To submit a NONMEM job, we need to supply either the path to a mod file or create a model object from `bbr`, and supply a `slurm-template.tmpl` file. To use `bbi` we also need a `bbi.yaml` file, which I've also supplied in `/model/nonmem/bbi.yaml`.
+To submit a NONMEM job, we need to supply either the path to a mod file or create a model object from `bbr`, and supply a `slurm-template.tmpl` file. To use `bbi` we also need a `bbi.yaml` file, which I've also supplied in `/model/nonmem/bbi.yaml` (and is also supplied with the R project starter).
 
 Here is an example of a template file that will call `bbi`:
 
@@ -105,9 +113,13 @@ Here is an example of a template file that will call `bbi`:
 {{/parallel}}
 ```
 
-This file will call `bbi` to run our supplied model (`{{model_path}}.mod`) if `ncpu > 1` then parallel will be true and the code between `{{#parallel}}` and `{{/parallel}}` will be populated. if `ncpu = 1` then parallel will be false and the code between `{{^parallel}}` and `{{/parallel}}` will be populated. Notice we'll have to supply the `bbi_exe_path` for it to start the NONMEM run because `submit_nonmem_model` does not supply that variable to the template by default.
+This file will call `bbi` to run our supplied model (`{{model_path}}.mod`) if `ncpu > 1` then parallel will be true and the code between `{{#parallel}}` and `{{/parallel}}` will be populated. if `ncpu = 1` then parallel will be false and the code between `{{^parallel}}` and `{{/parallel}}` will be populated. By default, `submit_nonmem_model` will inject `Sys.which("bbi")` into the template, so if `bbi` is not on your path we'll have to supply the `bbi_exe_path` for it to start the NONMEM run.
 
-We will use a few different template files with different functionality so we'll inject those template file paths to `submit_nonmem_model`. However, we'll use the `submission-log` directory for the output, so we'll set that option so `submit_nonmem_model` default can be used. The slurm template files are saved in `~/model/nonmem/` Additionally, there is a simple NONMEM control stream in `1001.mod` in the same directory that we can use for testing.
+```{r}
+Sys.which("bbi")
+```
+
+We will use a few different template files with different functionality so we'll inject those template file paths to `submit_nonmem_model`. However, we'll use the `submission-log` directory for the output, so we'll set that option as well as `bbi_config_path` so `submit_nonmem_model` defaults can be used. The slurm template files are saved in `~/model/nonmem/` Additionally, there is a simple NONMEM control stream in `1001.mod` in the same directory that we can use for testing.
 
 ```{r}
 library(bbr)
@@ -116,9 +128,10 @@ library(here)
 nonmem = file.path(here::here(), "vignettes", "model", "nonmem")
 
 options('slurmtools.submission_root' = file.path(nonmem, "submission-log"))
+options('slurmtools.bbi_config_path' = file.path(nonmem, "bbi.yaml"))
 ```
 
-To create the bbr model object, we need to have both `1001.mod` and `1001.yaml` which contains metadata about the model in the supplied directory (`/model/nonmem/`).
+To create the `bbr` model object, we need to have both `1001.mod` and `1001.yaml` which contains metadata about the model in the supplied directory (`./model/nonmem/`). We'll check for mod_number.yaml and if it exists, read in the model otherwise create it and then read it.
 
 ```{r}
 mod_number <- "1001"
@@ -130,21 +143,18 @@ if (file.exists(file.path(nonmem, paste0(mod_number, ".yaml")))) {
 }
 ```
 
-We can now submit the job and point to the template file in `model/nonmem/slurm-job-bbi.tmpl`
+We can now submit the job and point to the template file in `model/nonmem/slurm-job-bbi.tmpl`.
 
 ```{r}
 submission <- slurmtools::submit_nonmem_model(
   mod,
   slurm_job_template_path = file.path(nonmem, "slurm-job-bbi.tmpl"),
-  slurm_template_opts = list(
-    bbi_exe_path = Sys.which("bbi"),
-    bbi_config_path = file.path(nonmem, "bbi.yaml"))
 )
 
 submission
 ```
 
-Notice we get a Warning about a config.toml file not being found. I'll expand on that later, but for now we see a `status` with an exit code of 0 suggesting a successful command, and the `stdout` gives us the batch job number. We can use `slurmtools::get_slurm_jobs()` to monitor the status of the job. Here, I've filtered the results to only show the job I just submitted above.
+Notice we get a Warning about a config.toml file not being found. I'll expand on that later, but for now we see a `status` with an exit code of 0 suggesting a successful command, and the `stdout` gives us the batch job number. We can use `slurmtools::get_slurm_jobs()` to monitor the status of the job. Here, we can supply the user = "matthews" argument to filter to just the jobs I've submitted.
 
 ```{r}
 slurmtools::get_slurm_jobs(user = 'matthews')
@@ -202,8 +212,6 @@ submission_ntfy <- slurmtools::submit_nonmem_model(
   slurm_job_template_path = file.path(nonmem, "slurm-job-bbi-ntfy.tmpl"),
   overwrite = TRUE,
   slurm_template_opts = list(
-    bbi_exe_path = Sys.which("bbi"),
-    bbi_config_path = file.path(nonmem, "bbi.yaml"),
     ntfy = "ntfy_demo")
 )
 

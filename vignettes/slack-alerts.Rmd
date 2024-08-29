@@ -1,0 +1,144 @@
+---
+title: "slack-alerts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{slack-alerts}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+#removing generated files from running this vignette
+nonmem <- file.path("model", "nonmem")
+
+unlink(file.path(nonmem, "1001"), recursive = TRUE)
+unlink(file.path(nonmem, "1001.yaml"))
+unlink(file.path(nonmem, "1001.toml"))
+unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
+unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
+```
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(slurmtools)
+library(bbr)
+library(here)
+
+nonmem = file.path(here::here(), "vignettes", "model", "nonmem")
+options('slurmtools.submission_root' = file.path(nonmem, "submission-log"))
+```
+
+```{r}
+mod_number <- "1001"
+
+if (file.exists(file.path(nonmem, paste0(mod_number, ".yaml")))) {
+  mod <- bbr::read_model(file.path(nonmem, mod_number))
+} else {
+  mod <- bbr::new_model(file.path(nonmem, mod_number))
+}
+```
+
+# Cut me some Slack
+
+There is also functionality to pair `nmm` with
+[slack_notifier](https://github.com/A2-ai/slack_notifier/releases/) and
+get messages sent directly to you via a slack bot. This requires you to
+download the slack_notifier binaries and added them to your path so
+`nmm` can find it. You can download the latest release and extract the
+binary and again save it to `~/.local/bin`.
+
+```{r}
+Sys.which("slack_notifier")
+```
+
+slack_notifier requires an additional `slack_notifier/config.yaml` file
+that contains the slack bot OAuth token which is found from
+[[[https://api.slack.com/apps/\\\\](https://api.slack.com/apps/\\){.uri}]([https://api.slack.com/apps/\\](https://api.slack.com/apps/\){.uri}){.uri}\<YOUR
+APP ID\> /oauth?].
+
+``` slack_notifier/config.yaml
+SLACK_OAUTH_TOKEN: "encrypted(Bot User OAuth Token)"
+```
+
+Again, we need to update the `1001.toml` file to get slack
+notifications. We need to set `alert = "slack"` and provide the `email`
+associated with the slack account in `generate_nmm_config`.
+
+```{r}
+slurmtools::generate_nmm_config( 
+  mod, 
+  alert = "slack",
+  email = "matthews@a2-ai.com",
+  watched_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem",
+  output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress")
+```
+
+This generates the following toml file:
+
+``` 1001.toml
+model_number = '1001'
+files_to_track = [ 'lst', 'ext', 'grd' ]
+tmp_dir = '/tmp'
+watched_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem'
+output_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress'
+poll_duration = 1
+alert = 'Slack'
+level = 'Debug'
+email = 'matthews@a2-ai.com'
+threads = 1
+topic = ''
+```
+
+With `alert = 'Slack'` and `email` set in the `1001.toml` file `nmm`
+will send slack notifications directly to you when a NONMEM run starts
+and it will reply to that message with notifications if any gradients
+hit 0 and when the run finishes it checks if all -1E9 lines are present
+in the .ext file and gives another message about any parameters that hit
+0 gradient.
+
+```{r}
+submission_nmm <- slurmtools::submit_nonmem_model( 
+  mod, 
+  overwrite = TRUE,
+  slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
+  slurm_template_opts = list(
+    nmm_exe_path = normalizePath("~/.local/bin/nmm"))
+)
+
+submission_nmm
+```
+
+```{r}
+slurmtools::get_slurm_jobs()
+```
+
+![nmm slack alerts](data/images/nmm_slack_notifications.png)
+
+```{r, include = FALSE}
+#cancelling any running nonmem jobs
+state <- slurmtools::get_slurm_jobs(user = "matthews")
+
+if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
+  for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
+    processx::run("scancel", args = paste0(job_id))
+  }
+}
+
+#removing generated files from running this vignette
+nonmem <- file.path("model", "nonmem")
+
+unlink(file.path(nonmem, "1001"), recursive = TRUE)
+unlink(file.path(nonmem, "1001.yaml"))
+unlink(file.path(nonmem, "1001.toml"))
+unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
+unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
+```
