@@ -53,11 +53,13 @@ This function uses the inputs to populate a template Bash shell script that subm
 By default these values are provided to the slurm template file:
 
 ``` r
-list(
+default_template_list = list(
   partition = partition,
   parallel = parallel,
   ncpu = ncpu,
   job_name = sprintf("%s-nonmem-run", basename(.mod$absolute_model_path)),
+  project_path = project_path,
+  project_name = project_name,
   bbi_exe_path = Sys.which("bbi"),
   bbi_config_path = bbi_config_path,
   model_path = .mod$absolute_model_path,
@@ -99,6 +101,7 @@ Here is an example of a template file that will call `bbi`:
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task={{ncpu}}
 #SBATCH --partition={{partition}}
+#SBATCH --account={{project_name}}
 
 # submit_nonmem_model uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
@@ -154,7 +157,7 @@ submission <- slurmtools::submit_nonmem_model(
 submission
 ```
 
-Notice we get a Warning about a config.toml file not being found. I'll expand on that later, but for now we see a `status` with an exit code of 0 suggesting a successful command, and the `stdout` gives us the batch job number. We can use `slurmtools::get_slurm_jobs()` to monitor the status of the job. Here, we can supply the user = "matthews" argument to filter to just the jobs I've submitted.
+We see a `status` with an exit code of 0 suggesting a successful command, and the `stdout` gives us the batch job number. We can use `slurmtools::get_slurm_jobs()` to monitor the status of the job. Here, we can supply the user = "matthews" argument to filter to just the jobs I've submitted.
 
 ```{r}
 slurmtools::get_slurm_jobs(user = 'matthews')
@@ -181,6 +184,7 @@ Here is a modified template file that adds a `JOBID=$SLURM_JOBID` and some ntfy 
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task={{ncpu}}
 #SBATCH --partition={{partition}}
+#SBATCH --account={{project_name}}
 
 JOBID=$SLURM_JOBID
 
@@ -231,6 +235,7 @@ Note that the run number will match the run specified in `submission$stdout`. We
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=cpu2mem4gb
+#SBATCH --account=slurmtools
 
 JOBID=$SLURM_JOBID
 
