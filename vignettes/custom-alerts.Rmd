@@ -67,8 +67,7 @@ not give you the path to the nmm binary if it is on your path or not. We
 can inject the `nmm_exe_path` like we did with `bbi_exe_path` and assume
 it's not on our path.
 
-Remember that error about the `config.toml` file not existing? Well this
-is the reason. This file controls what `nmm` will monitor and where to
+The `config.toml` file controls what `nmm` will monitor and where to
 look for files and how to alert you. We'll use `generate_nmm_config()`
 to create this file. First we can look at the documentation to see what
 type of information we should pass to this function.![documentation for

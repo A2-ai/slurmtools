@@ -4,7 +4,8 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task={{ncpu}}
 #SBATCH --partition={{partition}}
-
+#SBATCH --account={{project_name}}
+#{{project_path}}
 unset SLURM_NODELIST
 unset SLURM_JOB_NODELIST
 unset SLURM_JOB_USER

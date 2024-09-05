@@ -72,18 +72,13 @@ submit_nonmem_model <-
       bbi_exe_path <- slurm_template_opts$bbi_exe_path
     }
 
-
     if (is.null(slurm_template_opts$project_path)) {
-      project_path <- rstudioapi::getActiveProject()
+      project_path <- here::here()
     } else {
       project_path <- slurm_template_opts$project_path
     }
     if (is.null(slurm_template_opts$project_name)) {
-      project_name <- tools::file_path_sans_ext(
-        list.files(
-          path = project_path,
-          pattern = ".Rproj$")
-        )
+      project_name <- here::here() %>% basename()
     } else {
       project_name <- slurm_template_opts$project_name
     }

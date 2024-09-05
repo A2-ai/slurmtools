@@ -4,6 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task={{ncpu}}
 #SBATCH --partition={{partition}}
+#SBATCH --account={{project_name}}
 
 JOBID=$SLURM_JOBID
 
