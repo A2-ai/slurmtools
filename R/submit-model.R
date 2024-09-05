@@ -56,19 +56,36 @@ submit_nonmem_model <-
     }
 
     config_toml_path <- paste0(.mod$absolute_model_path, ".toml")
-    if (!fs::file_exists(config_toml_path)) {
-      rlang::warn(sprintf("config.toml file not found, if submitting the job with nmm this is required. Please run generate_nmm_config()"))
-    }
+    #if (!fs::file_exists(config_toml_path)) {
+    #  rlang::warn(sprintf("config.toml file not found, if submitting the job with nmm this is required. Please run generate_nmm_config()"))
+    #}
 
     if (is.null(slurm_template_opts$nmm_exe_path)) {
       nmm_exe_path <- Sys.which("nmm")
     } else {
       nmm_exe_path <- slurm_template_opts$nmm_exe_path
     }
+
     if (is.null(slurm_template_opts$bbi_exe_path)) {
       bbi_exe_path <- Sys.which("bbi")
     } else {
       bbi_exe_path <- slurm_template_opts$bbi_exe_path
+    }
+
+
+    if (is.null(slurm_template_opts$project_path)) {
+      project_path <- rstudioapi::getActiveProject()
+    } else {
+      project_path <- slurm_template_opts$project_path
+    }
+    if (is.null(slurm_template_opts$project_name)) {
+      project_name <- tools::file_path_sans_ext(
+        list.files(
+          path = project_path,
+          pattern = ".Rproj$")
+        )
+    } else {
+      project_name <- slurm_template_opts$project_name
     }
 
     default_template_list = list(
@@ -76,6 +93,8 @@ submit_nonmem_model <-
       parallel = parallel,
       ncpu = ncpu,
       job_name = sprintf("%s-nonmem-run", basename(.mod$absolute_model_path)),
+      project_path = project_path,
+      project_name = project_name,
       bbi_exe_path = bbi_exe_path,
       bbi_config_path = bbi_config_path,
       model_path = .mod$absolute_model_path,

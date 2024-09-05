@@ -111,7 +111,8 @@ submission_nmm <- slurmtools::submit_nonmem_model(
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
   slurm_template_opts = list(
-    nmm_exe_path = normalizePath("~/.local/bin/nmm"))
+    nmm_exe_path = normalizePath("~/.local/bin/nmm")
+  )
 )
 
 submission_nmm
