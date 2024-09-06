@@ -61,13 +61,13 @@ jobs:
           rm -rf /tmp/slurm-mocks
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install bbr from GitHub
+        run: Rscript -e 'remotes::install_github("metrumresearchgroup/bbr", ref = "main")'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
-      - name: Install bbr from GitHub
-        run: Rscript -e 'remotes::install_github("metrumresearchgroup/bbr", ref = "main")'
 
       - uses: r-lib/actions/check-r-package@v2
         with:
