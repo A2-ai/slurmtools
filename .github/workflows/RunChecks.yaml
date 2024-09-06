@@ -65,7 +65,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
-            metrumresearchgroup/mrgmisec
+            metrumresearchgroup/mrgmisc
             metrumresearchgroup/nmrec
             metrumresearchgroup/bbr
             any::rcmdcheck
