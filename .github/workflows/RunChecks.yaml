@@ -61,6 +61,9 @@ jobs:
           rm -rf /tmp/slurm-mocks
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install remotes package
+        run: Rscript -e 'install.packages("remotes")'
+
       - name: Install bbr from GitHub
         run: Rscript -e 'remotes::install_github("metrumresearchgroup/bbr", ref = "main")'
 
