@@ -62,17 +62,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install bbr from GitHub
-        run: |
-          Rscript -e 'install.packages("remotes")'
-          Rscript -e 'remotes::install_github("metrumresearchgroup/mrgmisc")'
-          Rscript -e 'remotes::install_github("metrumresearchgroup/nmrec")'
-          Rscript -e 'remotes::install_github("metrumresearchgroup/bbr")'
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
-            metrumresearchgorup/bbr
+            metrumresearchgroup/bbr
             any::rcmdcheck
           needs: check
 
