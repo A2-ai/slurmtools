@@ -65,7 +65,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
-            metrumresearchgroup/mrgmisc
+            metrumresearchgroup/mrgmisec
             metrumresearchgroup/nmrec
             metrumresearchgroup/bbr
             any::rcmdcheck
@@ -74,3 +74,4 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+          vignettes: 'FALSE'

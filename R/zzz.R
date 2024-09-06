@@ -7,7 +7,7 @@
   result <- tryCatch(
     {processx::run("squeue", args = "--version")},
     error = function(e) {
-      message("Warning: 'squeue' command not found or failed to run.")
+      warning("'squeue' command not found or failed to run.")
       return(NULL)
     }
   )
