@@ -4,14 +4,23 @@
 }
 
 .onLoad <- function(libname, pkgname) {
-  processx_output <- processx::run("squeue", args = "--version")
-  if (processx_output$status != 0) {
-    warning("squeue not installed correctly")
-  } else {
-    # stdout format is "slurm major.minor.patch/n"
-    version <- strsplit(processx_output$stdout," ")[[1]][[2]] %>%
-      trimws() %>%
-      package_version()
-    options("squeue.version" = version)
+  result <- tryCatch(
+    {processx::run("squeue", args = "--version")},
+    error = function(e) {
+      message("Warning: 'squeue' command not found or failed to run.")
+      return(NULL)
+    }
+  )
+
+  if (!is.null(result)) {
+    if (result$status != 0) {
+      warning("squeue not installed correctly")
+    } else {
+      # stdout format is "slurm major.minor.patch/n"
+      version <- strsplit(result$stdout," ")[[1]][[2]] %>%
+        trimws() %>%
+        package_version()
+      options("squeue.version" = version)
+    }
   }
 }
