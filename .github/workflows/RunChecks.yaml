@@ -50,6 +50,8 @@ jobs:
           chmod +x /usr/local/bin/sacct
 
           echo "/usr/local/bin" >> $GITHUB_PATH
+          sinfo
+          sacct
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -74,3 +76,4 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+          env: ${{ GITHUB_PATH }}
