@@ -51,7 +51,7 @@ jobs:
 
           echo "/usr/local/bin" >> $GITHUB_PATH
           sinfo
-          sacct
+
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
