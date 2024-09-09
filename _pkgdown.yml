@@ -1,4 +1,51 @@
-url: ~
 template:
   bootstrap: 5
+  bslib:
+    bg: "#FFFFFF"
+    fg: "#63666A"
+    primary: "#1E63AF"
 
+navbar:
+  title: slurmtools
+  bg: primary
+  structure:
+    left:
+    - intro
+    - reference
+    right:
+    - search
+    - github
+  components:
+    reference:
+      text: Reference
+      href: reference/index.html
+    github:
+      icon: fa-github fa-lg
+      href: https://github.com/a2-ai/slurmtools
+    intro:
+      text: Get Started
+      menu:
+      - text: slurmtools-vignette
+        href: articles/Running-nonmem.html
+      - text: custom-alerts
+        href: articles/custom-alerts.html
+
+reference:
+- title: Data Processing Functions
+  contents:
+  - submit_nonmem_model
+  - get_slurm_jobs
+  - get_slurm_partitions
+  - check_slurm_partitions
+  - lookup_partitions_by_cpu
+  - partition_advice
+  - process_slurm_partitions
+  - run_sinfo
+
+articles:
+- title: Vignettes
+  navbar: ~
+  contents:
+  - Running-nonmem
+  - custom-alerts
+  - slack-alerts
