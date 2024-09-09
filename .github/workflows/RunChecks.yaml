@@ -50,9 +50,10 @@ jobs:
           chmod +x /usr/local/bin/sacct
 
           echo "/usr/local/bin" >> $GITHUB_PATH
-          Rscript -e 'if (!requireNamespace("processx", quietly = TRUE)) install.packages("processx"); processx::run("sinfo")'
-          Rscript -e 'processx::run("sacct")'
-
+          Rscript -e 'if (!requireNamespace("processx", quietly = TRUE)) install.packages("processx"); processx::run("sinfo", args = "--json")'
+          Rscript -e 'Sys.which("sinfo")'
+          Rscript -e 'processx::run("sacct", args = "--json")'
+          Rscript -e 'Sys.which("sacct")'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
