@@ -51,17 +51,8 @@ jobs:
 
           echo "/usr/local/bin" >> $GITHUB_PATH
           Rscript -e 'if (!requireNamespace("processx", quietly = TRUE)) install.packages("processx"); processx::run("sinfo")'
+          Rscript -e 'processx::run("sacct")'
 
-
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Grab outputs directory from mocked repo
-        run: |
-          cd /tmp
-          gh repo clone a2-ai-tech-training/slurm-mocks
-          mv /tmp/slurm-mocks/sinfo/outputs $GITHUB_WORKSPACE/
-          rm -rf /tmp/slurm-mocks
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
