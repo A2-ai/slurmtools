@@ -54,7 +54,7 @@ jobs:
 
       - name: Check mocked binaries work in different step
         run: |
-          Rscript -e 'if (!requireNamespace("processx", quietly = TRUE)) install.packages("processx"); processx::run("sinfo", args = "--json")'
+          Rscript -e 'if (!requireNamespace("processx", quietly = TRUE)) install.packages("processx"); processx::run("sinfo", args = c("--format", "%P,%c,%m"),)'
           Rscript -e 'Sys.which("sinfo")'
           Rscript -e 'processx::run("sacct", args = "--json")'
           Rscript -e 'Sys.which("sacct")'
