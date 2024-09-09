@@ -3,7 +3,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">slurmtools</a>
 
@@ -15,15 +15,15 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/custom-alerts.html">custom-alerts</a></li>
-    <li><a class="dropdown-item" href="../articles/Running-nonmem.html">Running Nonmem with slurmtools</a></li>
-    <li><a class="dropdown-item" href="../articles/slack-alerts.html">slack-alerts</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-get-started" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Get Started</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-get-started"><li><a class="dropdown-item" href="../articles/Running-nonmem.html">slurmtools-vignette</a></li>
+    <li><a class="dropdown-item" href="../articles/custom-alerts.html">custom-alerts</a></li>
   </ul></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/a2-ai/slurmtools"><span class="fa fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -36,7 +36,7 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="data-processing-functions">Data Processing Functions<a class="anchor" aria-label="anchor" href="#data-processing-functions"></a></h2>
 
 
 
@@ -48,10 +48,10 @@
 
       <dl><dt>
 
-          <code><a href="check_slurm_partitions.html">check_slurm_partitions()</a></code>
+          <code><a href="submit_nonmem_model.html">submit_nonmem_model()</a></code>
 
         </dt>
-        <dd>throws error if the number of requested CPUs exceeds the number of CPUs available in the requested partition</dd>
+        <dd>submit a nonmem model to slurm in parallel</dd>
       </dl><dl><dt>
 
           <code><a href="get_slurm_jobs.html">get_slurm_jobs()</a></code>
@@ -64,6 +64,12 @@
 
         </dt>
         <dd>get list of partition names for the given cluster</dd>
+      </dl><dl><dt>
+
+          <code><a href="check_slurm_partitions.html">check_slurm_partitions()</a></code>
+
+        </dt>
+        <dd>throws error if the number of requested CPUs exceeds the number of CPUs available in the requested partition</dd>
       </dl><dl><dt>
 
           <code><a href="lookup_partitions_by_cpu.html">lookup_partitions_by_cpu()</a></code>
@@ -88,12 +94,6 @@
 
         </dt>
         <dd>get list of each partition's number of CPUs and memory</dd>
-      </dl><dl><dt>
-
-          <code><a href="submit_nonmem_model.html">submit_nonmem_model()</a></code>
-
-        </dt>
-        <dd>submit a nonmem model to slurm in parallel</dd>
       </dl></div>
   </main></div>
 
