@@ -33,13 +33,6 @@ knitr::opts_chunk$set(
 
 To install `slurmtools` use the following commands:
 
-``` r
-options(repos = c(
-  "slurmtools" = "https://a2-ai.github.io/gh-pkg-mirror/slurmtools", 
-  getOption("repos")))
-install.packages("slurmtools")
-```
-
 ```{r setup}
 library(slurmtools)
 ```

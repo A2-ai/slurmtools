@@ -25,10 +25,12 @@ navbar:
     intro:
       text: Get Started
       menu:
-      - text: slurmtools-vignette
+      - text: Running NONMEM
         href: articles/Running-nonmem.html
       - text: custom-alerts
         href: articles/custom-alerts.html
+      - text: slack-alerts
+        href: articles/slack-alerts.html
 
 reference:
 - title: Data Processing Functions
