@@ -109,6 +109,7 @@ submit_nonmem_model <-
           template_list
         )
       })
+
     script_file_path <-
         file.path(submission_root, sprintf("%s.sh", basename(.mod$absolute_model_path)))
     if (!dry_run) {
@@ -118,7 +119,7 @@ submit_nonmem_model <-
       brio::write_file(template_script, script_file_path)
       fs::file_chmod(script_file_path, "0755")
     }
-    cmd <- list(cmd = "sbatch", args = script_file_path, template_script = template_script, partition = partition)
+    cmd <- list(cmd = Sys.which("sbatch"), args = script_file_path, template_script = template_script, partition = partition)
     if (dry_run) {
       return(cmd)
     }

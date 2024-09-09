@@ -45,7 +45,8 @@ parse_jobs_json <- function(.json) {
 #' @param user user filter
 #' @export
 get_slurm_jobs <- function(user = NULL){
-  cmd <- list(cmd = "squeue", args = "--json")
+
+  cmd <- list(cmd = Sys.which("squeue"), args = "--json")
   res <- processx::run(cmd$cmd, args = cmd$args)
   if (res$status != 0) {
     # todo: better handle returning why
@@ -55,7 +56,16 @@ get_slurm_jobs <- function(user = NULL){
   res_df$submit_time <- as.POSIXct(res_df$submit_time, origin = "1970-01-01")
   res_df$start_time <- as.POSIXct(res_df$start_time, origin = "1970-01-01")
   if (!is.null(user)) {
-    return(dplyr::filter(res_df, user_name == user))
+    df <- tryCatch(
+      {
+        dplyr::filter(res_df, user_name == user)
+      },
+      error = function(e) {
+        res_df
+      }
+    )
+  } else {
+    df <- res_df
   }
-  res_df
+  return(df)
 }

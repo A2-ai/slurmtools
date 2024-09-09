@@ -62,7 +62,7 @@ Sys.which("slack_notifier")
 
 slack_notifier requires an additional `slack_notifier/config.yaml` file
 that contains the slack bot OAuth token which is found from
-[[[https://api.slack.com/apps/\\\\](https://api.slack.com/apps/\\){.uri}]([https://api.slack.com/apps/\\](https://api.slack.com/apps/\){.uri}){.uri}\<YOUR
+[[[https://api.slack.com/apps/\\\\](https://api.slack.com/apps/){.uri}](%5Bhttps://api.slack.com/apps/%5D(https://api.slack.com/apps/)%7B.uri%7D){.uri}\<YOUR
 APP ID\> /oauth?].
 
 ``` slack_notifier/config.yaml
@@ -125,21 +125,21 @@ slurmtools::get_slurm_jobs()
 ![nmm slack alerts](data/images/nmm_slack_notifications.png)
 
 ```{r, include = FALSE}
-#cancelling any running nonmem jobs
-state <- slurmtools::get_slurm_jobs(user = "matthews")
-
-if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
-  for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
-    processx::run("scancel", args = paste0(job_id))
-  }
-}
-
-#removing generated files from running this vignette
-nonmem <- file.path("model", "nonmem")
-
-unlink(file.path(nonmem, "1001"), recursive = TRUE)
-unlink(file.path(nonmem, "1001.yaml"))
-unlink(file.path(nonmem, "1001.toml"))
-unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
-unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
+# #cancelling any running nonmem jobs
+# state <- slurmtools::get_slurm_jobs(user = "matthews")
+# 
+# if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
+#   for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
+#     processx::run("scancel", args = paste0(job_id))
+#   }
+# }
+# 
+# #removing generated files from running this vignette
+# nonmem <- file.path("model", "nonmem")
+# 
+# unlink(file.path(nonmem, "1001"), recursive = TRUE)
+# unlink(file.path(nonmem, "1001.yaml"))
+# unlink(file.path(nonmem, "1001.toml"))
+# unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
+# unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```

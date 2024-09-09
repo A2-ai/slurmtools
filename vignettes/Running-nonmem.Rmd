@@ -250,20 +250,20 @@ To reiterate, this template file is run as a bash shell script so anything you c
 
 ```{r, include = FALSE}
 #cancelling any running nonmem jobs
-state <- slurmtools::get_slurm_jobs(user = "matthews")
-
-if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
-  for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
-    processx::run("scancel", args = paste0(job_id))
-  }
-}
-
-#removing generated files from running this vignette
-nonmem <- file.path("model", "nonmem")
-
-unlink(file.path(nonmem, "1001"), recursive = TRUE)
-unlink(file.path(nonmem, "1001.yaml"))
-unlink(file.path(nonmem, "1001.toml"))
-unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
-unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
+# state <- slurmtools::get_slurm_jobs(user = "matthews")
+# 
+# if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
+#   for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
+#     processx::run("scancel", args = paste0(job_id))
+#   }
+# }
+# 
+# #removing generated files from running this vignette
+# nonmem <- file.path("model", "nonmem")
+# 
+# unlink(file.path(nonmem, "1001"), recursive = TRUE)
+# unlink(file.path(nonmem, "1001.yaml"))
+# unlink(file.path(nonmem, "1001.toml"))
+# unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
+# unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```
