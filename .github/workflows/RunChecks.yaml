@@ -54,7 +54,7 @@ jobs:
           mv ./squeue /usr/local/bin/squeue
           chmod 755 /usr/local/bin/squeue
 
-          gh release download "sbatch/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/"
+          gh release download "sbatch/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
           tar -xvf /usr/local/bin/sbatch_Linux_x86_64.tar.gz
           mv ./sbatch /usr/local/bin/sbatch
           chmod 755 /usr/local/bin/sbatch
@@ -66,9 +66,10 @@ jobs:
       - name: Check mocked binaries work in different step
         run: |
           Rscript -e 'if (!requireNamespace("processx", quietly = TRUE)) install.packages("processx"); processx::run("sinfo", args = c("--format", "%P,%c,%m"),)'
-          Rscript -e 'Sys.which("sinfo")'
           Rscript -e 'processx::run("sacct", args = "--json")'
-          Rscript -e 'Sys.which("sacct")'
+          Rscript -e 'processx::run("squeue", args = "--version")'
+          Rscript -e 'processx::run("squeue", args = "--json")'
+          Rscript -e 'processx::run("sbatch", args = "path_to_file")'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
