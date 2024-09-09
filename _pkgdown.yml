@@ -48,4 +48,4 @@ articles:
   contents:
   - Running-nonmem
   - custom-alerts
-  #- slack-alerts
+  - slack-alerts
