@@ -1,5 +1,8 @@
 pandoc: 3.1.11
 pkgdown: 2.1.0
 pkgdown_sha: ~
-articles: {}
-last_built: 2024-08-07T17:55Z
+articles:
+  custom-alerts: custom-alerts.html
+  Running-nonmem: Running-nonmem.html
+  slack-alerts: slack-alerts.html
+last_built: 2024-09-09T19:06Z
