@@ -32,7 +32,12 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, local::.
+          extra-packages: |
+            metrumresearchgroup/mrgmisc
+            metrumresearchgroup/nmrec
+            metrumresearchgroup/bbr
+            any::pkgdown
+            local::.
           needs: website
 
       - name: Build site
