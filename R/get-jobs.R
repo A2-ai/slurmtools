@@ -45,7 +45,8 @@ parse_jobs_json <- function(.json) {
 #' @param user user filter
 #' @export
 get_slurm_jobs <- function(user = NULL){
-  cmd <- list(cmd = "squeue", args = "--json")
+
+  cmd <- list(cmd = Sys.which("squeue"), args = "--json")
   res <- processx::run(cmd$cmd, args = cmd$args)
   if (res$status != 0) {
     # todo: better handle returning why

@@ -5,7 +5,7 @@
 
 .onLoad <- function(libname, pkgname) {
   result <- tryCatch(
-    {processx::run("squeue", args = "--version")},
+    {processx::run(Sys.which("squeue"), args = "--version")},
     error = function(e) {
       warning("'squeue' command not found or failed to run.")
       return(NULL)
