@@ -42,12 +42,12 @@ jobs:
           gh release download "sinfo/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
           tar -xvf /usr/local/bin/sinfo_Linux_x86_64.tar.gz
           mv ./sinfo /usr/local/bin/sinfo
-          chmod +x /usr/local/bin/sinfo
+          chmod 755 /usr/local/bin/sinfo
 
           gh release download "sacct/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
           tar -xvf /usr/local/bin/sacct_Linux_x86_64.tar.gz
           mv ./sacct /usr/local/bin/sacct
-          chmod +x /usr/local/bin/sacct
+          chmod 755 /usr/local/bin/sacct
           echo "/usr/local/bin" >> $GITHUB_PATH
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
