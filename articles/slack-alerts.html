@@ -66,19 +66,18 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">slurmtools</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Needed slurmtools options</span> ───────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.slurm_job_template_path') is not set.</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.submission_root') is not set.</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.bbi_config_path') is not set.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please set all options for job submission defaults to work.</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://metrumresearchgroup.github.io/bbr" class="external-link">bbr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; here() starts at /home/runner/work/slurmtools/slurmtools</span></span>
-<span></span>
-<span><span class="va">nonmem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">'slurmtools.submission_root'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"submission-log"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(slurmtools)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>──  [<span class="dv">1</span>mNeeded slurmtools options [<span class="dv">22</span>m ───────────────────────────────────────────────────</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.slurm_job_template_path'</span>) is not set.</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.submission_root'</span>) is not set.</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.bbi_config_path'</span>) is not set.</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a> [<span class="dv">36</span>mℹ [<span class="dv">39</span>m Please set all options <span class="cf">for</span> job submission defaults to work.</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">library</span>(bbr)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">here</span>() starts at <span class="sc">/</span>home<span class="sc">/</span>runner<span class="sc">/</span>work<span class="sc">/</span>slurmtools<span class="sc">/</span>slurmtools</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>nonmem <span class="ot">=</span> <span class="fu">file.path</span>(here<span class="sc">::</span><span class="fu">here</span>(), <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">options</span>(<span class="st">'slurmtools.submission_root'</span> <span class="ot">=</span> <span class="fu">file.path</span>(nonmem, <span class="st">"submission-log"</span>))</span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
 <span></span>
@@ -92,80 +91,102 @@
 </h2>
 <p>There is also functionality to pair <code>nmm</code> with <a href="https://github.com/A2-ai/slack_notifier/releases/" class="external-link">slack_notifier</a>
 and get messages sent directly to you via a slack bot. This requires you
-to download the slack_notifier binaries and added them to your path so
-<code>nmm</code> can find it. You can download the latest release and
-extract the binary and again save it to <code>~/.local/bin</code>.</p>
+to download the slack_notifier binaries. You can download the latest
+release and extract the binary and again save it to
+<code>~/.local/bin</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.which.html" class="external-link">Sys.which</a></span><span class="op">(</span><span class="st">"slack_notifier"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; slack_notifier </span></span>
-<span><span class="co">#&gt;             ""</span></span></code></pre></div>
-<p>slack_notifier requires an additional
-<code>slack_notifier/config.yaml</code> file that contains the slack bot
-OAuth token which is found from [<a href="%5Bhttps://api.slack.com/apps/%5D(https://api.slack.com/apps/)%7B.uri%7D" class="external-link uri">[https://api.slack.com/apps/\\](https://api.slack.com/apps/){.uri}</a>&lt;YOUR
-APP ID&gt; /oauth?].</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode slack_notifier/config.yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">SLACK_OAUTH_TOKEN</span><span class="kw">:</span><span class="at"> </span><span class="st">"encrypted(Bot User OAuth Token)"</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.which.html" class="external-link">Sys.which</a></span><span class="op">(</span><span class="st">"snt"</span><span class="op">)</span></span>
+<span><span class="va">snt</span> </span>
+<span> <span class="st">""</span> </span></code></pre></div>
+<p><code>snt</code> requires the slack bot OAuth token which is found
+from [<a href="%5Bhttps://api.slack.com/apps/%5D(https://api.slack.com/apps/)%7B.uri%7D" class="external-link uri">[https://api.slack.com/apps/\\](https://api.slack.com/apps/){.uri}</a>&lt;YOUR
+APP ID&gt; /oauth?]. This can be saved in a file and fed into the
+<code>snt</code> with the <code>tokenFile</code> flag.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode slack_notifier/config.yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">token</span><span class="kw">:</span><span class="at"> </span><span class="st">"encrypted(Bot User OAuth Token)"</span></span></code></pre></div>
 <p>Again, we need to update the <code>1001.toml</code> file to get slack
-notifications. We need to set <code>alert = "slack"</code> and provide
-the <code>email</code> associated with the slack account in
-<code>generate_nmm_config</code>.</p>
+notifications. If we look at the <code>snt</code> help message we see
+that it should be called via
+<code>snt slack -c config_file -k decryption_key -a token -f tokenFile -e email -m message -t timestamp</code></p>
+<p>the config_file can contain the key, and token file so you don’t need
+to repeatedly use that information. I’ve saved the tokenFile location
+and key in a config file in
+<code>~/.local/bin/slack_notifier_settings.yaml</code> and will use the
+-c flag to point to that.</p>
+<p>With this our call to <code>snt</code> would look like:</p>
+<p><code>snt slack -c ~/.local/bin/slack_notifier_settings.yaml -e matthews@a2-ai.com -m "Hello"</code></p>
+<p>The timestamp flag is needed if we want to reply to a message, which
+to save on spamming alerts we want to do. However, since we can’t
+possible know the timestamp of a message we have yet to send we don’t
+have a way of specifying this argument now. This is what the use_stdout
+argument for <code>nmm</code> alerter is for. It will capture the
+standard out of the call to the alerter binary and parse it for
+additional flags to use on subsequent calls. With all this in mind, we
+can update our <code>nmm</code> config to achieve this slack
+messaging.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/generate_nmm_config.html">generate_nmm_config</a></span><span class="op">(</span> </span>
 <span>  <span class="va">mod</span>, </span>
-<span>  alert <span class="op">=</span> <span class="st">"slack"</span>,</span>
-<span>  email <span class="op">=</span> <span class="st">"matthews@a2-ai.com"</span>,</span>
 <span>  watched_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem"</span>,</span>
-<span>  output_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress"</span><span class="op">)</span></span></code></pre></div>
+<span>  output_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress"</span>,</span>
+<span>  alerter_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    alerter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.which.html" class="external-link">Sys.which</a></span><span class="op">(</span><span class="st">'snt'</span><span class="op">)</span>, <span class="co">#binary location of nmm,</span></span>
+<span>    command <span class="op">=</span> <span class="st">"slack"</span>,</span>
+<span>    message_flag <span class="op">=</span> <span class="st">"m"</span>, <span class="co">#This is the default so we don't need to specify it</span></span>
+<span>    use_stdout <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co">#captures output of snt -- which will include --timestamp aksfl;ajklajl;</span></span>
+<span>    args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>email <span class="op">=</span> <span class="st">"matthews@a2-ai.com"</span>, config <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/.local/bin/slack_notifier_settings.yaml"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 <p>This generates the following toml file:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode 1001.toml"><code class="sourceCode toml"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="dt">model_number</span> <span class="op">=</span> <span class="st">'</span><span class="vs">1001</span><span class="st">'</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="dt">files_to_track</span> <span class="op">=</span> <span class="op">[</span> <span class="st">'</span><span class="vs">lst</span><span class="st">'</span><span class="op">,</span> <span class="st">'</span><span class="vs">ext</span><span class="st">'</span><span class="op">,</span> <span class="st">'</span><span class="vs">grd</span><span class="st">'</span> <span class="op">]</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="dt">tmp_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/tmp</span><span class="st">'</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="dt">watched_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem</span><span class="st">'</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="dt">output_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress</span><span class="st">'</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="dt">poll_duration</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="dt">alert</span> <span class="op">=</span> <span class="st">'</span><span class="vs">Slack</span><span class="st">'</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="dt">level</span> <span class="op">=</span> <span class="st">'</span><span class="vs">Debug</span><span class="st">'</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="dt">email</span> <span class="op">=</span> <span class="st">'</span><span class="vs">matthews@a2-ai.com</span><span class="st">'</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="dt">threads</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="dt">topic</span> <span class="op">=</span> <span class="st">''</span></span></code></pre></div>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="dt">watched_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem</span><span class="st">'</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="dt">output_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress</span><span class="st">'</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="kw">[alerter]</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="dt">alerter</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/.local/bin/snt</span><span class="st">'</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="dt">command</span> <span class="op">=</span> <span class="st">'</span><span class="vs">slack</span><span class="st">'</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="dt">message_flag</span> <span class="op">=</span> <span class="st">'</span><span class="vs">m</span><span class="st">'</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="dt">use_stdout</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="kw">[alerter.args]</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="dt">email</span> <span class="op">=</span> <span class="st">'</span><span class="vs">matthews@a2-ai.com</span><span class="st">'</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="dt">config</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/.local/bin/slack_notifier_settings.yaml</span><span class="st">'</span></span></code></pre></div>
 <p>With <code>alert = 'Slack'</code> and <code>email</code> set in the
 <code>1001.toml</code> file <code>nmm</code> will send slack
 notifications directly to you when a NONMEM run starts and it will reply
 to that message with notifications if any gradients hit 0 and when the
 run finishes it checks if all -1E9 lines are present in the .ext file
 and gives another message about any parameters that hit 0 gradient.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">submission_nmm</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_nonmem_model.html">submit_nonmem_model</a></span><span class="op">(</span> </span>
-<span>  <span class="va">mod</span>, </span>
-<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  slurm_job_template_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"slurm-job-nmm.tmpl"</span><span class="op">)</span>,</span>
-<span>  slurm_template_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    nmm_exe_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="st">"~/.local/bin/nmm"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in normalizePath("~/.local/bin/nmm"):</span></span>
-<span><span class="co">#&gt; path[1]="/home/runner/.local/bin/nmm": No such file or directory</span></span>
-<span></span>
-<span><span class="va">submission_nmm</span></span>
-<span><span class="co">#&gt; $status</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $stdout</span></span>
-<span><span class="co">#&gt; [1] "Submitted batch job 804\n"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $stderr</span></span>
-<span><span class="co">#&gt; [1] ""</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $timeout</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $submit_time</span></span>
-<span><span class="co">#&gt; POSIXct of length 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $start_time</span></span>
-<span><span class="co">#&gt; POSIXct of length 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>submission_nmm <span class="ot">&lt;-</span> slurmtools<span class="sc">::</span><span class="fu">submit_nonmem_model</span>( </span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  mod, </span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">overwrite =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">slurm_job_template_path =</span> <span class="fu">file.path</span>(nonmem, <span class="st">"slurm-job-nmm.tmpl"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">slurm_template_opts =</span> <span class="fu">list</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">nmm_exe_path =</span> <span class="fu">normalizePath</span>(<span class="st">"~/.local/bin/nmm"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  )</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>Warning <span class="cf">in</span> <span class="fu">normalizePath</span>(<span class="st">"~/.local/bin/nmm"</span>)<span class="sc">:</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>path[<span class="dv">1</span>]<span class="ot">=</span><span class="st">"/home/runner/.local/bin/nmm"</span><span class="sc">:</span> No such file or directory</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>submission_nmm</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="sc">$</span>status</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="sc">$</span>stdout</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Submitted batch job 804</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="sc">$</span>stderr</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">""</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="sc">$</span>timeout</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>slurmtools<span class="sc">::</span><span class="fu">get_slurm_jobs</span>(<span class="at">user =</span> <span class="st">"matthews"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="sc">$</span>submit_time</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>POSIXct of length <span class="dv">0</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="sc">$</span>start_time</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>POSIXct of length <span class="dv">0</span></span></code></pre></div>
 <div class="float">
-<img src="data/images/nmm_slack_notifications.png" alt="nmm slack alerts"><div class="figcaption">nmm slack alerts</div>
+<img src="data%2Fimages%2Fnmm_slack_notifications.png" alt="nmm slack alerts"><div class="figcaption">nmm slack alerts</div>
 </div>
 </div>
   </main>
@@ -178,7 +199,7 @@ and gives another message about any parameters that hit 0 gradient.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

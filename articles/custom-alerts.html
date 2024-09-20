@@ -66,27 +66,27 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">slurmtools</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Needed slurmtools options</span> ───────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.slurm_job_template_path') is not set.</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.submission_root') is not set.</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.bbi_config_path') is not set.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please set all options for job submission defaults to work.</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://metrumresearchgroup.github.io/bbr" class="external-link">bbr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; here() starts at /home/runner/work/slurmtools/slurmtools</span></span>
-<span></span>
-<span><span class="va">nonmem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">'slurmtools.submission_root'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"submission-log"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(slurmtools)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>──  [<span class="dv">1</span>mNeeded slurmtools options [<span class="dv">22</span>m ───────────────────────────────────────────────────</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.slurm_job_template_path'</span>) is not set.</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.submission_root'</span>) is not set.</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.bbi_config_path'</span>) is not set.</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a> [<span class="dv">36</span>mℹ [<span class="dv">39</span>m Please set all options <span class="cf">for</span> job submission defaults to work.</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">library</span>(bbr)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">here</span>() starts at <span class="sc">/</span>home<span class="sc">/</span>runner<span class="sc">/</span>work<span class="sc">/</span>slurmtools<span class="sc">/</span>slurmtools</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>nonmem <span class="ot">=</span> <span class="fu">file.path</span>(here<span class="sc">::</span><span class="fu">here</span>(), <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">options</span>(<span class="st">'slurmtools.submission_root'</span> <span class="ot">=</span> <span class="fu">file.path</span>(nonmem, <span class="st">"submission-log"</span>))</span></code></pre></div>
 <div class="section level2">
 <h2 id="submitting-a-nonmem-job-with-nmm">Submitting a NONMEM job with nmm<a class="anchor" aria-label="anchor" href="#submitting-a-nonmem-job-with-nmm"></a>
 </h2>
 <p>Instead of using bbi we can use <code>nmm</code> (<a href="https://github.com/A2-ai/nonmem-monitor" class="external-link">NONMEM Monitor</a>) which
 currently has some additional functionality of sending notifications
 about zero gradients, missing -1E9 lines in ext file, and some very
-basic control stream errors. Currently, only slack or <a href="ntfy.sh">ntfy.sh</a> is supported for receiving notifications. To
-use <code>nmm</code> you can install the latest release from the github
+basic control stream errors. Nonmem-monitor also allows for setting up
+an alerter to be better fed these messages - more on that later. To use
+<code>nmm</code> you can install the latest release from the github
 repository linked above.</p>
 <p>We can update the template file accordingly:</p>
 <pre class="slurm-job-nmm.tmpl"><code>#!/bin/bash 
@@ -109,7 +109,10 @@ assume it’s not on our path.</p>
 monitor and where to look for files and how to alert you. We’ll use
 <code><a href="../reference/generate_nmm_config.html">generate_nmm_config()</a></code> to create this file. First we can
 look at the documentation to see what type of information we should pass
-to this function.<img src="data/images/generate_nmm_config_help.png" alt="documentation for generate_nmm_config()"></p>
+to this function.</p>
+<div class="float">
+<img src="data%2Fimages%2Fgenerate_nmm_config_help.png" alt="documentation for generate_nmm_config()"><div class="figcaption">documentation for generate_nmm_config()</div>
+</div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
 <span></span>
@@ -120,21 +123,16 @@ to this function.<img src="data/images/generate_nmm_config_help.png" alt="docume
 <span><span class="op">}</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/generate_nmm_config.html">generate_nmm_config</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></code></pre></div>
-<p>This generates the following toml file. Notice that alert is set to
-‘None’, and both email and topic are empty. Since we’re in vignettes
-we’ll need to update the <code>watched_dir</code> and
-<code>output_dir</code>.</p>
+<p>This generates the following toml file. By passing in just the mod
+object, <code>nmm</code> will use the default values for the other
+options so if you need to change which files are tracked, or how many
+threads to use you’ll have to explicitly pass that to
+<code>generate_nmm_config</code>. Since we’re in vignettes we’ll need to
+update the <code>watched_dir</code> and <code>output_dir</code>
+accordingly.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode 1001.toml"><code class="sourceCode toml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="dt">model_number</span> <span class="op">=</span> <span class="st">'</span><span class="vs">1001</span><span class="st">'</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="dt">files_to_track</span> <span class="op">=</span> <span class="op">[</span> <span class="st">'</span><span class="vs">lst</span><span class="st">'</span><span class="op">,</span> <span class="st">'</span><span class="vs">ext</span><span class="st">'</span><span class="op">,</span> <span class="st">'</span><span class="vs">grd</span><span class="st">'</span> <span class="op">]</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="dt">tmp_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/tmp</span><span class="st">'</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="dt">watched_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem</span><span class="st">'</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="dt">output_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem/in_progress</span><span class="st">'</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="dt">poll_duration</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="dt">alert</span> <span class="op">=</span> <span class="st">'</span><span class="vs">None</span><span class="st">'</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="dt">level</span> <span class="op">=</span> <span class="st">'</span><span class="vs">Debug</span><span class="st">'</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="dt">email</span> <span class="op">=</span> <span class="st">''</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="dt">threads</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="dt">topic</span> <span class="op">=</span> <span class="st">''</span></span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="dt">watched_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem</span><span class="st">'</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="dt">output_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem/in_progress</span><span class="st">'</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/generate_nmm_config.html">generate_nmm_config</a></span><span class="op">(</span> </span>
 <span>  <span class="va">mod</span>, </span>
@@ -142,50 +140,40 @@ we’ll need to update the <code>watched_dir</code> and
 <span>  output_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress"</span><span class="op">)</span></span></code></pre></div>
 <p>This updates the <code>1001.toml</code> config file to:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode 1001.toml"><code class="sourceCode toml"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="dt">model_number</span> <span class="op">=</span> <span class="st">'</span><span class="vs">1001</span><span class="st">'</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="dt">files_to_track</span> <span class="op">=</span> <span class="op">[</span> <span class="st">'</span><span class="vs">lst</span><span class="st">'</span><span class="op">,</span> <span class="st">'</span><span class="vs">ext</span><span class="st">'</span><span class="op">,</span> <span class="st">'</span><span class="vs">grd</span><span class="st">'</span> <span class="op">]</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="dt">tmp_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/tmp</span><span class="st">'</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="dt">watched_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem</span><span class="st">'</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="dt">output_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress</span><span class="st">'</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="dt">poll_duration</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="dt">alert</span> <span class="op">=</span> <span class="st">'</span><span class="vs">None</span><span class="st">'</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="dt">level</span> <span class="op">=</span> <span class="st">'</span><span class="vs">Debug</span><span class="st">'</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="dt">email</span> <span class="op">=</span> <span class="st">''</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="dt">threads</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="dt">topic</span> <span class="op">=</span> <span class="st">''</span></span></code></pre></div>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="dt">watched_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem</span><span class="st">'</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="dt">output_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress</span><span class="st">'</span></span></code></pre></div>
 <p>We can now run <code>submit_nonmem_model</code> and get essentially
 the same behavior as running with <code>bbi</code>. On linux
-<code>~/.local/bin/</code> will be on your path so saving binaries there
-is a good approach.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">submission_nmm</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_nonmem_model.html">submit_nonmem_model</a></span><span class="op">(</span> </span>
-<span>  <span class="va">mod</span>, </span>
-<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  slurm_job_template_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"slurm-job-nmm.tmpl"</span><span class="op">)</span>,</span>
-<span>  slurm_template_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    nmm_exe_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="st">"~/.local/bin/nmm"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in normalizePath("~/.local/bin/nmm"):</span></span>
-<span><span class="co">#&gt; path[1]="/home/runner/.local/bin/nmm": No such file or directory</span></span>
-<span></span>
-<span><span class="va">submission_nmm</span></span>
-<span><span class="co">#&gt; $status</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $stdout</span></span>
-<span><span class="co">#&gt; [1] "Submitted batch job 804\n"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $stderr</span></span>
-<span><span class="co">#&gt; [1] ""</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $timeout</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $submit_time</span></span>
-<span><span class="co">#&gt; POSIXct of length 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $start_time</span></span>
-<span><span class="co">#&gt; POSIXct of length 0</span></span></code></pre></div>
+<code>~/.local/bin/</code> will be on your path so saving the downloaded
+binaries there is a good approach.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>submission_nmm <span class="ot">&lt;-</span> slurmtools<span class="sc">::</span><span class="fu">submit_nonmem_model</span>( </span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  mod, </span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">overwrite =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">slurm_job_template_path =</span> <span class="fu">file.path</span>(nonmem, <span class="st">"slurm-job-nmm.tmpl"</span>),</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">slurm_template_opts =</span> <span class="fu">list</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="at">nmm_exe_path =</span> <span class="fu">normalizePath</span>(<span class="st">"~/.local/bin/nmm"</span>))</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>Warning <span class="cf">in</span> <span class="fu">normalizePath</span>(<span class="st">"~/.local/bin/nmm"</span>)<span class="sc">:</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>path[<span class="dv">1</span>]<span class="ot">=</span><span class="st">"/home/runner/.local/bin/nmm"</span><span class="sc">:</span> No such file or directory</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>submission_nmm</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="sc">$</span>status</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="sc">$</span>stdout</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Submitted batch job 804</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="sc">$</span>stderr</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">""</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="sc">$</span>timeout</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>slurmtools<span class="sc">::</span><span class="fu">get_slurm_jobs</span>(<span class="at">user =</span> <span class="st">"matthews"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="sc">$</span>submit_time</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>POSIXct of length <span class="dv">0</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="sc">$</span>start_time</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>POSIXct of length <span class="dv">0</span></span></code></pre></div>
 <p>The one difference between using <code>nmm</code> compared to
 <code>bbi</code> is that a new directory is created that contains a log
 file that caught some issues with our run. This file is updated as
@@ -196,23 +184,20 @@ We also see an info level log that OMEGA(2,1) has 0 value – in our mod
 file we don’t specify any omega values off the diagonal so these are
 fixed at 0. Finally we see that GRD(6) hit 0 relatively early in the
 run.</p>
-<pre class="vignettes/model/nonmem/in_progress/1001/modeling_run_20240827201226.log"><code>20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="Successfully loaded default configuration from /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml"
-20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="Beginning Local Path"
-20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="A total of 1 models have completed the initial preparation phase"
-20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="[1001] Beginning local work phase"
-20:12:58 [INFO] OMEGA(2,1) has 0 value
-20:12:58 [INFO] SIGMA(2,1) has 0 value
-20:13:00 [INFO] SIGMA(2,1) has 0 value
-20:13:00 [INFO] OMEGA(2,1) has 0 value
-20:13:04 [INFO] SIGMA(2,1) has 0 value
-20:13:04 [INFO] OMEGA(2,1) has 0 value
-20:13:04 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd" has 0 gradient for parameter: GRD(6) </code></pre>
+<pre class="vignettes/model/nonmem/in_progress/1001/modeling_run_20240827201226.log"><code>19:13:45 [INFO] bbi log: time="2024-09-20T19:13:45Z" level=info msg="Successfully loaded default configuration from /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml"
+19:13:45 [INFO] bbi log: time="2024-09-20T19:13:45Z" level=info msg="Beginning Local Path"
+19:13:45 [INFO] bbi log: time="2024-09-20T19:13:45Z" level=info msg="A total of 1 models have completed the initial preparation phase"
+19:13:45 [INFO] bbi log: time="2024-09-20T19:13:45Z" level=info msg="[1001] Beginning local work phase"
+19:14:16 [INFO] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.ext": Iteration: 5, Parameter(s) that hit zero: ["SIGMA(2,1)", "OMEGA(2,1)"]
+19:14:19 [INFO] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.ext": Iteration: 10, Parameter(s) that hit zero: ["OMEGA(2,1)", "SIGMA(2,1)"]
+19:14:21 [INFO] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.ext": Iteration: 15, Parameter(s) that hit zero: ["SIGMA(2,1)", "OMEGA(2,1)"]
+19:14:21 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd" Iteration: 10, has 0 gradient for parameter(s): ["GRD(6)"] </code></pre>
 <p>After a run has finished several messages are sent to the log after a
 final check of the files listed in the <code>files_to_track</code> field
 of the <code>1001.toml</code> file.</p>
-<pre class="vignettes/model/nonmem/in_progress/1001/modeling_run_20240827201226.log"><code>20:13:16 [INFO] Received Exit code: exit status: 0
-20:13:16 [WARN] 1001.ext: Missing ext final output lines. Observed lines were: [-1000000000.0, -1000000004.0, -1000000006.0, -1000000007.0]
-20:13:16 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd": The following parameters hit zero gradient through the run: ["GRD(6)"]</code></pre>
+<pre class="vignettes/model/nonmem/in_progress/1001/modeling_run_20240827201226.log"><code>19:14:31 [INFO] Received Exit code: exit status: 0
+19:14:31 [WARN] 1001.ext: Missing ext final output lines. Observed lines were: [-1000000000.0, -1000000004.0, -1000000006.0, -1000000007.0]
+19:14:31 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd": The following parameters hit zero gradient through the run: ["GRD(6)"]</code></pre>
 <p>We see that GRD(6) hit zero during the run and that only a subset of
 the -1E9 lines were present in the .ext file.</p>
 </div>
@@ -228,65 +213,72 @@ file. We can get these alerts in real time without having to dig through
 a noisy log file.</p>
 <p>Let’s update our call to <code>generate_nmm_config</code> to have
 <code>nmm</code> send notifications to the <code>NONMEMmonitor</code>
-topic on <a href="ntfy.sh">ntfy.sh</a>.</p>
+topic on <a href="ntfy.sh">ntfy.sh</a>. Just like how
+<code>submit_nonmem_model</code> can feed additional information to the
+template with <code>slurm_template_opts</code>, we can add an alerter
+feature to nmm with <code>alerter_opts</code>. If we go to ntfy.sh we
+can see that to send a message to ntfy we can run
+<code>curl -d "Backup successful 😀"  ntfy.sh/mytopic</code>.
+<code>nmm</code> can call a binary with a command and pass a message to
+a flag. For ntfy, the binary is <code>curl</code> the message flag is
+<code>d</code> and the command is <code>ntfy.sh/mytopic</code> and there
+are no additional args.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/generate_nmm_config.html">generate_nmm_config</a></span><span class="op">(</span> </span>
 <span>  <span class="va">mod</span>, </span>
-<span>  alert <span class="op">=</span> <span class="st">"Ntfy"</span>,</span>
-<span>  topic <span class="op">=</span> <span class="st">"NONMEMmonitor"</span>,</span>
 <span>  watched_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem"</span>,</span>
-<span>  output_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress"</span><span class="op">)</span></span></code></pre></div>
+<span>  output_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress"</span>,</span>
+<span>  alerter_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    alerter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.which.html" class="external-link">Sys.which</a></span><span class="op">(</span><span class="st">'curl'</span><span class="op">)</span>, <span class="co">#binary location of curl,</span></span>
+<span>    command <span class="op">=</span> <span class="st">"ntfy.sh/NONMEMmonitor"</span>,</span>
+<span>    message_flag <span class="op">=</span> <span class="st">"d"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>This updates the <code>1001.toml</code> file to this:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode 1001.toml"><code class="sourceCode toml"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="dt">model_number</span> <span class="op">=</span> <span class="st">'</span><span class="vs">1001</span><span class="st">'</span></span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="dt">files_to_track</span> <span class="op">=</span> <span class="op">[</span> <span class="st">'</span><span class="vs">lst</span><span class="st">'</span><span class="op">,</span> <span class="st">'</span><span class="vs">ext</span><span class="st">'</span><span class="op">,</span> <span class="st">'</span><span class="vs">grd</span><span class="st">'</span> <span class="op">]</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="dt">tmp_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/tmp</span><span class="st">'</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="dt">watched_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem</span><span class="st">'</span></span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="dt">output_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress</span><span class="st">'</span></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="dt">poll_duration</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="dt">alert</span> <span class="op">=</span> <span class="st">'</span><span class="vs">Ntfy</span><span class="st">'</span></span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="dt">level</span> <span class="op">=</span> <span class="st">'</span><span class="vs">Debug</span><span class="st">'</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="dt">email</span> <span class="op">=</span> <span class="st">''</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="dt">threads</span> <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="dt">topic</span> <span class="op">=</span> <span class="st">'</span><span class="vs">NONMEMmonitor</span><span class="st">'</span></span></code></pre></div>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="dt">watched_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem</span><span class="st">'</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="dt">output_dir</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress</span><span class="st">'</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="kw">[alerter]</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="dt">alerter</span> <span class="op">=</span> <span class="st">'</span><span class="vs">/usr/bin/curl</span><span class="st">'</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="dt">command</span> <span class="op">=</span> <span class="st">'</span><span class="vs">ntfy.sh/NONMEMmonitor</span><span class="st">'</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="dt">message_flag</span> <span class="op">=</span> <span class="st">'</span><span class="vs">d</span><span class="st">'</span></span></code></pre></div>
 <p>When we re-run the <code>submit_nonmem_model</code> call we will now
 get ntfy notifications. One thing to note is that <code>nmm</code> will
 print full paths in the log, but will only send notifications with the
 <code>model_number</code> (or
 <code>model_number.file_extension</code>).</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">submission_nmm</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_nonmem_model.html">submit_nonmem_model</a></span><span class="op">(</span> </span>
-<span>  <span class="va">mod</span>, </span>
-<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  slurm_job_template_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"slurm-job-nmm.tmpl"</span><span class="op">)</span>,</span>
-<span>  slurm_template_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    nmm_exe_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="st">"~/.local/bin/nmm-x86_64-unknown-linux-gnu/nmm"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in normalizePath("~/.local/bin/nmm-x86_64-unknown-linux-gnu/nmm"):</span></span>
-<span><span class="co">#&gt; path[1]="/home/runner/.local/bin/nmm-x86_64-unknown-linux-gnu/nmm": No such</span></span>
-<span><span class="co">#&gt; file or directory</span></span>
-<span></span>
-<span><span class="va">submission_nmm</span></span>
-<span><span class="co">#&gt; $status</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $stdout</span></span>
-<span><span class="co">#&gt; [1] "Submitted batch job 804\n"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $stderr</span></span>
-<span><span class="co">#&gt; [1] ""</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $timeout</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span>user <span class="op">=</span> <span class="st">"matthews"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $submit_time</span></span>
-<span><span class="co">#&gt; POSIXct of length 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $start_time</span></span>
-<span><span class="co">#&gt; POSIXct of length 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>submission_nmm <span class="ot">&lt;-</span> slurmtools<span class="sc">::</span><span class="fu">submit_nonmem_model</span>( </span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  mod, </span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">overwrite =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">slurm_job_template_path =</span> <span class="fu">file.path</span>(nonmem, <span class="st">"slurm-job-nmm.tmpl"</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="at">slurm_template_opts =</span> <span class="fu">list</span>(</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>    <span class="at">nmm_exe_path =</span> <span class="fu">normalizePath</span>(<span class="st">"~/.local/bin/nmm"</span>))</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>Warning <span class="cf">in</span> <span class="fu">normalizePath</span>(<span class="st">"~/.local/bin/nmm"</span>)<span class="sc">:</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>path[<span class="dv">1</span>]<span class="ot">=</span><span class="st">"/home/runner/.local/bin/nmm"</span><span class="sc">:</span> No such file or directory</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>submission_nmm</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="sc">$</span>status</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="sc">$</span>stdout</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Submitted batch job 804</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="sc">$</span>stderr</span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">""</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="sc">$</span>timeout</span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>slurmtools<span class="sc">::</span><span class="fu">get_slurm_jobs</span>(<span class="at">user =</span> <span class="st">"matthews"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="sc">$</span>submit_time</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>POSIXct of length <span class="dv">0</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="sc">$</span>start_time</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>POSIXct of length <span class="dv">0</span></span></code></pre></div>
 <p>This gives us the notifications in a much more digestible format</p>
 <div class="float">
-<img src="data/images/nmm_ntfy_alerts.png" alt="nmm ntfy.sh alerts"><div class="figcaption">nmm ntfy.sh alerts</div>
+<img src="data%2Fimages%2Fnmm_ntfy_alerts.png" alt="nmm ntfy.sh alerts"><div class="figcaption">nmm ntfy.sh alerts</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -300,7 +292,7 @@ print full paths in the log, but will only send notifications with the
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

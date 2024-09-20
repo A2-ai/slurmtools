@@ -46,17 +46,15 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_nmm_config</span><span class="op">(</span></span>
 <span>  <span class="va">.mod</span>,</span>
-<span>  model_number <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  files_to_track <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lst"</span>, <span class="st">"ext"</span>, <span class="st">"grd"</span><span class="op">)</span>,</span>
-<span>  tmp_dir <span class="op">=</span> <span class="st">"/tmp"</span>,</span>
+<span>  model_number <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  files_to_track <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tmp_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  watched_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"nonmem"</span><span class="op">)</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">watched_dir</span>, <span class="st">"in_progress"</span><span class="op">)</span>,</span>
-<span>  poll_duration <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  alert <span class="op">=</span> <span class="st">"None"</span>,</span>
-<span>  level <span class="op">=</span> <span class="st">"Debug"</span>,</span>
-<span>  email <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  threads <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  topic <span class="op">=</span> <span class="st">""</span></span>
+<span>  poll_duration <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  level <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  threads <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alerter_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -73,11 +71,11 @@
 
 
 <dt id="arg-files-to-track">files_to_track<a class="anchor" aria-label="anchor" href="#arg-files-to-track"></a></dt>
-<dd><p>a vector of file extensions. Default is c("lst", "ext", "grd")</p></dd>
+<dd><p>a vector of file extensions. If left blank, nmm will use .ext, .lst. and .grd.</p></dd>
 
 
 <dt id="arg-tmp-dir">tmp_dir<a class="anchor" aria-label="anchor" href="#arg-tmp-dir"></a></dt>
-<dd><p>a temporary directory location to run nonmem. Default is /tmp</p></dd>
+<dd><p>a temporary directory location to run nonmem. If left blank nmm will use /tmp</p></dd>
 
 
 <dt id="arg-watched-dir">watched_dir<a class="anchor" aria-label="anchor" href="#arg-watched-dir"></a></dt>
@@ -89,27 +87,19 @@
 
 
 <dt id="arg-poll-duration">poll_duration<a class="anchor" aria-label="anchor" href="#arg-poll-duration"></a></dt>
-<dd><p>the amount of time in seconds between the watchers polling</p></dd>
-
-
-<dt id="arg-alert">alert<a class="anchor" aria-label="anchor" href="#arg-alert"></a></dt>
-<dd><p>Where to send alerts if any. Default is None, available options are None or Slack</p></dd>
+<dd><p>the amount of time in seconds between the watchers polling. If left blank, nmm will use 1 second</p></dd>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>What level to log at. Default is info. Available options are Trace, Debug, Info, Warn, Fatal</p></dd>
-
-
-<dt id="arg-email">email<a class="anchor" aria-label="anchor" href="#arg-email"></a></dt>
-<dd><p>if alert is set to Slack, this should be the email associated with slack to get messages sent directly to you.</p></dd>
+<dd><p>What level to log at. Available options are Trace, Debug, Info, Warn, Fatal if left blank, nmm will use Info</p></dd>
 
 
 <dt id="arg-threads">threads<a class="anchor" aria-label="anchor" href="#arg-threads"></a></dt>
-<dd><p>number of threads if running a parallel job. Default is 1</p></dd>
+<dd><p>number of threads if running a parallel job. If left blank nmm will use 1</p></dd>
 
 
-<dt id="arg-topic">topic<a class="anchor" aria-label="anchor" href="#arg-topic"></a></dt>
-<dd><p>the ntfy.sh topic to send alerts to.</p></dd>
+<dt id="arg-alerter-opts">alerter_opts<a class="anchor" aria-label="anchor" href="#arg-alerter-opts"></a></dt>
+<dd><p>a list for setting up an alerter fields needed are alerter, command, message_flag, use_stdout, args (list of additional args to be passed to alerter)</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -133,7 +123,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

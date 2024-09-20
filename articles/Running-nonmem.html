@@ -92,7 +92,7 @@ These options are used for default arguments in the
 <code>submit_nonmem_model</code> function. Running
 <code><a href="../reference/submit_nonmem_model.html">?submit_nonmem_model</a></code> we can see the documentation</p>
 <div class="float">
-<img src="data/images/submit_nonmem_model_help.png" alt="Help view for submit_nonmem_model function"><div class="figcaption">Help view for <code>submit_nonmem_model</code>
+<img src="data%2Fimages%2Fsubmit_nonmem_model_help.png" alt="Help view for submit_nonmem_model function"><div class="figcaption">Help view for <code>submit_nonmem_model</code>
 function</div>
 </div>
 <p>This function uses the inputs to populate a template Bash shell
@@ -316,8 +316,8 @@ curl -d "Finished model run: {{job_name}} $JOBID" ntfy.sh/{{ntfy}}
 <span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
 <p>We again get a 0 exit code status and now instead of using
 <code><a href="../reference/get_slurm_jobs.html">slurmtools::get_slurm_jobs()</a></code> to monitor the job, we can
-rely on the new notifications we just set up. <img src="data/images/ntfy_starting.png" alt="NONMEM job starting ntfy alert"></p>
-<p>and when the run finished we get another notification: <img src="data/images/ntfy_finished.png" alt="NONMEM Job finished ntfy alert"></p>
+rely on the new notifications we just set up. <img src="data%2Fimages%2Fntfy_starting.png" alt="NONMEM job starting ntfy alert"></p>
+<p>and when the run finished we get another notification: <img src="data%2Fimages%2Fntfy_finished.png" alt="NONMEM Job finished ntfy alert"></p>
 <p>Note that the run number will match the run specified in
 <code>submission$stdout</code>. We can see the new shell script this
 updated template file generated</p>
@@ -352,7 +352,7 @@ needed arguments and customize the behavior to your liking.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
