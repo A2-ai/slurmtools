@@ -24,7 +24,7 @@ unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = ""
 )
 ```
 
@@ -43,9 +43,9 @@ Instead of using bbi we can use `nmm` ([NONMEM
 Monitor](https://github.com/A2-ai/nonmem-monitor)) which currently has
 some additional functionality of sending notifications about zero
 gradients, missing -1E9 lines in ext file, and some very basic control
-stream errors. Currently, only slack or [ntfy.sh](ntfy.sh) is supported
-for receiving notifications. To use `nmm` you can install the latest
-release from the github repository linked above.
+stream errors. Nonmem-monitor also allows for setting up an alerter to
+be better fed these messages - more on that later. To use `nmm` you can
+install the latest release from the github repository linked above.
 
 We can update the template file accordingly:
 
@@ -70,7 +70,9 @@ it's not on our path.
 The `config.toml` file controls what `nmm` will monitor and where to
 look for files and how to alert you. We'll use `generate_nmm_config()`
 to create this file. First we can look at the documentation to see what
-type of information we should pass to this function.![documentation for
+type of information we should pass to this function.
+
+![documentation for
 generate_nmm_config()](data/images/generate_nmm_config_help.png)
 
 ```{r}
@@ -87,22 +89,17 @@ if (file.exists(file.path(nonmem, paste0(mod_number, ".yaml")))) {
 slurmtools::generate_nmm_config(mod)
 ```
 
-This generates the following toml file. Notice that alert is set to
-'None', and both email and topic are empty. Since we're in vignettes
-we'll need to update the `watched_dir` and `output_dir`.
+This generates the following toml file. By passing in just the mod
+object, `nmm` will use the default values for the other options so if
+you need to change which files are tracked, or how many threads to use
+you'll have to explicitly pass that to `generate_nmm_config`. Since
+we're in vignettes we'll need to update the `watched_dir` and
+`output_dir` accordingly.
 
 ``` 1001.toml
 model_number = '1001'
-files_to_track = [ 'lst', 'ext', 'grd' ]
-tmp_dir = '/tmp'
 watched_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem'
 output_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem/in_progress'
-poll_duration = 1
-alert = 'None'
-level = 'Debug'
-email = ''
-threads = 1
-topic = ''
 ```
 
 ```{r}
@@ -116,20 +113,13 @@ This updates the `1001.toml` config file to:
 
 ``` 1001.toml
 model_number = '1001'
-files_to_track = [ 'lst', 'ext', 'grd' ]
-tmp_dir = '/tmp'
 watched_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem'
 output_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress'
-poll_duration = 1
-alert = 'None'
-level = 'Debug'
-email = ''
-threads = 1
-topic = ''
 ```
 
 We can now run `submit_nonmem_model` and get essentially the same
-behavior as running with `bbi`. On linux `~/.local/bin/` will be on your path so saving binaries there is a good approach.
+behavior as running with `bbi`. On linux `~/.local/bin/` will be on your
+path so saving the downloaded binaries there is a good approach.
 
 ```{r}
 submission_nmm <- slurmtools::submit_nonmem_model( 
@@ -144,7 +134,7 @@ submission_nmm
 ```
 
 ```{r}
-slurmtools::get_slurm_jobs()
+slurmtools::get_slurm_jobs(user = "matthews")
 ```
 
 The one difference between using `nmm` compared to `bbi` is that a new
@@ -158,17 +148,14 @@ values off the diagonal so these are fixed at 0. Finally we see that
 GRD(6) hit 0 relatively early in the run.
 
 ``` vignettes/model/nonmem/in_progress/1001/modeling_run_20240827201226.log
-20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="Successfully loaded default configuration from /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml"
-20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="Beginning Local Path"
-20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="A total of 1 models have completed the initial preparation phase"
-20:12:36 [INFO] bbi log: time="2024-08-27T20:12:36Z" level=info msg="[1001] Beginning local work phase"
-20:12:58 [INFO] OMEGA(2,1) has 0 value
-20:12:58 [INFO] SIGMA(2,1) has 0 value
-20:13:00 [INFO] SIGMA(2,1) has 0 value
-20:13:00 [INFO] OMEGA(2,1) has 0 value
-20:13:04 [INFO] SIGMA(2,1) has 0 value
-20:13:04 [INFO] OMEGA(2,1) has 0 value
-20:13:04 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd" has 0 gradient for parameter: GRD(6) 
+19:13:45 [INFO] bbi log: time="2024-09-20T19:13:45Z" level=info msg="Successfully loaded default configuration from /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml"
+19:13:45 [INFO] bbi log: time="2024-09-20T19:13:45Z" level=info msg="Beginning Local Path"
+19:13:45 [INFO] bbi log: time="2024-09-20T19:13:45Z" level=info msg="A total of 1 models have completed the initial preparation phase"
+19:13:45 [INFO] bbi log: time="2024-09-20T19:13:45Z" level=info msg="[1001] Beginning local work phase"
+19:14:16 [INFO] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.ext": Iteration: 5, Parameter(s) that hit zero: ["SIGMA(2,1)", "OMEGA(2,1)"]
+19:14:19 [INFO] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.ext": Iteration: 10, Parameter(s) that hit zero: ["OMEGA(2,1)", "SIGMA(2,1)"]
+19:14:21 [INFO] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.ext": Iteration: 15, Parameter(s) that hit zero: ["SIGMA(2,1)", "OMEGA(2,1)"]
+19:14:21 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd" Iteration: 10, has 0 gradient for parameter(s): ["GRD(6)"] 
 ```
 
 After a run has finished several messages are sent to the log after a
@@ -176,9 +163,9 @@ final check of the files listed in the `files_to_track` field of the
 `1001.toml` file.
 
 ``` vignettes/model/nonmem/in_progress/1001/modeling_run_20240827201226.log
-20:13:16 [INFO] Received Exit code: exit status: 0
-20:13:16 [WARN] 1001.ext: Missing ext final output lines. Observed lines were: [-1000000000.0, -1000000004.0, -1000000006.0, -1000000007.0]
-20:13:16 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd": The following parameters hit zero gradient through the run: ["GRD(6)"]
+19:14:31 [INFO] Received Exit code: exit status: 0
+19:14:31 [WARN] 1001.ext: Missing ext final output lines. Observed lines were: [-1000000000.0, -1000000004.0, -1000000006.0, -1000000007.0]
+19:14:31 [WARN] "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001/1001.grd": The following parameters hit zero gradient through the run: ["GRD(6)"]
 ```
 
 We see that GRD(6) hit zero during the run and that only a subset of the
@@ -194,31 +181,40 @@ lines, and 0 parameter values can also be sent to ntfy by altering the
 dig through a noisy log file.
 
 Let's update our call to `generate_nmm_config` to have `nmm` send
-notifications to the `NONMEMmonitor` topic on [ntfy.sh](ntfy.sh).
+notifications to the `NONMEMmonitor` topic on [ntfy.sh](ntfy.sh). Just
+like how `submit_nonmem_model` can feed additional information to the
+template with `slurm_template_opts`, we can add an alerter feature to
+nmm with `alerter_opts`. If we go to ntfy.sh we can see that to send a
+message to ntfy we can run
+`curl -d "Backup successful 😀"  ntfy.sh/mytopic`. `nmm` can call a
+binary with a command and pass a message to a flag. For ntfy, the binary
+is `curl` the message flag is `d` and the command is `ntfy.sh/mytopic`
+and there are no additional args.
 
 ```{r}
 slurmtools::generate_nmm_config( 
   mod, 
-  alert = "Ntfy",
-  topic = "NONMEMmonitor",
   watched_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem",
-  output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress")
+  output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress",
+  alerter_opts = list(
+    alerter = Sys.which('curl'), #binary location of curl,
+    command = "ntfy.sh/NONMEMmonitor",
+    message_flag = "d"
+  )
+)
 ```
 
 This updates the `1001.toml` file to this:
 
 ``` 1001.toml
 model_number = '1001'
-files_to_track = [ 'lst', 'ext', 'grd' ]
-tmp_dir = '/tmp'
 watched_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem'
 output_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress'
-poll_duration = 1
-alert = 'Ntfy'
-level = 'Debug'
-email = ''
-threads = 1
-topic = 'NONMEMmonitor'
+
+[alerter]
+alerter = '/usr/bin/curl'
+command = 'ntfy.sh/NONMEMmonitor'
+message_flag = 'd'
 ```
 
 When we re-run the `submit_nonmem_model` call we will now get ntfy
@@ -232,7 +228,7 @@ submission_nmm <- slurmtools::submit_nonmem_model(
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
   slurm_template_opts = list(
-    nmm_exe_path = normalizePath("~/.local/bin/nmm-x86_64-unknown-linux-gnu/nmm"))
+    nmm_exe_path = normalizePath("~/.local/bin/nmm"))
 )
 
 submission_nmm
@@ -259,9 +255,9 @@ This gives us the notifications in a much more digestible format
 # #removing generated files from running this vignette
 # nonmem <- file.path("model", "nonmem")
 # 
-# unlink(file.path(nonmem, "1001"), recursive = TRUE)
-# unlink(file.path(nonmem, "1001.yaml"))
-# unlink(file.path(nonmem, "1001.toml"))
-# unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
-# unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
+unlink(file.path(nonmem, "1001"), recursive = TRUE)
+unlink(file.path(nonmem, "1001.yaml"))
+unlink(file.path(nonmem, "1001.toml"))
+unlink(file.path(nonmem, "submission-log"), recursive = TRUE)
+unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```

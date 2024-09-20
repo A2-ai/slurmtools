@@ -6,17 +6,15 @@
 \usage{
 generate_nmm_config(
   .mod,
-  model_number = "",
-  files_to_track = c("lst", "ext", "grd"),
-  tmp_dir = "/tmp",
+  model_number = NULL,
+  files_to_track = NULL,
+  tmp_dir = NULL,
   watched_dir = file.path("model", "nonmem"),
   output_dir = file.path(watched_dir, "in_progress"),
-  poll_duration = 1,
-  alert = "None",
-  level = "Debug",
-  email = "",
-  threads = 1,
-  topic = ""
+  poll_duration = NULL,
+  level = NULL,
+  threads = NULL,
+  alerter_opts = list()
 )
 }
 \arguments{
@@ -24,25 +22,21 @@ generate_nmm_config(
 
 \item{model_number}{a string of model number e.g. 101a15. Default is pulled from .mod}
 
-\item{files_to_track}{a vector of file extensions. Default is c("lst", "ext", "grd")}
+\item{files_to_track}{a vector of file extensions. If left blank, nmm will use .ext, .lst. and .grd.}
 
-\item{tmp_dir}{a temporary directory location to run nonmem. Default is /tmp}
+\item{tmp_dir}{a temporary directory location to run nonmem. If left blank nmm will use /tmp}
 
 \item{watched_dir}{the directory where nonmem will output. Default is here::here()/model/nonmem}
 
 \item{output_dir}{the directory where watcher will place log and any output files default is here::here()/model/nonmem/in_progress}
 
-\item{poll_duration}{the amount of time in seconds between the watchers polling}
+\item{poll_duration}{the amount of time in seconds between the watchers polling. If left blank, nmm will use 1 second}
 
-\item{alert}{Where to send alerts if any. Default is None, available options are None or Slack}
+\item{level}{What level to log at. Available options are Trace, Debug, Info, Warn, Fatal if left blank, nmm will use Info}
 
-\item{level}{What level to log at. Default is info. Available options are Trace, Debug, Info, Warn, Fatal}
+\item{threads}{number of threads if running a parallel job. If left blank nmm will use 1}
 
-\item{email}{if alert is set to Slack, this should be the email associated with slack to get messages sent directly to you.}
-
-\item{threads}{number of threads if running a parallel job. Default is 1}
-
-\item{topic}{the ntfy.sh topic to send alerts to.}
+\item{alerter_opts}{a list for setting up an alerter fields needed are alerter, command, message_flag, use_stdout, args (list of additional args to be passed to alerter)}
 }
 \value{
 none

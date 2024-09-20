@@ -242,21 +242,12 @@ curl -d "Finished model run: 1001-nonmem-run $JOBID" ntfy.sh/ntfy_demo
 To reiterate, this template file is run as a bash shell script so anything you can do in bash you can put into the template and pass the needed arguments and customize the behavior to your liking.
 
 ```{r, include = FALSE}
-#cancelling any running nonmem jobs
-# state <- slurmtools::get_slurm_jobs(user = "matthews")
-# 
-# if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
-#   for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
-#     processx::run("scancel", args = paste0(job_id))
-#   }
-# }
-# 
-# #removing generated files from running this vignette
+#removing generated files from running this vignette
 # nonmem <- file.path("model", "nonmem")
 # 
-# unlink(file.path(nonmem, "1001"), recursive = TRUE)
-# unlink(file.path(nonmem, "1001.yaml"))
-# unlink(file.path(nonmem, "1001.toml"))
-# unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
-# unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
+unlink(file.path(nonmem, "1001"), recursive = TRUE)
+unlink(file.path(nonmem, "1001.yaml"))
+unlink(file.path(nonmem, "1001.toml"))
+unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
+unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```
