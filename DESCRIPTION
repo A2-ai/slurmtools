@@ -22,9 +22,9 @@ Imports:
     utils,
     whisker,
     withr,
-    rextendr,
     here,
     cli,
+    stringi
 Suggests: 
     knitr,
     rmarkdown,
