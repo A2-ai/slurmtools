@@ -62,15 +62,15 @@ generate_nmm_config <- function(
 
   if (length(alerter_opts) != 0) {
     if ("args" %in% names(alerter_opts)) {
-      write_file(rextendr::to_toml(
+      write_file(to_toml(
         toml,
         alerter = alerter_opts[names(alerter_opts) != "args"],
         alerter.args = alerter_opts$args),
         config_toml_path)
     } else {
-      write_file(rextendr::to_toml(toml, alerter = alerter_opts), config_toml_path)
+      write_file(to_toml(toml, alerter = alerter_opts), config_toml_path)
     }
   } else {
-    write_file(rextendr::to_toml(toml), config_toml_path)
+    write_file(to_toml(toml), config_toml_path)
   }
 }
