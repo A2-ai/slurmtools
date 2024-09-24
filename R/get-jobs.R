@@ -68,6 +68,9 @@ get_slurm_jobs <- function(user = NULL){
       )
     )
 
+  res_df <- res_df %>%
+    dplyr::select("job_id", "partition", "user_name", "job_state", "time", dplyr::everything())
+
   if (!is.null(user)) {
     df <- tryCatch(
       {
@@ -80,7 +83,6 @@ get_slurm_jobs <- function(user = NULL){
   } else {
     df <- res_df
   }
-  df <- df %>%
-    dplyr::select(job_id, partition, user_name, job_state, time, dplyr::everything())
+
   return(df)
 }

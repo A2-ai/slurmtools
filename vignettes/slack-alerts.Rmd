@@ -1,5 +1,5 @@
 ---
-title: "slack-alerts"
+title: "slack-alerts"    
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{slack-alerts}
@@ -60,9 +60,8 @@ Sys.which("snt")
 ```
 
 `snt` requires the slack bot OAuth token which is found from
-[[[https://api.slack.com/apps/\\\\](https://api.slack.com/apps/){.uri}](%5Bhttps://api.slack.com/apps/%5D(https://api.slack.com/apps/)%7B.uri%7D){.uri}\<YOUR
-APP ID\> /oauth?]. This can be saved in a file and fed into the `snt`
-with the `tokenFile` flag.
+`https://api.slack.com/apps/<YOUR_APP_ID>/oauth?`. This can be saved in
+a file and fed into the `snt` with the `tokenFile` flag.
 
 ``` slack_notifier/config.yaml
 token: "encrypted(Bot User OAuth Token)"
