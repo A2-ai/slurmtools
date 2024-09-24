@@ -35,7 +35,7 @@ IWRES = IRES/W
 Y = IPRED * (1 + EPS(1)) + EPS(2)
 
 $THETA
-(0, 0.5)  ;1 CL (L/d)
+(0, 1.5)  ;1 CL (L/d)
 (0, 20)   ;2 VC (L)
 
 $OMEGA

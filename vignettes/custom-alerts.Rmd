@@ -72,8 +72,9 @@ look for files and how to alert you. We'll use `generate_nmm_config()`
 to create this file. First we can look at the documentation to see what
 type of information we should pass to this function.
 
-![documentation for
-generate_nmm_config()](data/images/generate_nmm_config_help.png)
+```{r}
+?generate_nmm_config
+```
 
 ```{r}
 mod_number <- "1001"

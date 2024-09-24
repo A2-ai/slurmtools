@@ -39,27 +39,15 @@ library(slurmtools)
 
 We are given a message when loading slurmtools that some options are not set and that default job submission will not work without them. These options are used for default arguments in the `submit_nonmem_model` function. Running `?submit_nonmem_model` we can see the documentation
 
-![Help view for `submit_nonmem_model` function](data/images/submit_nonmem_model_help.png)
+```{r}
+?submit_nonmem_model
+```
+
+## Default variables and values provided to the template
 
 This function uses the inputs to populate a template Bash shell script that submits the NONMEM job to slurm. A default template file is supplied with the Project Starter and it can be modified to do additional tasks as long as they are possible within Bash.
 
 By default these values are provided to the slurm template file:
-
-``` r
-default_template_list = list(
-  partition = partition,
-  parallel = parallel,
-  ncpu = ncpu,
-  job_name = sprintf("%s-nonmem-run", basename(.mod$absolute_model_path)),
-  project_path = project_path,
-  project_name = project_name,
-  bbi_exe_path = Sys.which("bbi"),
-  bbi_config_path = bbi_config_path,
-  model_path = .mod$absolute_model_path,
-  config_toml_path = config_toml_path,
-  nmm_exe_path = Sys.which("nmm")
-)
-```
 
 -   `partition` is an argument to `submit_nonmem_model`
 
@@ -80,6 +68,22 @@ default_template_list = list(
 -   `nmm_exe_path` is determined via `Sys.which("nmm")`
 
 If you need to feed more arguments to the template you simply supply them in the `slurm_template_opts` argument as a list. More on that later.
+
+``` r
+default_template_list = list(
+  partition = partition,
+  parallel = parallel,
+  ncpu = ncpu,
+  job_name = sprintf("%s-nonmem-run", basename(.mod$absolute_model_path)),
+  project_path = project_path,
+  project_name = project_name,
+  bbi_exe_path = Sys.which("bbi"),
+  bbi_config_path = bbi_config_path,
+  model_path = .mod$absolute_model_path,
+  config_toml_path = config_toml_path,
+  nmm_exe_path = Sys.which("nmm")
+)
+```
 
 ## Submitting a NONMEM job with `bbi`
 
@@ -144,6 +148,7 @@ We can now submit the job and point to the template file in `model/nonmem/slurm-
 ```{r}
 submission <- slurmtools::submit_nonmem_model(
   mod,
+  overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-bbi.tmpl"),
 )
 
@@ -153,7 +158,7 @@ submission
 We see a `status` with an exit code of 0 suggesting a successful command, and the `stdout` gives us the batch job number. We can use `slurmtools::get_slurm_jobs()` to monitor the status of the job. Here, we can supply the user = "matthews" argument to filter to just the jobs I've submitted.
 
 ```{r}
-slurmtools::get_slurm_jobs(user = 'matthews')
+slurmtools::get_slurm_jobs(user = "matthews")
 ```
 
 If we look in the `slurmtools.submisstion_root` directory we can see the shell script that was generated with `submit_nonmem_model`. Here is the whisker replaced call to bbi:
