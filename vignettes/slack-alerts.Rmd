@@ -145,7 +145,7 @@ submission_nmm
 ```
 
 ```{r}
-slurmtools::get_slurm_jobs(user = "matthews")
+slurmtools::get_slurm_jobs()
 ```
 
 ![nmm slack alerts](data/images/nmm_slack_notifications.png)

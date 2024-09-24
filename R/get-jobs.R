@@ -6,18 +6,20 @@ parse_job_to_row <- function(job) {
   # alter parsing based on result
 
   if (getOption("squeue.version") > package_version("23.02.4")){
-    submit_time = job$submit_time$number
-    start_time = job$start_time$number
+    submit_time <- job$submit_time$number
+    start_time <- job$start_time$number
+    end_time <- job$end_time$number
     ### This is "hacky", it looks like for configuring model the list is 3 {"Running", "Configuring", "Power_up_node"}
     if (length(job$job_state) > 1){
-      job_state = job$job_state[[2]]
+      job_state <- job$job_state[[2]]
     } else {
-      job_state = job$job_state[[1]]
+      job_state <- job$job_state[[1]]
     }
   } else {
-    submit_time = job$submit_time
-    start_time = job$start_time
-    job_state = job$job_state
+    submit_time <- job$submit_time
+    start_time <- job$start_time
+    end_time <- job$end_time
+    job_state <- job$job_state
   }
 
   tibble::tibble(
@@ -29,6 +31,7 @@ parse_job_to_row <- function(job) {
     standard_output = job$standard_output,
     submit_time = submit_time,
     start_time = start_time,
+    end_time = end_time,
     user_name = job$user_name,
     current_working_directory = job$current_working_directory
   )
@@ -55,6 +58,16 @@ get_slurm_jobs <- function(user = NULL){
   res_df <- parse_jobs_json(jsonlite::fromJSON(res$stdout, simplifyVector = FALSE))
   res_df$submit_time <- as.POSIXct(res_df$submit_time, origin = "1970-01-01")
   res_df$start_time <- as.POSIXct(res_df$start_time, origin = "1970-01-01")
+  res_df$end_time <- as.POSIXct(res_df$end_time, origin = "1970-01-01")
+  res_df <- res_df %>%
+    dplyr::mutate(
+      time = dplyr::case_when(
+        job_state == "RUNNING" ~ Sys.time() - start_time,
+        job_state == "CONFIGURING" ~ Sys.time() - submit_time,
+        TRUE ~ end_time - start_time
+      )
+    )
+
   if (!is.null(user)) {
     df <- tryCatch(
       {
@@ -67,5 +80,7 @@ get_slurm_jobs <- function(user = NULL){
   } else {
     df <- res_df
   }
+  df <- df %>%
+    dplyr::select(job_id, partition, user_name, job_state, time, dplyr::everything())
   return(df)
 }
