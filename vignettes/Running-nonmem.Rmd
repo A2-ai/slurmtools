@@ -49,21 +49,25 @@ This function uses the inputs to populate a template Bash shell script that subm
 
 By default these values are provided to the slurm template file:
 
--   `partition` is an argument to `submit_nonmem_model`
+-   `partition` is an argument to `submit_nonmem_model` by default this will be the first element of `get_slurm_partitions()`
 
 -   `parallel` is `TRUE` if `ncpu > 1`, else `FALSE`
 
--   `ncpu` is an argument to `submit_nonmem_model`
+-   `ncpu` is an argument to `submit_nonmem_model` - your input of `ncpu` must be less than or equal to the number of cpus on the `partition`
 
--   `job_name` is created from the `.mod` argument supplied to `submit_nonmem_model`
+-   `job_name` is created from the `.mod` argument supplied to `submit_nonmem_model` - default is `<nonmem_model_name>-nonmem-run`
+
+-   `project_path` is determined from `here::here()` and should be the root of the Rproject
+
+-   `project_name` is determined from `here::here() %>% basename()` - for this project it would be `slurmtools`
 
 -   `bbi_exe_path` is determined via \`Sys.which("bbi")
 
--   `bbi_config_path` is determined via getOption("slurmtools.bbi_config_path")
+-   `bbi_config_path` is determined via getOption("slurmtools.bbi_config_path") 
 
 -   `model_path` is determined from the `.mod` argument supplied to `submit_nonmem_model`
 
--   `config_toml_path` is determined from the `.mod` argument supplied to `submit_nonmem_model` and is requried to use `nmm` (NONMEM monitor)
+-   `config_toml_path` is determined from the `.mod` argument supplied to `submit_nonmem_model` and is required to use `nmm` (NONMEM monitor)
 
 -   `nmm_exe_path` is determined via `Sys.which("nmm")`
 
@@ -100,6 +104,7 @@ Here is an example of a template file that will call `bbi`:
 #SBATCH --partition={{partition}}
 #SBATCH --account={{project_name}}
 
+#{{project_path}}
 # submit_nonmem_model uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
 
@@ -164,7 +169,19 @@ slurmtools::get_slurm_jobs(user = "matthews")
 If we look in the `slurmtools.submisstion_root` directory we can see the shell script that was generated with `submit_nonmem_model`. Here is the whisker replaced call to bbi:
 
 ``` 1001.sh
-/usr/local/bin/bbi nonmem run local /cluster-data/user-homes/matthews/Projects/slurmtools_vignette/model/nonmem/1001.mod --config /cluster-data/user-homes/matthews/Projects/slurmtools_vignette/model/nonmem/bbi.yaml
+#!/bin/bash
+#SBATCH --job-name="1001-nonmem-run"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --partition=cpu2mem4gb
+#SBATCH --account=slurmtools
+
+#/cluster-data/user-homes/matthews/Packages/slurmtools
+# submit_nonmem_model uses the whisker package to populate template files
+# https://github.com/edwindj/whisker
+
+/usr/local/bin/bbi nonmem run local /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001.mod --config /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml
 ```
 
 ## Extending templates
