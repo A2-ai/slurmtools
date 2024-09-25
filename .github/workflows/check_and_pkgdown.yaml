@@ -50,6 +50,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            metrumresearchgroup/mrgmisc
+            metrumresearchgroup/nmrec
+            metrumresearchgroup/bbr
+            any::rcmdcheck
+            any::pkgdown
+
+
   R-CMD-check:
     runs-on: ubuntu-latest
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -63,16 +73,6 @@ jobs:
           - {os: ubuntu-latest, r: '4.2'}
 
     steps:
-      - name: Install dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            metrumresearchgroup/mrgmisc
-            metrumresearchgroup/nmrec
-            metrumresearchgroup/bbr
-            any::rcmdcheck
-          needs: check
-
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
@@ -88,17 +88,6 @@ jobs:
       contents: write
 
     steps:
-      - name: Install dependencies for pkgdown
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            metrumresearchgroup/mrgmisc
-            metrumresearchgroup/nmrec
-            metrumresearchgroup/bbr
-            any::pkgdown
-            local::.
-          needs: website
-
       - name: Build pkgdown site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
