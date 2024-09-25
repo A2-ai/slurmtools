@@ -10,7 +10,7 @@ parse_job_to_row <- function(job) {
     start_time <- job$start_time$number
     end_time <- job$end_time$number
     ### This is "hacky", it looks like for configuring model the list is 3 {"Running", "Configuring", "Power_up_node"}
-    if (length(job$job_state) > 1){
+    if (length(job$job_state) == 3){
       job_state <- job$job_state[[2]]
     } else {
       job_state <- job$job_state[[1]]
