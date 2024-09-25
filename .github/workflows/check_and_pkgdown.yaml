@@ -1,26 +1,16 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+name: R-CMD-check_and_pkgdown
+
 on:
   push:
-    branches: [main, master, pkgdown_ci]
+    branches: [main, master, workflow_test, vignette_update]
   pull_request:
-    branches: [main, master]
-  release:
-    types: [published]
-  workflow_dispatch:
-
-name: pkgdown
+    branches: [main, master, workflow_test]
 
 jobs:
-  pkgdown:
+  common-setup:
     runs-on: ubuntu-latest
-    # Only restrict concurrency for non-PR jobs
-    concurrency:
-      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: write
+    outputs:
+      binaries_path: ${{ steps.add_to_path.outputs.bin_path }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +18,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v2
         with:
+          r-version: '4.3' # You can update this dynamically if needed
           use-public-rspm: true
 
       - name: Download mocked binaries
+        id: add_to_path
         run: |
           mkdir -p /usr/local/bin
           cd /tmp
@@ -58,7 +50,46 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+  R-CMD-check:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    needs: common-setup
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest, r: '4.3'}
+          - {os: ubuntu-latest, r: '4.2'}
+
+    steps:
+      - name: Install dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            metrumresearchgroup/mrgmisc
+            metrumresearchgroup/nmrec
+            metrumresearchgroup/bbr
+            any::rcmdcheck
+          needs: check
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+
+  pkgdown:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+    needs: common-setup
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Install dependencies for pkgdown
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
             metrumresearchgroup/mrgmisc
@@ -68,7 +99,7 @@ jobs:
             local::.
           needs: website
 
-      - name: Build site
+      - name: Build pkgdown site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
