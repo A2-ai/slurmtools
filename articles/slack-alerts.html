@@ -89,15 +89,16 @@
 <div class="section level2">
 <h2 id="cut-me-some-slack">Cut me some Slack<a class="anchor" aria-label="anchor" href="#cut-me-some-slack"></a>
 </h2>
-<p>There is also functionality to pair <code>nmm</code> with <a href="https://github.com/A2-ai/slack_notifier/releases/" class="external-link">slack_notifier</a>
+<p>There is also functionality to pair <a href="https://github.com/A2-ai/nonmem-monitor/releases" class="external-link"><code>nmm</code></a>
+with <a href="https://github.com/A2-ai/slack_notifier/releases/" class="external-link">slack_notifier</a>
 and get messages sent directly to you via a slack bot. This requires you
 to download the slack_notifier binaries. You can download the latest
 release and extract the binary and again save it to
 <code>~/.local/bin</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.which.html" class="external-link">Sys.which</a></span><span class="op">(</span><span class="st">"snt"</span><span class="op">)</span></span>
-<span><span class="va">snt</span> </span>
-<span> <span class="st">""</span> </span></code></pre></div>
+<span>                                               <span class="va">snt</span> </span>
+<span><span class="st">"/cluster-data/user-homes/matthews/.local/bin/snt"</span></span></code></pre></div>
 <p><code>snt</code> requires the slack bot OAuth token which is found
 from <code>https://api.slack.com/apps/&lt;YOUR_APP_ID&gt;/oauth?</code>.
 This can be saved in a file and fed into the <code>snt</code> with the
