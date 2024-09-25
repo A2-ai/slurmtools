@@ -27,9 +27,9 @@ navbar:
       menu:
       - text: Running NONMEM
         href: articles/Running-nonmem.html
-      - text: custom-alerts
+      - text: Custom Alerts
         href: articles/custom-alerts.html
-      - text: slack-alerts
+      - text: Slack Alerts
         href: articles/slack-alerts.html
 
 reference:

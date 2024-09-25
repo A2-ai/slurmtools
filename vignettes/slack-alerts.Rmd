@@ -1,8 +1,8 @@
 ---
-title: "slack-alerts"    
+title: "Slack-alerts"    
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{slack-alerts}
+  %\VignetteIndexEntry{Slack notifications with nmm}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 

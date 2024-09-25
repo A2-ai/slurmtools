@@ -39,10 +39,6 @@ library(slurmtools)
 
 We are given a message when loading slurmtools that some options are not set and that default job submission will not work without them. These options are used for default arguments in the `submit_nonmem_model` function. Running `?submit_nonmem_model` we can see the documentation
 
-```{r}
-?submit_nonmem_model
-```
-
 ## Default variables and values provided to the template
 
 This function uses the inputs to populate a template Bash shell script that submits the NONMEM job to slurm. A default template file is supplied with the Project Starter and it can be modified to do additional tasks as long as they are possible within Bash.

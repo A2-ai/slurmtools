@@ -1,8 +1,8 @@
 ---
-title: "custom-alerts"
+title: "Custom-alerts"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{custom-alerts}
+  %\VignetteIndexEntry{Setting up custom alerts}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -70,11 +70,7 @@ it's not on our path.
 The `config.toml` file controls what `nmm` will monitor and where to
 look for files and how to alert you. We'll use `generate_nmm_config()`
 to create this file. First we can look at the documentation to see what
-type of information we should pass to this function.
-
-```{r}
-?generate_nmm_config
-```
+type of information we should pass to this function. `?generate_nmm_config()`
 
 ```{r}
 mod_number <- "1001"
