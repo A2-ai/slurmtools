@@ -44,7 +44,7 @@ jobs:
           mv ./sacct /usr/local/bin/sacct
           chmod 755 /usr/local/bin/sacct
 
-          gh release download "squeue/v0.2.0" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
+          gh release download "squeue/v0.2.1" -R a2-ai-tech-training/slurm-mocks -p "*Linux_x86_64.tar.gz" -D /usr/local/bin/
           tar -xvf /usr/local/bin/squeue_Linux_x86_64.tar.gz
           mv ./squeue /usr/local/bin/squeue
           chmod 755 /usr/local/bin/squeue
