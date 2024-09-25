@@ -49,14 +49,16 @@ if (file.exists(file.path(nonmem, paste0(mod_number, ".yaml")))) {
 
 # Cut me some Slack
 
-There is also functionality to pair `nmm` with
+There is also functionality to pair [`nmm`](https://github.com/A2-ai/nonmem-monitor/releases) with
 [slack_notifier](https://github.com/A2-ai/slack_notifier/releases/) and
 get messages sent directly to you via a slack bot. This requires you to
 download the slack_notifier binaries. You can download the latest
 release and extract the binary and again save it to `~/.local/bin`.
 
-```{r}
+``` r
 Sys.which("snt")
+                                               snt 
+"/cluster-data/user-homes/matthews/.local/bin/snt"
 ```
 
 `snt` requires the slack bot OAuth token which is found from

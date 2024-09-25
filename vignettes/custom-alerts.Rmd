@@ -40,7 +40,7 @@ options('slurmtools.submission_root' = file.path(nonmem, "submission-log"))
 ## Submitting a NONMEM job with nmm
 
 Instead of using bbi we can use `nmm` ([NONMEM
-Monitor](https://github.com/A2-ai/nonmem-monitor)) which currently has
+Monitor](https://github.com/A2-ai/nonmem-monitor/releases)) which currently has
 some additional functionality of sending notifications about zero
 gradients, missing -1E9 lines in ext file, and some very basic control
 stream errors. Nonmem-monitor also allows for setting up an alerter to
