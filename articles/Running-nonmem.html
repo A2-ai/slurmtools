@@ -33,8 +33,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-get-started" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Get Started</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-get-started">
 <li><a class="dropdown-item" href="../articles/Running-nonmem.html">Running NONMEM</a></li>
-    <li><a class="dropdown-item" href="../articles/custom-alerts.html">custom-alerts</a></li>
-    <li><a class="dropdown-item" href="../articles/slack-alerts.html">slack-alerts</a></li>
+    <li><a class="dropdown-item" href="../articles/custom-alerts.html">Custom Alerts</a></li>
+    <li><a class="dropdown-item" href="../articles/slack-alerts.html">Slack Alerts</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -91,8 +91,6 @@ not set and that default job submission will not work without them.
 These options are used for default arguments in the
 <code>submit_nonmem_model</code> function. Running
 <code><a href="../reference/submit_nonmem_model.html">?submit_nonmem_model</a></code> we can see the documentation</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="op">?</span><span class="va">submit_nonmem_model</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="default-variables-and-values-provided-to-the-template">Default variables and values provided to the template<a class="anchor" aria-label="anchor" href="#default-variables-and-values-provided-to-the-template"></a>
@@ -136,7 +134,7 @@ and is required to use <code>nmm</code> (NONMEM monitor)</p></li>
 <p>If you need to feed more arguments to the template you simply supply
 them in the <code>slurm_template_opts</code> argument as a list. More on
 that later.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">default_template_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  partition <span class="op">=</span> <span class="va">partition</span>,</span>
 <span>  parallel <span class="op">=</span> <span class="va">parallel</span>,</span>
@@ -192,7 +190,7 @@ populated. By default, <code>submit_nonmem_model</code> will inject
 <code>Sys.which("bbi")</code> into the template, so if <code>bbi</code>
 is not on your path we’ll have to supply the <code>bbi_exe_path</code>
 for it to start the NONMEM run.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.which.html" class="external-link">Sys.which</a></span><span class="op">(</span><span class="st">"bbi"</span><span class="op">)</span></span>
 <span><span class="va">bbi</span> </span>
 <span> <span class="st">""</span> </span></code></pre></div>
@@ -205,20 +203,20 @@ option as well as <code>bbi_config_path</code> so
 template files are saved in <code>~/model/nonmem/</code> Additionally,
 there is a simple NONMEM control stream in <code>1001.mod</code> in the
 same directory that we can use for testing.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(bbr)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">library</span>(here)</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">here</span>() starts at <span class="sc">/</span>home<span class="sc">/</span>runner<span class="sc">/</span>work<span class="sc">/</span>slurmtools<span class="sc">/</span>slurmtools</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>nonmem <span class="ot">=</span> <span class="fu">file.path</span>(here<span class="sc">::</span><span class="fu">here</span>(), <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">options</span>(<span class="st">'slurmtools.submission_root'</span> <span class="ot">=</span> <span class="fu">file.path</span>(nonmem, <span class="st">"submission-log"</span>))</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="fu">options</span>(<span class="st">'slurmtools.bbi_config_path'</span> <span class="ot">=</span> <span class="fu">file.path</span>(nonmem, <span class="st">"bbi.yaml"</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(bbr)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">here</span>() starts at <span class="sc">/</span>home<span class="sc">/</span>runner<span class="sc">/</span>work<span class="sc">/</span>slurmtools<span class="sc">/</span>slurmtools</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>nonmem <span class="ot">=</span> <span class="fu">file.path</span>(here<span class="sc">::</span><span class="fu">here</span>(), <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">options</span>(<span class="st">'slurmtools.submission_root'</span> <span class="ot">=</span> <span class="fu">file.path</span>(nonmem, <span class="st">"submission-log"</span>))</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">options</span>(<span class="st">'slurmtools.bbi_config_path'</span> <span class="ot">=</span> <span class="fu">file.path</span>(nonmem, <span class="st">"bbi.yaml"</span>))</span></code></pre></div>
 <p>To create the <code>bbr</code> model object, we need to have both
 <code>1001.mod</code> and <code>1001.yaml</code> which contains metadata
 about the model in the supplied directory
 (<code>./model/nonmem/</code>). We’ll check for mod_number.yaml and if
 it exists, read in the model otherwise create it and then read it.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">mod_number</span>, <span class="st">".yaml"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -228,53 +226,53 @@ it exists, read in the model otherwise create it and then read it.</p>
 <span><span class="op">}</span></span></code></pre></div>
 <p>We can now submit the job and point to the template file in
 <code>model/nonmem/slurm-job-bbi.tmpl</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>submission <span class="ot">&lt;-</span> slurmtools<span class="sc">::</span><span class="fu">submit_nonmem_model</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  mod,</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">overwrite =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">slurm_job_template_path =</span> <span class="fu">file.path</span>(nonmem, <span class="st">"slurm-job-bbi.tmpl"</span>),</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>)</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>submission</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="sc">$</span>status</span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="sc">$</span>stdout</span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Submitted batch job 804</span><span class="sc">\n</span><span class="st">"</span></span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="sc">$</span>stderr</span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">""</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a></span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="sc">$</span>timeout</span>
-<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>submission <span class="ot">&lt;-</span> slurmtools<span class="sc">::</span><span class="fu">submit_nonmem_model</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  mod,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">overwrite =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">slurm_job_template_path =</span> <span class="fu">file.path</span>(nonmem, <span class="st">"slurm-job-bbi.tmpl"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>submission</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="sc">$</span>status</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="sc">$</span>stdout</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Submitted batch job 804</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="sc">$</span>stderr</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">""</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="sc">$</span>timeout</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
 <p>We see a <code>status</code> with an exit code of 0 suggesting a
 successful command, and the <code>stdout</code> gives us the batch job
 number. We can use <code><a href="../reference/get_slurm_jobs.html">slurmtools::get_slurm_jobs()</a></code> to monitor
 the status of the job. Here, we can supply the user = “matthews”
 argument to filter to just the jobs I’ve submitted.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>slurmtools<span class="sc">::</span><span class="fu">get_slurm_jobs</span>(<span class="at">user =</span> <span class="st">"matthews"</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 1 × 12 [39m</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  job_id partition  user_name job_state time     cpus standard_input</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>int<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m       [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>drtn<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m   [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>int<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m         </span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m1 [<span class="dv">39</span>m    [<span class="dv">4</span>m1 [<span class="dv">24</span>m159 cpu2mem4gb matthews  COMPLETED <span class="dv">13</span> secs     <span class="dv">1</span> <span class="sc">/</span>dev<span class="sc">/</span>null     </span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># ℹ 5 more variables: standard_output &lt;chr&gt;, submit_time &lt;dttm&gt;, [39m</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co">#   start_time &lt;dttm&gt;, end_time &lt;dttm&gt;, current_working_directory &lt;chr&gt; [39m</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>slurmtools<span class="sc">::</span><span class="fu">get_slurm_jobs</span>(<span class="at">user =</span> <span class="st">"matthews"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 1 × 12 [39m</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  job_id partition  user_name job_state time     cpus standard_input</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>int<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m       [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>drtn<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m   [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>int<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m         </span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m1 [<span class="dv">39</span>m    [<span class="dv">4</span>m1 [<span class="dv">24</span>m159 cpu2mem4gb matthews  COMPLETED <span class="dv">13</span> secs     <span class="dv">1</span> <span class="sc">/</span>dev<span class="sc">/</span>null     </span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># ℹ 5 more variables: standard_output &lt;chr&gt;, submit_time &lt;dttm&gt;, [39m</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co">#   start_time &lt;dttm&gt;, end_time &lt;dttm&gt;, current_working_directory &lt;chr&gt; [39m</span></span></code></pre></div>
 <p>If we look in the <code>slurmtools.submisstion_root</code> directory
 we can see the shell script that was generated with
 <code>submit_nonmem_model</code>. Here is the whisker replaced call to
 bbi:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode 1001.sh"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#SBATCH --job-name="1001-nonmem-run"</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#SBATCH --nodes=1</span></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#SBATCH --ntasks=1</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#SBATCH --partition=cpu2mem4gb</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#SBATCH --account=slurmtools</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#/cluster-data/user-homes/matthews/Packages/slurmtools</span></span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co"># submit_nonmem_model uses the whisker package to populate template files</span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co"># https://github.com/edwindj/whisker</span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="ex">/usr/local/bin/bbi</span> nonmem run local /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001.mod <span class="at">--config</span> /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode 1001.sh"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#SBATCH --job-name="1001-nonmem-run"</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#SBATCH --ntasks=1</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#SBATCH --partition=cpu2mem4gb</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#SBATCH --account=slurmtools</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#/cluster-data/user-homes/matthews/Packages/slurmtools</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co"># submit_nonmem_model uses the whisker package to populate template files</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co"># https://github.com/edwindj/whisker</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="ex">/usr/local/bin/bbi</span> nonmem run local /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001.mod <span class="at">--config</span> /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="extending-templates">Extending templates<a class="anchor" aria-label="anchor" href="#extending-templates"></a>
@@ -321,26 +319,26 @@ curl -d "Finished model run: {{job_name}} $JOBID" ntfy.sh/{{ntfy}}
 {{/ntfy}}</code></pre>
 <p>Since we’ve already run this model we will provide the
 <code>overwrite = TRUE</code> argument to force a new nonmem run.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>submission_ntfy <span class="ot">&lt;-</span> slurmtools<span class="sc">::</span><span class="fu">submit_nonmem_model</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  mod, </span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">slurm_job_template_path =</span> <span class="fu">file.path</span>(nonmem, <span class="st">"slurm-job-bbi-ntfy.tmpl"</span>),</span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">overwrite =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">slurm_template_opts =</span> <span class="fu">list</span>(</span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>    <span class="at">ntfy =</span> <span class="st">"ntfy_demo"</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>)</span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a></span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>submission_ntfy</span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="sc">$</span>status</span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="sc">$</span>stdout</span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Submitted batch job 804</span><span class="sc">\n</span><span class="st">"</span></span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a></span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="sc">$</span>stderr</span>
-<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">""</span></span>
-<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a></span>
-<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="sc">$</span>timeout</span>
-<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>submission_ntfy <span class="ot">&lt;-</span> slurmtools<span class="sc">::</span><span class="fu">submit_nonmem_model</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  mod, </span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">slurm_job_template_path =</span> <span class="fu">file.path</span>(nonmem, <span class="st">"slurm-job-bbi-ntfy.tmpl"</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">overwrite =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="at">slurm_template_opts =</span> <span class="fu">list</span>(</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>    <span class="at">ntfy =</span> <span class="st">"ntfy_demo"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>)</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>submission_ntfy</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="sc">$</span>status</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="sc">$</span>stdout</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Submitted batch job 804</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="sc">$</span>stderr</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">""</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="sc">$</span>timeout</span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
 <p>We again get a 0 exit code status and now instead of using
 <code><a href="../reference/get_slurm_jobs.html">slurmtools::get_slurm_jobs()</a></code> to monitor the job, we can
 rely on the new notifications we just set up. <img src="data%2Fimages%2Fntfy_starting.png" alt="NONMEM job starting ntfy alert"></p>
@@ -348,21 +346,21 @@ rely on the new notifications we just set up. <img src="data%2Fimages%2Fntfy_sta
 <p>Note that the run number will match the run specified in
 <code>submission$stdout</code>. We can see the new shell script this
 updated template file generated</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode 1001.sh"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#SBATCH --job-name="1001-nonmem-run"</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#SBATCH --nodes=1</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#SBATCH --ntasks=1</span></span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#SBATCH --partition=cpu2mem4gb</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#SBATCH --account=slurmtools</span></span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="va">JOBID</span><span class="op">=</span><span class="va">$SLURM_JOBID</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a></span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-d</span> <span class="st">"Starting model run: 1001-nonmem-run </span><span class="va">$JOBID</span><span class="st">"</span> ntfy.sh/ntfy_demo</span>
-<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a></span>
-<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="ex">/usr/local/bin/bbi</span> nonmem run local /cluster-data/user-homes/matthews/Projects/slurmtools_vignette/model/nonmem/1001.mod <span class="at">--config</span> /cluster-data/user-homes/matthews/Projects/slurmtools_vignette/model/nonmem/bbi.yaml</span>
-<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-d</span> <span class="st">"Finished model run: 1001-nonmem-run </span><span class="va">$JOBID</span><span class="st">"</span> ntfy.sh/ntfy_demo</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode 1001.sh"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#SBATCH --job-name="1001-nonmem-run"</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#SBATCH --nodes=1</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#SBATCH --ntasks=1</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=1</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#SBATCH --partition=cpu2mem4gb</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#SBATCH --account=slurmtools</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="va">JOBID</span><span class="op">=</span><span class="va">$SLURM_JOBID</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-d</span> <span class="st">"Starting model run: 1001-nonmem-run </span><span class="va">$JOBID</span><span class="st">"</span> ntfy.sh/ntfy_demo</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="ex">/usr/local/bin/bbi</span> nonmem run local /cluster-data/user-homes/matthews/Projects/slurmtools_vignette/model/nonmem/1001.mod <span class="at">--config</span> /cluster-data/user-homes/matthews/Projects/slurmtools_vignette/model/nonmem/bbi.yaml</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-d</span> <span class="st">"Finished model run: 1001-nonmem-run </span><span class="va">$JOBID</span><span class="st">"</span> ntfy.sh/ntfy_demo</span></code></pre></div>
 <p>To reiterate, this template file is run as a bash shell script so
 anything you can do in bash you can put into the template and pass the
 needed arguments and customize the behavior to your liking.</p>
