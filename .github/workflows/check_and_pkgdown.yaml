@@ -2,9 +2,9 @@ name: R-CMD-check_and_pkgdown
 
 on:
   push:
-    branches: [main, master, workflow_test, vignette_update]
+    branches: [main, single_gh_actions]
   pull_request:
-    branches: [main, master, workflow_test]
+    branches: [main]
 
 jobs:
   common-setup:
