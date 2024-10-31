@@ -66,18 +66,19 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(slurmtools)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>──  [<span class="dv">1</span>mNeeded slurmtools options [<span class="dv">22</span>m ───────────────────────────────────────────────────</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.slurm_job_template_path'</span>) is not set.</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.submission_root'</span>) is not set.</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a> [<span class="dv">31</span>m✖ [<span class="dv">39</span>m <span class="fu">option</span>(<span class="st">'slurmtools.bbi_config_path'</span>) is not set.</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a> [<span class="dv">36</span>mℹ [<span class="dv">39</span>m Please set all options <span class="cf">for</span> job submission defaults to work.</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">library</span>(bbr)</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">library</span>(here)</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">here</span>() starts at <span class="sc">/</span>home<span class="sc">/</span>runner<span class="sc">/</span>work<span class="sc">/</span>slurmtools<span class="sc">/</span>slurmtools</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>nonmem <span class="ot">=</span> <span class="fu">file.path</span>(here<span class="sc">::</span><span class="fu">here</span>(), <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">options</span>(<span class="st">'slurmtools.submission_root'</span> <span class="ot">=</span> <span class="fu">file.path</span>(nonmem, <span class="st">"submission-log"</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">slurmtools</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Needed slurmtools options</span> ───────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.slurm_job_template_path') is not set.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.submission_root') is not set.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> option('slurmtools.bbi_config_path') is not set.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please set all options for job submission defaults to work.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://metrumresearchgroup.github.io/bbr" class="external-link">bbr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; here() starts at /home/runner/work/slurmtools/slurmtools</span></span>
+<span></span>
+<span><span class="va">nonmem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">'slurmtools.submission_root'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"submission-log"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
 <span></span>
@@ -157,36 +158,38 @@ notifications directly to you when a NONMEM run starts and it will reply
 to that message with notifications if any gradients hit 0 and when the
 run finishes it checks if all -1E9 lines are present in the .ext file
 and gives another message about any parameters that hit 0 gradient.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>submission_nmm <span class="ot">&lt;-</span> slurmtools<span class="sc">::</span><span class="fu">submit_nonmem_model</span>( </span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  mod, </span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">overwrite =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">slurm_job_template_path =</span> <span class="fu">file.path</span>(nonmem, <span class="st">"slurm-job-nmm.tmpl"</span>),</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">slurm_template_opts =</span> <span class="fu">list</span>(</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">nmm_exe_path =</span> <span class="fu">normalizePath</span>(<span class="st">"~/.local/bin/nmm"</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  )</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>)</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>Warning <span class="cf">in</span> <span class="fu">normalizePath</span>(<span class="st">"~/.local/bin/nmm"</span>)<span class="sc">:</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>path[<span class="dv">1</span>]<span class="ot">=</span><span class="st">"/home/runner/.local/bin/nmm"</span><span class="sc">:</span> No such file or directory</span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>submission_nmm</span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="sc">$</span>status</span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="sc">$</span>stdout</span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Submitted batch job 804</span><span class="sc">\n</span><span class="st">"</span></span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a></span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="sc">$</span>stderr</span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">""</span></span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a></span>
-<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="sc">$</span>timeout</span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>slurmtools<span class="sc">::</span><span class="fu">get_slurm_jobs</span>()</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># A tibble: 1 × 12 [39m</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  job_id partition  user_name job_state time     cpus standard_input</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>int<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m       [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m      [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>drtn<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m   [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>int<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m  [<span class="dv">3</span>m [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="sc">&lt;</span>chr<span class="sc">&gt;</span> [<span class="dv">39</span>m [<span class="dv">23</span>m         </span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">250</span>m1 [<span class="dv">39</span>m    [<span class="dv">4</span>m1 [<span class="dv">24</span>m159 cpu2mem4gb matthews  COMPLETED <span class="dv">13</span> secs     <span class="dv">1</span> <span class="sc">/</span>dev<span class="sc">/</span>null     </span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co"># ℹ 5 more variables: standard_output &lt;chr&gt;, submit_time &lt;dttm&gt;, [39m</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a> [<span class="dv">38</span>;<span class="dv">5</span>;<span class="dv">246</span>m<span class="co">#   start_time &lt;dttm&gt;, end_time &lt;dttm&gt;, current_working_directory &lt;chr&gt; [39m</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">submission_nmm</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_nonmem_model.html">submit_nonmem_model</a></span><span class="op">(</span> </span>
+<span>  <span class="va">mod</span>, </span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  slurm_job_template_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"slurm-job-nmm.tmpl"</span><span class="op">)</span>,</span>
+<span>  slurm_template_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    nmm_exe_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="st">"~/.local/bin/nmm"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in normalizePath("~/.local/bin/nmm"):</span></span>
+<span><span class="co">#&gt; path[1]="/home/runner/.local/bin/nmm": No such file or directory</span></span>
+<span></span>
+<span><span class="va">submission_nmm</span></span>
+<span><span class="co">#&gt; $status</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $stdout</span></span>
+<span><span class="co">#&gt; [1] "Submitted batch job 804\n"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $stderr</span></span>
+<span><span class="co">#&gt; [1] ""</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $timeout</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 12</span></span></span>
+<span><span class="co">#&gt;   job_id partition  user_name job_state time     cpus standard_input</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;drtn&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>   <span style="text-decoration: underline;">1</span>159 cpu2mem4gb matthews  COMPLETED 13 secs     1 /dev/null     </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: standard_output &lt;chr&gt;, submit_time &lt;dttm&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   start_time &lt;dttm&gt;, end_time &lt;dttm&gt;, current_working_directory &lt;chr&gt;</span></span></span></code></pre></div>
 <div class="float">
 <img src="data%2Fimages%2Fnmm_slack_notifications.png" alt="nmm slack alerts"><div class="figcaption">nmm slack alerts</div>
 </div>
