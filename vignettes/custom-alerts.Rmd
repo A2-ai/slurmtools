@@ -24,7 +24,7 @@ unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = ""
+  comment = "#>"
 )
 ```
 
