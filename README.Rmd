@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # slurmtools
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/A2-ai/slurmtools/actions/workflows/RunChecks.yaml/badge.svg)](https://github.com/A2-ai/slurmtools/actions/workflows/RunChecks.yaml)
 <!-- badges: end -->
 
 `slurmtools` is a collection of utility functions suitable for interacting with slurm and submitting nonmem jobs.

@@ -30,7 +30,6 @@
 #' @importFrom rlang dots_list
 #' @importFrom rlang is_atomic
 #' @importFrom rlang is_missing
-#' @importFrom rlang map2_chr
 #' @importFrom rlang names2
 #' @importFrom stringi stri_replace_all_regex
 #' @importFrom tibble tibble

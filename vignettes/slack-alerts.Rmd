@@ -74,10 +74,10 @@ notifications. If we look at the `snt` help message we see that it
 should be called via
 `snt slack -c config_file -k decryption_key -a token -f tokenFile -e email -m message -t timestamp`
 
-the config_file can contain the key, and token file so you don't need to
-repeatedly use that information. I've saved the tokenFile location and
-key in a config file in `~/.local/bin/slack_notifier_settings.yaml` and
-will use the -c flag to point to that.
+the config_file can contain the key (if not using the default snt key), and 
+token file so you don't need to repeatedly use that information. I've saved the tokenFile location in a config file in 
+`~/.local/bin/slack_notifier_settings.yaml` and will use the -c flag to point
+to that.
 
 With this our call to `snt` would look like:
 
@@ -98,7 +98,7 @@ slurmtools::generate_nmm_config(
   watched_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem",
   output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress",
   alerter_opts = list(
-    alerter = Sys.which('snt'), #binary location of nmm,
+    alerter = normalizePath('~/.local/bin/snt'), #binary location of nmm,
     command = "slack",
     message_flag = "m", #This is the default so we don't need to specify it
     use_stdout = TRUE, #captures output of snt -- which will include --timestamp aksfl;ajklajl;

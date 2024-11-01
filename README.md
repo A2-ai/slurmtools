@@ -4,6 +4,8 @@
 # slurmtools
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/A2-ai/slurmtools/actions/workflows/RunChecks.yaml/badge.svg)](https://github.com/A2-ai/slurmtools/actions/workflows/RunChecks.yaml)
 <!-- badges: end -->
 
 `slurmtools` is a collection of utility functions suitable for
@@ -33,6 +35,15 @@ library(slurmtools)
 knitr::kable(get_slurm_jobs())
 ```
 
-| job_id | job_state | cpus | partition | standard_input | standard_output | submit_time | start_time | end_time | user_name | current_working_directory |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-|  |  |  |  |  |  |  |  |  |  |  |
+| job_id | partition | user_name | job_state | time | cpus | standard_input | standard_output | submit_time | start_time | end_time | current_working_directory |
+|---:|:---|:---|:---|:---|---:|:---|:---|:---|:---|:---|:---|
+| 87 | cpu2mem4gb | matthews | FAILED | 2 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-87.out | 2024-11-01 15:20:24 | 2024-11-01 15:20:24 | 2024-11-01 15:20:26 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
+| 88 | cpu2mem4gb | matthews | COMPLETED | 1 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-88.out | 2024-11-01 15:20:24 | 2024-11-01 15:20:25 | 2024-11-01 15:20:26 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
+| 89 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-89.out | 2024-11-01 15:20:25 | 2024-11-01 15:20:26 | 2024-11-01 15:20:26 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
+| 90 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-90.out | 2024-11-01 15:20:25 | 2024-11-01 15:24:06 | 2024-11-01 15:24:06 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
+| 91 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-91.out | 2024-11-01 15:20:26 | 2024-11-01 15:20:26 | 2024-11-01 15:20:26 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
+| 92 | cpu2mem4gb | matthews | FAILED | 1 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-92.out | 2024-11-01 15:20:49 | 2024-11-01 15:24:06 | 2024-11-01 15:24:07 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
+| 93 | cpu2mem4gb | matthews | COMPLETED | 0 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-93.out | 2024-11-01 15:20:50 | 2024-11-01 15:20:52 | 2024-11-01 15:20:52 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
+| 94 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-94.out | 2024-11-01 15:20:51 | 2024-11-01 15:20:52 | 2024-11-01 15:20:52 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
+| 95 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-95.out | 2024-11-01 15:20:52 | 2024-11-01 15:20:52 | 2024-11-01 15:20:52 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
+| 96 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-96.out | 2024-11-01 15:20:54 | 2024-11-01 15:20:55 | 2024-11-01 15:20:55 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |

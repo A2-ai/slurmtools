@@ -7,7 +7,7 @@
 get_slurm_jobs(user = NULL)
 }
 \arguments{
-\item{user}{user filter}
+\item{user}{string of user id to filter results by}
 }
 \description{
 get slurm jobs
