@@ -57,7 +57,7 @@
 <div class="page-header"><h1 id="slurmtools">slurmtools<a class="anchor" aria-label="anchor" href="#slurmtools"></a>
 </h1></div>
 <!-- badges: start -->
-<!-- badges: end -->
+
 <p><code>slurmtools</code> is a collection of utility functions suitable for interacting with slurm and submitting nonmem jobs.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -81,44 +81,175 @@
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="9%">
-<col width="9%">
-<col width="9%">
-<col width="9%">
-<col width="9%">
-<col width="9%">
-<col width="9%">
-<col width="9%">
-<col width="9%">
-<col width="9%">
-<col width="9%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
 </colgroup>
 <thead><tr class="header">
-<th align="left">job_id</th>
-<th align="left">job_state</th>
-<th align="left">cpus</th>
+<th align="right">job_id</th>
 <th align="left">partition</th>
+<th align="left">user_name</th>
+<th align="left">job_state</th>
+<th align="left">time</th>
+<th align="right">cpus</th>
 <th align="left">standard_input</th>
 <th align="left">standard_output</th>
 <th align="left">submit_time</th>
 <th align="left">start_time</th>
 <th align="left">end_time</th>
-<th align="left">user_name</th>
 <th align="left">current_working_directory</th>
 </tr></thead>
-<tbody><tr class="odd">
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
-</tr></tbody>
+<tbody>
+<tr class="odd">
+<td align="right">87</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">FAILED</td>
+<td align="left">2 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-87.out</td>
+<td align="left">2024-11-01 15:20:24</td>
+<td align="left">2024-11-01 15:20:24</td>
+<td align="left">2024-11-01 15:20:26</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="even">
+<td align="right">88</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">COMPLETED</td>
+<td align="left">1 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-88.out</td>
+<td align="left">2024-11-01 15:20:24</td>
+<td align="left">2024-11-01 15:20:25</td>
+<td align="left">2024-11-01 15:20:26</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="odd">
+<td align="right">89</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">FAILED</td>
+<td align="left">0 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-89.out</td>
+<td align="left">2024-11-01 15:20:25</td>
+<td align="left">2024-11-01 15:20:26</td>
+<td align="left">2024-11-01 15:20:26</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="even">
+<td align="right">90</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">FAILED</td>
+<td align="left">0 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-90.out</td>
+<td align="left">2024-11-01 15:20:25</td>
+<td align="left">2024-11-01 15:24:06</td>
+<td align="left">2024-11-01 15:24:06</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="odd">
+<td align="right">91</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">FAILED</td>
+<td align="left">0 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-91.out</td>
+<td align="left">2024-11-01 15:20:26</td>
+<td align="left">2024-11-01 15:20:26</td>
+<td align="left">2024-11-01 15:20:26</td>
+<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="even">
+<td align="right">92</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">FAILED</td>
+<td align="left">1 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-92.out</td>
+<td align="left">2024-11-01 15:20:49</td>
+<td align="left">2024-11-01 15:24:06</td>
+<td align="left">2024-11-01 15:24:07</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="odd">
+<td align="right">93</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">COMPLETED</td>
+<td align="left">0 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-93.out</td>
+<td align="left">2024-11-01 15:20:50</td>
+<td align="left">2024-11-01 15:20:52</td>
+<td align="left">2024-11-01 15:20:52</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="even">
+<td align="right">94</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">FAILED</td>
+<td align="left">0 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-94.out</td>
+<td align="left">2024-11-01 15:20:51</td>
+<td align="left">2024-11-01 15:20:52</td>
+<td align="left">2024-11-01 15:20:52</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="odd">
+<td align="right">95</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">FAILED</td>
+<td align="left">0 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-95.out</td>
+<td align="left">2024-11-01 15:20:52</td>
+<td align="left">2024-11-01 15:20:52</td>
+<td align="left">2024-11-01 15:20:52</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="even">
+<td align="right">96</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">matthews</td>
+<td align="left">FAILED</td>
+<td align="left">0 secs</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-96.out</td>
+<td align="left">2024-11-01 15:20:54</td>
+<td align="left">2024-11-01 15:20:55</td>
+<td align="left">2024-11-01 15:20:55</td>
+<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+</tbody>
 </table>
 </div>
 </div>
@@ -147,7 +278,12 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/A2-ai/slurmtools/actions/workflows/RunChecks.yaml" class="external-link"><img src="https://github.com/A2-ai/slurmtools/actions/workflows/RunChecks.yaml/badge.svg" alt="R-CMD-check"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
