@@ -39,13 +39,26 @@ parse_job_to_row <- function(job) {
 
 parse_jobs_json <- function(.json) {
   if (!length(.json$jobs)) {
-    return(NULL)
+    empty <- tibble::tibble(
+      job_id = "",
+      job_state = "",
+      cpus = "",
+      partition = "",
+      standard_input = "",
+      standard_output = "",
+      submit_time = "",
+      start_time = "",
+      end_time = "",
+      user_name = "",
+      current_working_directory = "",
+    )
+    return(empty)
   }
   purrr::list_rbind(purrr::map(.json$jobs, parse_job_to_row))
 }
 
 #' get slurm jobs
-#' @param user user filter
+#' @param user string of user id to filter results by
 #' @export
 get_slurm_jobs <- function(user = NULL){
 
@@ -56,6 +69,9 @@ get_slurm_jobs <- function(user = NULL){
     rlang::abort("unable to get slurm jobs, test what the output would be by running `squeue --json`")
   }
   res_df <- parse_jobs_json(jsonlite::fromJSON(res$stdout, simplifyVector = FALSE))
+  if (all(sapply(res_df, function(column) all(is.na(column) | column == "")))) {
+    return(res_df)
+  }
   res_df$submit_time <- as.POSIXct(res_df$submit_time, origin = "1970-01-01")
   res_df$start_time <- as.POSIXct(res_df$start_time, origin = "1970-01-01")
   res_df$end_time <- as.POSIXct(res_df$end_time, origin = "1970-01-01")

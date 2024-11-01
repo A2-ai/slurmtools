@@ -1,19 +1,38 @@
-slurmtools
-==================
 
-`slurmtools` is a collection of utility functions suitable for interacting with slurm and submitting nonmem jobs.
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
-## Usage
+# slurmtools
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+`slurmtools` is a collection of utility functions suitable for
+interacting with slurm and submitting nonmem jobs.
+
+## Installation
+
+You can install the development version of slurmtools from
+[GitHub](https://github.com/) with:
 
 ``` r
-> library(slurmtools)
-> get_slurm_jobs()
-# A tibble: 4 × 10
-  job_id job_state    cpus partition  standard_input standard_output                                                                  submit_time         start_time          user_name current_working_dire…¹
-   <int> <chr>       <int> <chr>      <chr>          <chr>                                                                            <dttm>              <dttm>              <chr>     <chr>                 
-1      3 COMPLETED       1 cpu2mem4gb /dev/null      /cluster-data/user-homes/devin/test-training/scm_dir1/base_modelfit_dir1/NM_run… 2024-02-20 17:19:30 2024-02-20 17:23:15 devin     /cluster-data/user-ho…
-2      4 RUNNING         1 cpu2mem4gb /dev/null      /cluster-data/user-homes/devin/test-training/scm_dir1/modelfit_dir1/NM_run1/nmf… 2024-02-20 17:24:03 2024-02-20 17:24:03 devin     /cluster-data/user-ho…
-3      5 RUNNING         1 cpu2mem4gb /dev/null      /cluster-data/user-homes/devin/test-training/scm_dir1/modelfit_dir1/NM_run2/nmf… 2024-02-20 17:24:03 2024-02-20 17:24:03 devin     /cluster-data/user-ho…
-4      6 CONFIGURING     1 cpu2mem4gb /dev/null      /cluster-data/user-homes/devin/test-training/scm_dir1/modelfit_dir1/NM_run3/nmf… 2024-02-20 17:24:03 2024-02-20 17:24:03 devin     /cluster-data/user-ho…
-# ℹ abbreviated name: ¹​current_working_directory
+# install.packages("pak")
+pak::pkg_install("a2-ai/slurmtools")
 ```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+``` r
+library(slurmtools)
+#> ── Needed slurmtools options ───────────────────────────────────────────────────
+#> ✖ option('slurmtools.slurm_job_template_path') is not set.
+#> ✖ option('slurmtools.submission_root') is not set.
+#> ✖ option('slurmtools.bbi_config_path') is not set.
+#> ℹ Please set all options for job submission defaults to work.
+knitr::kable(get_slurm_jobs())
+```
+
+| job_id | job_state | cpus | partition | standard_input | standard_output | submit_time | start_time | end_time | user_name | current_working_directory |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+|  |  |  |  |  |  |  |  |  |  |  |
