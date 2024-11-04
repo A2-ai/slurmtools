@@ -16,6 +16,11 @@
 #'  that shows status and other information given with `squeue`
 #' }
 #'
+#' @section cancelling jobs:
+#' \itemize{
+#'  \item \code{\link{cancel_job}}: Cancels the specified job
+#' }
+#'
 #' @section slurm partitions:
 #' \itemize{
 #'  \item \code{\link{get_slurm_partitions}}: Gives a vector of available
