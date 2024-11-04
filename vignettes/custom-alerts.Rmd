@@ -11,17 +11,6 @@ editor_options:
 ---
 
 ```{r, include = FALSE}
-#removing generated files from running this vignette
-nonmem <- file.path("model", "nonmem")
-
-unlink(file.path(nonmem, "1001"), recursive = TRUE)
-unlink(file.path(nonmem, "1001.yaml"))
-unlink(file.path(nonmem, "1001.toml"))
-unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
-unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
-```
-
-```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -40,12 +29,13 @@ options('slurmtools.submission_root' = file.path(nonmem, "submission-log"))
 ## Submitting a NONMEM job with nmm
 
 Instead of using bbi we can use `nmm` ([NONMEM
-Monitor](https://github.com/A2-ai/nonmem-monitor/releases)) which currently has
-some additional functionality of sending notifications about zero
-gradients, missing -1E9 lines in ext file, and some very basic control
-stream errors. Nonmem-monitor also allows for setting up an alerter to
-be better fed these messages - more on that later. To use `nmm` you can
-install the latest release from the github repository linked above.
+Monitor](https://github.com/A2-ai/nonmem-monitor/releases)) which
+currently has some additional functionality of sending notifications
+about zero gradients, missing -1E9 lines in ext file, and some very
+basic control stream errors. Nonmem-monitor also allows for setting up
+an alerter to be better fed these messages - more on that later. To use
+`nmm` you can install the latest release from the github repository
+linked above.
 
 We can update the template file accordingly:
 
@@ -70,7 +60,8 @@ it's not on our path.
 The `config.toml` file controls what `nmm` will monitor and where to
 look for files and how to alert you. We'll use `generate_nmm_config()`
 to create this file. First we can look at the documentation to see what
-type of information we should pass to this function. `?generate_nmm_config()`
+type of information we should pass to this function.
+`?generate_nmm_config()`
 
 ```{r}
 mod_number <- "1001"
@@ -239,19 +230,16 @@ This gives us the notifications in a much more digestible format
 
 ![nmm ntfy.sh alerts](data/images/nmm_ntfy_alerts.png)
 
-```{r, include = FALSE}
-# #cancelling any running nonmem jobs
-# state <- slurmtools::get_slurm_jobs(user = "matthews")
-# 
-# if (any(state$job_state %in% c("RUNNING", "CONFIGURING"))) {
-#   for (job_id in state %>% dplyr::filter(job_state == "RUNNING") %>% dplyr::pull("job_id")) {
-#     processx::run("scancel", args = paste0(job_id))
-#   }
-# }
-# 
-# #removing generated files from running this vignette
-# nonmem <- file.path("model", "nonmem")
-# 
+```{r cleanup, include = FALSE}
+# cancelling any running nonmem jobs
+jobs <- get_slurm_jobs(user = "matthews") %>%
+  dplyr::filter(job_state == "RUNNING") %>% 
+  dplyr::pull(job_id)
+
+for (job in jobs) {
+  cancel_job(job)
+}
+
 unlink(file.path(nonmem, "1001"), recursive = TRUE)
 unlink(file.path(nonmem, "1001.yaml"))
 unlink(file.path(nonmem, "1001.toml"))

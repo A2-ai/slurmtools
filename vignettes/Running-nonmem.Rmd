@@ -6,18 +6,6 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-```{r, include = FALSE}
-#removing generated files from running this vignette
-nonmem <- file.path("model", "nonmem")
-
-unlink(file.path(nonmem, "1001"), recursive = TRUE)
-unlink(file.path(nonmem, "1001.yaml"))
-unlink(file.path(nonmem, "1001.toml"))
-unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
-unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
-```
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -259,13 +247,19 @@ curl -d "Finished model run: 1001-nonmem-run $JOBID" ntfy.sh/ntfy_demo
 
 To reiterate, this template file is run as a bash shell script so anything you can do in bash you can put into the template and pass the needed arguments and customize the behavior to your liking.
 
-```{r, include = FALSE}
-#removing generated files from running this vignette
-# nonmem <- file.path("model", "nonmem")
-# 
+```{r cleanup, include = FALSE}
+# cancelling any running nonmem jobs
+jobs <- get_slurm_jobs(user = "matthews") %>%
+  dplyr::filter(job_state == "RUNNING") %>% 
+  dplyr::pull(job_id)
+
+for (job in jobs) {
+  cancel_job(job)
+}
+
 unlink(file.path(nonmem, "1001"), recursive = TRUE)
 unlink(file.path(nonmem, "1001.yaml"))
 unlink(file.path(nonmem, "1001.toml"))
-unlink(file.path(nonmem, "submission-log"), recursive = TRUE) 
+unlink(file.path(nonmem, "submission-log"), recursive = TRUE)
 unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```
