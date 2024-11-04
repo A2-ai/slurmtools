@@ -1,6 +1,6 @@
 Package: slurmtools
 Title: slurm tooling 
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: c(person("Devin", "Pastoor", , "devin@a2-ai.com", role = c("aut", "cre")),
     person("Jenna", "Elwing", email = "jenna@a2-ai.com", role = "aut"),
     person("Matthew", "Smith", email = "matthews@a2-ai.com", role = "aut"))
