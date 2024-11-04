@@ -2,13 +2,21 @@
 % Please edit documentation in R/get-partitions.R
 \name{get_slurm_partitions}
 \alias{get_slurm_partitions}
-\title{get list of partition names for the given cluster}
+\title{Gets the available slurm partitions the user can use.}
 \usage{
 get_slurm_partitions(cache = TRUE)
 }
 \arguments{
 \item{cache}{optional argument to forgo caching}
 }
+\value{
+vector of available partitions
+}
 \description{
-get list of partition names for the given cluster
+Gets the available slurm partitions the user can use.
+}
+\examples{
+\dontrun{
+get_slurm_partitions
+}
 }

@@ -5,6 +5,8 @@ partition_cache <- new.env(parent = emptyenv())
 #' get list of each partition's number of CPUs and memory
 #'
 #' @return the raw partition-cpu-memory string output from `sinfo`
+#' @keywords internal
+#' @noRd
 run_sinfo <- function() {
   sinfobin <- Sys.which("sinfo")
   if (!nzchar(sinfobin)) {
@@ -29,9 +31,10 @@ run_sinfo <- function() {
 #'    [process_slurm_partitions()]
 #'
 #' @param cache optional argument to forgo caching
-#'
 #' @return the processed table of each partition's
 #'    number of CPUs and memory
+#' @keywords internal
+#' @noRd
 lookup_partitions_by_cpu <- function(cache = TRUE) {
   avail_cpus <- if(cache) {
     if (is.null(partition_cache[["run_sinfo"]])) {
@@ -57,6 +60,8 @@ lookup_partitions_by_cpu <- function(cache = TRUE) {
 #'
 #' @return the table such that the default partition will be first
 #'    and will have the asterisk removed
+#' @keywords internal
+#' @noRd
 process_slurm_partitions <- function(table){
   all_partitions <- table$PARTITION
   is_default_partition <- grepl('\\*$', x = all_partitions, )
@@ -69,12 +74,16 @@ process_slurm_partitions <- function(table){
   return(table)
 }
 
-
-#' get list of partition names for the given cluster
+#' Gets the available slurm partitions the user can use.
 #'
 #' @param cache optional argument to forgo caching
 #'
+#' @return vector of available partitions
 #' @export
+#'
+#' @examples \dontrun{
+#' get_slurm_partitions
+#' }
 get_slurm_partitions <- function(cache = TRUE) {
   table <- if (cache) {
     if (is.null(partition_cache[["partition_by_cpu"]])) {
@@ -105,6 +114,9 @@ get_slurm_partitions <- function(cache = TRUE) {
 #' @param cache optional argument to forgo caching
 #'
 #' @return string with suggestion upon [check_slurm_partitions()] error
+#'
+#' @keywords internal
+#' @noRd
 partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
 
   sorted_table <- avail_cpus_table %>% dplyr::filter(CPUS >= ncpu) %>%  dplyr::arrange(CPUS, MEMORY)
@@ -125,6 +137,9 @@ partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
 #' @param ncpu number of CPUs requested by user
 #' @param partition name of partition requested by user
 #' @param cache optional argument to forgo caching
+#'
+#' @keywords internal
+#' @noRd
 #'
 #' @examples \dontrun{
 #' check_slurm_partitions(17, "cpu2mem4gb")

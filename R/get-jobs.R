@@ -1,6 +1,12 @@
 utils::globalVariables(c("user_name"))
 
-# Function to parse each job into a tibble row
+#' Function to parse each job into a tibble row
+#'
+#' @param job output from parse_jobs_json
+#'
+#' @return tibble of parsed jobs
+#' @keywords internal
+#' @noRd
 parse_job_to_row <- function(job) {
   # check options for squeue version
   # alter parsing based on result
@@ -37,6 +43,13 @@ parse_job_to_row <- function(job) {
   )
 }
 
+#' Function to transform squeue --json output into named list
+#'
+#' @param .json output from squeue --json call
+#'
+#' @return list of parsed output
+#' @keywords internal
+#' @noRd
 parse_jobs_json <- function(.json) {
   if (!length(.json$jobs)) {
     empty <- tibble::tibble(
@@ -57,9 +70,16 @@ parse_jobs_json <- function(.json) {
   purrr::list_rbind(purrr::map(.json$jobs, parse_job_to_row))
 }
 
-#' get slurm jobs
-#' @param user string of user id to filter results by
+#' Gets the jobs run on slurm as a tibble
+#'
+#' @param user optional user name to filter jobs only submitted by user
+#'
+#' @return a tibble containing the jobs submitted to slurm
 #' @export
+#'
+#' @examples \dontrun{
+#' get_slurm_jobs()
+#' }
 get_slurm_jobs <- function(user = NULL){
 
   cmd <- list(cmd = Sys.which("squeue"), args = "--json")
