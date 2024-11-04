@@ -7,6 +7,7 @@
 <url><loc>/articles/slack-alerts.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
+<url><loc>/reference/cancel_job.html</loc></url>
 <url><loc>/reference/generate_nmm_config.html</loc></url>
 <url><loc>/reference/get_slurm_jobs.html</loc></url>
 <url><loc>/reference/get_slurm_partitions.html</loc></url>
