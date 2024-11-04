@@ -1,5 +1,5 @@
 ---
-title: "Slack-alerts"    
+title: "Slack notifications with nmm"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Slack notifications with nmm}
@@ -146,7 +146,7 @@ submission_nmm
 ```
 
 ```{r}
-slurmtools::get_slurm_jobs()
+slurmtools::get_slurm_jobs(user = 'matthews')
 ```
 
 ![nmm slack alerts](data/images/nmm_slack_notifications.png)
