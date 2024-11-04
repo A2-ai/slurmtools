@@ -36,13 +36,10 @@ reference:
 - title: Data Processing Functions
   contents:
   - submit_nonmem_model
+  - generate_nmm_config
   - get_slurm_jobs
   - get_slurm_partitions
-  - check_slurm_partitions
-  - lookup_partitions_by_cpu
-  - partition_advice
-  - process_slurm_partitions
-  - run_sinfo
+  - slurmtools
 
 articles:
 - title: Vignettes
