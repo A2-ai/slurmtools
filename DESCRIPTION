@@ -24,7 +24,8 @@ Imports:
     withr,
     here,
     cli,
-    stringi
+    stringi,
+    hms
 Suggests: 
     knitr,
     rmarkdown,

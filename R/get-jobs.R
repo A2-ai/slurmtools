@@ -78,10 +78,10 @@ get_slurm_jobs <- function(user = NULL){
   res_df <- res_df %>%
     dplyr::mutate(
       time = dplyr::case_when(
-        job_state == "RUNNING" ~ Sys.time() - start_time,
-        job_state == "CONFIGURING" ~ Sys.time() - submit_time,
-        TRUE ~ end_time - start_time
-      )
+        job_state == "RUNNING" ~ round(Sys.time()) - round(start_time),
+        job_state == "CONFIGURING" ~ round(Sys.time()) - round(submit_time),
+        TRUE ~ round(end_time) - round(start_time)
+      ) %>% hms::as_hms()
     )
 
   res_df <- res_df %>%
