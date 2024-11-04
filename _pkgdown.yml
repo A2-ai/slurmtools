@@ -12,17 +12,16 @@ navbar:
     left:
     - intro
     - reference
+    - articles
     right:
     - search
     - github
+    - lightswitch
   components:
     reference:
       text: Reference
       href: reference/index.html
-    github:
-      icon: fa-github fa-lg
-      href: https://github.com/a2-ai/slurmtools
-    intro:
+    articles:
       text: Get Started
       menu:
       - text: Running NONMEM
@@ -31,18 +30,18 @@ navbar:
         href: articles/custom-alerts.html
       - text: Slack Alerts
         href: articles/slack-alerts.html
+    github:
+      icon: fa-github fa-lg
+      href: https://github.com/a2-ai/slurmtools
 
 reference:
 - title: Data Processing Functions
   contents:
   - submit_nonmem_model
+  - generate_nmm_config
   - get_slurm_jobs
   - get_slurm_partitions
-  - check_slurm_partitions
-  - lookup_partitions_by_cpu
-  - partition_advice
-  - process_slurm_partitions
-  - run_sinfo
+  - slurmtools
 
 articles:
 - title: Vignettes

@@ -1,4 +1,28 @@
-#' @keywords internal
+#' slurmtools: An R package for easily submitting NONMEM jobs to slurm.
+#'
+#' This package aims to ease the submission and monitoring of NONMEM jobs running
+#' on slurm.
+#'
+#' @section submitting jobs:
+#' \itemize{
+#'  \item \code{\link{submit_nonmem_model}}: Submits a job to slurm
+#'  \item \code{\link{generate_nmm_config}}: Generates a NONMEMmonitor config
+#'  file
+#' }
+#'
+#' @section monitoring jobs:
+#' \itemize{
+#'  \item \code{\link{get_slurm_jobs}}: Gives a table of submitted jobs to slurm
+#'  that shows status and other information given with `squeue`
+#' }
+#'
+#' @section slurm partitions:
+#' \itemize{
+#'  \item \code{\link{get_slurm_partitions}}: Gives a vector of available
+#'  partitions a user can submit jobs to.
+#' }
+#'
+#' @name slurmtools
 "_PACKAGE"
 
 ## usethis namespace: start

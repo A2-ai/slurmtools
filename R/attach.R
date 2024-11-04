@@ -34,7 +34,7 @@ slurmtools_options_message <- function() {
   }
 
   #format .onAttach message
-  msg <- ""
+  msg <- "\n\n"
   if (length(set_options)) {
     msg <- paste0(
       msg,
@@ -59,6 +59,6 @@ slurmtools_options_message <- function() {
     )
   }
 
-  msg
+  paste0(msg, "\n\n")
 }
 

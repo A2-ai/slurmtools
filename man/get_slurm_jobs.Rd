@@ -2,13 +2,21 @@
 % Please edit documentation in R/get-jobs.R
 \name{get_slurm_jobs}
 \alias{get_slurm_jobs}
-\title{get slurm jobs}
+\title{Gets the jobs run on slurm as a tibble}
 \usage{
 get_slurm_jobs(user = NULL)
 }
 \arguments{
-\item{user}{string of user id to filter results by}
+\item{user}{optional user name to filter jobs only submitted by user}
+}
+\value{
+a tibble containing the jobs submitted to slurm
 }
 \description{
-get slurm jobs
+Gets the jobs run on slurm as a tibble
+}
+\examples{
+\dontrun{
+get_slurm_jobs()
+}
 }
