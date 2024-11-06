@@ -12,7 +12,7 @@
 #' }
 cancel_job <- function(job_id, user = NULL) {
 
-  current_user = Sys.getenv("USER") %||% Sys.info()['user']
+  current_user = if (is.null(Sys.getenv("USER"))) Sys.info()['user'] else Sys.getenv("USER")
 
   if (!is.null(user) && user != current_user) {
     cat("The supplied user does not match the current user.\n")
@@ -35,8 +35,7 @@ cancel_job <- function(job_id, user = NULL) {
   }
 
   job_id_filtered <- jobs %>% dplyr::filter(.data$job_id == .env$job_id)
-  print(job_id_filtered)
-  if (job_id_filtered$job_state != "RUNNING") {
+  if (!job_id_filtered$job_state %in% c("RUNNING", "CONFIGURING")) {
     stop(paste0("Job: ", job_id, " is not running"))
   }
 
