@@ -11,7 +11,7 @@ parse_job_to_row <- function(job) {
   # check options for squeue version
   # alter parsing based on result
 
-  if (getOption("squeue.version") > package_version("23.02")){
+  if (package_version(getOption("squeue.version"))[1, 1:2] > package_version("23.02")) {
     submit_time <- job$submit_time$number
     start_time <- job$start_time$number
     end_time <- job$end_time$number
