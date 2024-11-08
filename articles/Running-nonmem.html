@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">slurmtools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9003</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@
 (fka <strong>S</strong>imple <strong>L</strong>inux
 <strong>U</strong>tility for <strong>R</strong>esource
 <strong>M</strong>anagement) and submitting NONMEM jobs. You can submit
-a NONMEM job with <code>submit_nonmem_model</code>, you can view current
+a NONMEM job with <code>submit_slurm_job</code>, you can view current
 jobs with <code>get_slurm_jobs</code>, and you can see the available
 partitions with <code>get_slurm_partitions</code>.</p>
 <div class="section level3">
@@ -92,8 +92,8 @@ partitions with <code>get_slurm_partitions</code>.</p>
 <p>We are given a message when loading slurmtools that some options are
 not set and that default job submission will not work without them.
 These options are used for default arguments in the
-<code>submit_nonmem_model</code> function. Running
-<code><a href="../reference/submit_nonmem_model.html">?submit_nonmem_model</a></code> we can see the documentation</p>
+<code>submit_slurm_job</code> function. Running
+<code><a href="../reference/submit_slurm_job.html">?submit_slurm_job</a></code> we can see the documentation</p>
 </div>
 <div class="section level3">
 <h3 id="default-variables-and-values-provided-to-the-template">Default variables and values provided to the template<a class="anchor" aria-label="anchor" href="#default-variables-and-values-provided-to-the-template"></a>
@@ -105,16 +105,15 @@ additional tasks as long as they are possible within Bash.</p>
 <p>By default these values are provided to the slurm template file:</p>
 <ul>
 <li><p><code>partition</code> is an argument to
-<code>submit_nonmem_model</code> by default this will be the first
-element of <code><a href="../reference/get_slurm_partitions.html">get_slurm_partitions()</a></code></p></li>
+<code>submit_slurm_job</code> by default this will be the first element
+of <code><a href="../reference/get_slurm_partitions.html">get_slurm_partitions()</a></code></p></li>
 <li><p><code>parallel</code> is <code>TRUE</code> if
 <code>ncpu &gt; 1</code>, else <code>FALSE</code></p></li>
-<li><p><code>ncpu</code> is an argument to
-<code>submit_nonmem_model</code> - your input of <code>ncpu</code> must
-be less than or equal to the number of cpus on the
-<code>partition</code></p></li>
+<li><p><code>ncpu</code> is an argument to <code>submit_slurm_job</code>
+- your input of <code>ncpu</code> must be less than or equal to the
+number of cpus on the <code>partition</code></p></li>
 <li><p><code>job_name</code> is created from the <code>.mod</code>
-argument supplied to <code>submit_nonmem_model</code> - default is
+argument supplied to <code>submit_slurm_job</code> - default is
 <code>&lt;nonmem_model_name&gt;-nonmem-run</code></p></li>
 <li><p><code>project_path</code> is determined from
 <code><a href="https://here.r-lib.org//reference/here.html" class="external-link">here::here()</a></code> and should be the root of the
@@ -127,10 +126,10 @@ be <code>slurmtools</code></p></li>
 <li><p><code>bbi_config_path</code> is determined via
 getOption(“slurmtools.bbi_config_path”)</p></li>
 <li><p><code>model_path</code> is determined from the <code>.mod</code>
-argument supplied to <code>submit_nonmem_model</code></p></li>
+argument supplied to <code>submit_slurm_job</code></p></li>
 <li><p><code>config_toml_path</code> is determined from the
-<code>.mod</code> argument supplied to <code>submit_nonmem_model</code>
-and is required to use <code>nmm</code> (NONMEM monitor)</p></li>
+<code>.mod</code> argument supplied to <code>submit_slurm_job</code> and
+is required to use <code>nmm</code> (NONMEM monitor)</p></li>
 <li><p><code>nmm_exe_path</code> is determined via
 <code>Sys.which("nmm")</code></p></li>
 </ul>
@@ -172,7 +171,7 @@ project starter).</p>
 #SBATCH --account={{project_name}}
 
 #{{project_path}}
-# submit_nonmem_model uses the whisker package to populate template files
+# submit_slurm_job uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
 
 {{#parallel}}
@@ -189,7 +188,7 @@ parallel will be true and the code between <code>{{#parallel}}</code>
 and <code>{{/parallel}}</code> will be populated. if
 <code>ncpu = 1</code> then parallel will be false and the code between
 <code>{{^parallel}}</code> and <code>{{/parallel}}</code> will be
-populated. By default, <code>submit_nonmem_model</code> will inject
+populated. By default, <code>submit_slurm_job</code> will inject
 <code>Sys.which("bbi")</code> into the template, so if <code>bbi</code>
 is not on your path we’ll have to supply the <code>bbi_exe_path</code>
 for it to start the NONMEM run.</p>
@@ -199,13 +198,13 @@ for it to start the NONMEM run.</p>
 <span><span class="co">#&gt;  ""</span></span></code></pre></div>
 <p>We will use a few different template files with different
 functionality so we’ll inject those template file paths to
-<code>submit_nonmem_model</code>. However, we’ll use the
+<code>submit_slurm_job</code>. However, we’ll use the
 <code>submission-log</code> directory for the output, so we’ll set that
 option as well as <code>bbi_config_path</code> so
-<code>submit_nonmem_model</code> defaults can be used. The slurm
-template files are saved in <code>~/model/nonmem/</code> Additionally,
-there is a simple NONMEM control stream in <code>1001.mod</code> in the
-same directory that we can use for testing.</p>
+<code>submit_slurm_job</code> defaults can be used. The slurm template
+files are saved in <code>~/model/nonmem/</code> Additionally, there is a
+simple NONMEM control stream in <code>1001.mod</code> in the same
+directory that we can use for testing.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://metrumresearchgroup.github.io/bbr" class="external-link">bbr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span>
@@ -231,7 +230,7 @@ it exists, read in the model otherwise create it and then read it.</p>
 <p>We can now submit the job and point to the template file in
 <code>model/nonmem/slurm-job-bbi.tmpl</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">submission</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_nonmem_model.html">submit_nonmem_model</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">submission</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_slurm_job.html">submit_slurm_job</a></span><span class="op">(</span></span>
 <span>  <span class="va">mod</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  slurm_job_template_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"slurm-job-bbi.tmpl"</span><span class="op">)</span>,</span>
@@ -264,7 +263,7 @@ argument to filter to just the jobs I’ve submitted.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   start_time &lt;dttm&gt;, end_time &lt;dttm&gt;, current_working_directory &lt;chr&gt;</span></span></span></code></pre></div>
 <p>If we look in the <code>slurmtools.submisstion_root</code> directory
 we can see the shell script that was generated with
-<code>submit_nonmem_model</code>. Here is the whisker replaced call to
+<code>submit_slurm_job</code>. Here is the whisker replaced call to
 bbi:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode 1001.sh"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#SBATCH --job-name="1001-nonmem-run"</span></span>
@@ -275,7 +274,7 @@ bbi:</p>
 <span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#SBATCH --account=slurmtools</span></span>
 <span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
 <span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#/cluster-data/user-homes/matthews/Packages/slurmtools</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co"># submit_nonmem_model uses the whisker package to populate template files</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co"># submit_slurm_job uses the whisker package to populate template files</span></span>
 <span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co"># https://github.com/edwindj/whisker</span></span>
 <span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a></span>
 <span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="ex">/usr/local/bin/bbi</span> nonmem run local /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001.mod <span class="at">--config</span> /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml</span></code></pre></div>
@@ -292,7 +291,7 @@ the job has started and finished. We can use <a href="ntfy.sh">ntfy.sh</a> and a
 achieve this.</p>
 <p>Here is a modified template file that adds a
 <code>JOBID=$SLURM_JOBID</code> and some ntfy calls. To get a
-notification we can supply <code>submit_nonmem_model</code> with
+notification we can supply <code>submit_slurm_job</code> with
 <code>ntfy</code> variable to send notifications. I’ll use
 <code>ntfy = ntfy_demo</code> for this.</p>
 <pre class="slurm-job-bbi-ntfy.tmpl"><code>#!/bin/bash
@@ -305,7 +304,7 @@ notification we can supply <code>submit_nonmem_model</code> with
 
 JOBID=$SLURM_JOBID
 
-# submit_nonmem_model uses the whisker package to populate template files
+# submit_slurm_job uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
 
 {{#ntfy}}
@@ -326,7 +325,7 @@ curl -d "Finished model run: {{job_name}} $JOBID" ntfy.sh/{{ntfy}}
 <p>Since we’ve already run this model we will provide the
 <code>overwrite = TRUE</code> argument to force a new nonmem run.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">submission_ntfy</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_nonmem_model.html">submit_nonmem_model</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">submission_ntfy</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_slurm_job.html">submit_slurm_job</a></span><span class="op">(</span></span>
 <span>  <span class="va">mod</span>, </span>
 <span>  slurm_job_template_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"slurm-job-bbi-ntfy.tmpl"</span><span class="op">)</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>

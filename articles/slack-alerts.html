@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">slurmtools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9003</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -163,7 +163,7 @@ to that message with notifications if any gradients hit 0 and when the
 run finishes it checks if all -1E9 lines are present in the .ext file
 and gives another message about any parameters that hit 0 gradient.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">submission_nmm</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_nonmem_model.html">submit_nonmem_model</a></span><span class="op">(</span> </span>
+<code class="sourceCode R"><span><span class="va">submission_nmm</span> <span class="op">&lt;-</span> <span class="fu">slurmtools</span><span class="fu">::</span><span class="fu"><a href="../reference/submit_slurm_job.html">submit_slurm_job</a></span><span class="op">(</span> </span>
 <span>  <span class="va">mod</span>, </span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  slurm_job_template_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"slurm-job-nmm.tmpl"</span><span class="op">)</span>,</span>

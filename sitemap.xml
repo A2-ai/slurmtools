@@ -14,5 +14,6 @@
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/slurmtools.html</loc></url>
 <url><loc>/reference/submit_nonmem_model.html</loc></url>
+<url><loc>/reference/submit_slurm_job.html</loc></url>
 </urlset>
 
