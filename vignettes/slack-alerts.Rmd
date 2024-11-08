@@ -121,7 +121,7 @@ in the .ext file and gives another message about any parameters that hit
 0 gradient.
 
 ```{r}
-submission_nmm <- slurmtools::submit_nonmem_model( 
+submission_nmm <- slurmtools::submit_slurm_job( 
   mod, 
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
@@ -146,8 +146,12 @@ jobs <- get_slurm_jobs(user = "matthews") %>%
   dplyr::pull(job_id)
 
 for (job in jobs) {
-  cancel_slurm_job(job)
+  tryCatch({
+    cancel_slurm_job(job, confirm = FALSE)  
+  }, error = function(e) {}
+  )
 }
+
 
 unlink(file.path(nonmem, "1001"), recursive = TRUE)
 unlink(file.path(nonmem, "1001.yaml"))

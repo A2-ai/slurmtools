@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 # Slurmtools for submitting NONMEM runs
 
-`slurmtools` is an R package for interacting with slurm (fka **S**imple **L**inux **U**tility for **R**esource **M**anagement) and submitting NONMEM jobs. You can submit a NONMEM job with `submit_nonmem_model`, you can view current jobs with `get_slurm_jobs`, and you can see the available partitions with `get_slurm_partitions`.
+`slurmtools` is an R package for interacting with slurm (fka **S**imple **L**inux **U**tility for **R**esource **M**anagement) and submitting NONMEM jobs. You can submit a NONMEM job with `submit_slurm_job`, you can view current jobs with `get_slurm_jobs`, and you can see the available partitions with `get_slurm_partitions`.
 
 ## Installing `slurmtools`
 
@@ -25,7 +25,7 @@ To install `slurmtools` use the following commands:
 library(slurmtools)
 ```
 
-We are given a message when loading slurmtools that some options are not set and that default job submission will not work without them. These options are used for default arguments in the `submit_nonmem_model` function. Running `?submit_nonmem_model` we can see the documentation
+We are given a message when loading slurmtools that some options are not set and that default job submission will not work without them. These options are used for default arguments in the `submit_slurm_job` function. Running `?submit_slurm_job` we can see the documentation
 
 ## Default variables and values provided to the template
 
@@ -33,13 +33,13 @@ This function uses the inputs to populate a template Bash shell script that subm
 
 By default these values are provided to the slurm template file:
 
--   `partition` is an argument to `submit_nonmem_model` by default this will be the first element of `get_slurm_partitions()`
+-   `partition` is an argument to `submit_slurm_job` by default this will be the first element of `get_slurm_partitions()`
 
 -   `parallel` is `TRUE` if `ncpu > 1`, else `FALSE`
 
--   `ncpu` is an argument to `submit_nonmem_model` - your input of `ncpu` must be less than or equal to the number of cpus on the `partition`
+-   `ncpu` is an argument to `submit_slurm_job` - your input of `ncpu` must be less than or equal to the number of cpus on the `partition`
 
--   `job_name` is created from the `.mod` argument supplied to `submit_nonmem_model` - default is `<nonmem_model_name>-nonmem-run`
+-   `job_name` is created from the `.mod` argument supplied to `submit_slurm_job` - default is `<nonmem_model_name>-nonmem-run`
 
 -   `project_path` is determined from `here::here()` and should be the root of the Rproject
 
@@ -49,9 +49,9 @@ By default these values are provided to the slurm template file:
 
 -   `bbi_config_path` is determined via getOption("slurmtools.bbi_config_path") 
 
--   `model_path` is determined from the `.mod` argument supplied to `submit_nonmem_model`
+-   `model_path` is determined from the `.mod` argument supplied to `submit_slurm_job`
 
--   `config_toml_path` is determined from the `.mod` argument supplied to `submit_nonmem_model` and is required to use `nmm` (NONMEM monitor)
+-   `config_toml_path` is determined from the `.mod` argument supplied to `submit_slurm_job` and is required to use `nmm` (NONMEM monitor)
 
 -   `nmm_exe_path` is determined via `Sys.which("nmm")`
 
@@ -89,7 +89,7 @@ Here is an example of a template file that will call `bbi`:
 #SBATCH --account={{project_name}}
 
 #{{project_path}}
-# submit_nonmem_model uses the whisker package to populate template files
+# submit_slurm_job uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
 
 {{#parallel}}
@@ -102,13 +102,13 @@ Here is an example of a template file that will call `bbi`:
 {{/parallel}}
 ```
 
-This file will call `bbi` to run our supplied model (`{{model_path}}.mod`) if `ncpu > 1` then parallel will be true and the code between `{{#parallel}}` and `{{/parallel}}` will be populated. if `ncpu = 1` then parallel will be false and the code between `{{^parallel}}` and `{{/parallel}}` will be populated. By default, `submit_nonmem_model` will inject `Sys.which("bbi")` into the template, so if `bbi` is not on your path we'll have to supply the `bbi_exe_path` for it to start the NONMEM run.
+This file will call `bbi` to run our supplied model (`{{model_path}}.mod`) if `ncpu > 1` then parallel will be true and the code between `{{#parallel}}` and `{{/parallel}}` will be populated. if `ncpu = 1` then parallel will be false and the code between `{{^parallel}}` and `{{/parallel}}` will be populated. By default, `submit_slurm_job` will inject `Sys.which("bbi")` into the template, so if `bbi` is not on your path we'll have to supply the `bbi_exe_path` for it to start the NONMEM run.
 
 ```{r}
 Sys.which("bbi")
 ```
 
-We will use a few different template files with different functionality so we'll inject those template file paths to `submit_nonmem_model`. However, we'll use the `submission-log` directory for the output, so we'll set that option as well as `bbi_config_path` so `submit_nonmem_model` defaults can be used. The slurm template files are saved in `~/model/nonmem/` Additionally, there is a simple NONMEM control stream in `1001.mod` in the same directory that we can use for testing.
+We will use a few different template files with different functionality so we'll inject those template file paths to `submit_slurm_job`. However, we'll use the `submission-log` directory for the output, so we'll set that option as well as `bbi_config_path` so `submit_slurm_job` defaults can be used. The slurm template files are saved in `~/model/nonmem/` Additionally, there is a simple NONMEM control stream in `1001.mod` in the same directory that we can use for testing.
 
 ```{r}
 library(bbr)
@@ -135,7 +135,7 @@ if (file.exists(file.path(nonmem, paste0(mod_number, ".yaml")))) {
 We can now submit the job and point to the template file in `model/nonmem/slurm-job-bbi.tmpl`.
 
 ```{r}
-submission <- slurmtools::submit_nonmem_model(
+submission <- slurmtools::submit_slurm_job(
   mod,
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-bbi.tmpl"),
@@ -150,7 +150,7 @@ We see a `status` with an exit code of 0 suggesting a successful command, and th
 slurmtools::get_slurm_jobs(user = "matthews")
 ```
 
-If we look in the `slurmtools.submisstion_root` directory we can see the shell script that was generated with `submit_nonmem_model`. Here is the whisker replaced call to bbi:
+If we look in the `slurmtools.submisstion_root` directory we can see the shell script that was generated with `submit_slurm_job`. Here is the whisker replaced call to bbi:
 
 ``` 1001.sh
 #!/bin/bash
@@ -162,7 +162,7 @@ If we look in the `slurmtools.submisstion_root` directory we can see the shell s
 #SBATCH --account=slurmtools
 
 #/cluster-data/user-homes/matthews/Packages/slurmtools
-# submit_nonmem_model uses the whisker package to populate template files
+# submit_slurm_job uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
 
 /usr/local/bin/bbi nonmem run local /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001.mod --config /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml
@@ -174,7 +174,7 @@ Because the templates create a bash shell script there is an almost infinite num
 
 Let's add a notification feature that will send a notification when the job has started and finished. We can use [ntfy.sh](ntfy.sh) and add the necessary info to our template to achieve this.
 
-Here is a modified template file that adds a `JOBID=$SLURM_JOBID` and some ntfy calls. To get a notification we can supply `submit_nonmem_model` with `ntfy` variable to send notifications. I'll use `ntfy = ntfy_demo` for this.
+Here is a modified template file that adds a `JOBID=$SLURM_JOBID` and some ntfy calls. To get a notification we can supply `submit_slurm_job` with `ntfy` variable to send notifications. I'll use `ntfy = ntfy_demo` for this.
 
 ``` slurm-job-bbi-ntfy.tmpl
 #!/bin/bash
@@ -187,7 +187,7 @@ Here is a modified template file that adds a `JOBID=$SLURM_JOBID` and some ntfy 
 
 JOBID=$SLURM_JOBID
 
-# submit_nonmem_model uses the whisker package to populate template files
+# submit_slurm_job uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
 
 {{#ntfy}}
@@ -210,7 +210,7 @@ curl -d "Finished model run: {{job_name}} $JOBID" ntfy.sh/{{ntfy}}
 Since we've already run this model we will provide the `overwrite = TRUE` argument to force a new nonmem run.
 
 ```{r}
-submission_ntfy <- slurmtools::submit_nonmem_model(
+submission_ntfy <- slurmtools::submit_slurm_job(
   mod, 
   slurm_job_template_path = file.path(nonmem, "slurm-job-bbi-ntfy.tmpl"),
   overwrite = TRUE,
@@ -254,7 +254,10 @@ jobs <- get_slurm_jobs(user = "matthews") %>%
   dplyr::pull(job_id)
 
 for (job in jobs) {
-  cancel_slurm_job(job)
+  tryCatch({
+    cancel_slurm_job(job, confirm = FALSE)  
+  }, error = function(e) {}
+  )
 }
 
 unlink(file.path(nonmem, "1001"), recursive = TRUE)

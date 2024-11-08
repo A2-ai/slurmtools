@@ -1,5 +1,5 @@
 ---
-title: "Custom-alerts"
+title: "Setting up custom alerts"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Setting up custom alerts}
@@ -50,7 +50,7 @@ We can update the template file accordingly:
 {{nmm_exe_path}} -c {{config_toml_path}} run
 ```
 
-default, `submit_nonmem_model` will provide `nmm_exe_path` and
+default, `submit_slurm_job` will provide `nmm_exe_path` and
 `config_toml_path` to the template. Just like with `bbi_exe_path`,
 `nmm_exe_path` is determined with `Sys.which("nmm")` which may or may
 not give you the path to the nmm binary if it is on your path or not. We
@@ -105,12 +105,12 @@ watched_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/m
 output_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress'
 ```
 
-We can now run `submit_nonmem_model` and get essentially the same
-behavior as running with `bbi`. On linux `~/.local/bin/` will be on your
-path so saving the downloaded binaries there is a good approach.
+We can now run `submit_slurm_job` and get essentially the same behavior
+as running with `bbi`. On linux `~/.local/bin/` will be on your path so
+saving the downloaded binaries there is a good approach.
 
 ```{r}
-submission_nmm <- slurmtools::submit_nonmem_model( 
+submission_nmm <- slurmtools::submit_slurm_job( 
   mod, 
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
@@ -170,7 +170,7 @@ dig through a noisy log file.
 
 Let's update our call to `generate_nmm_config` to have `nmm` send
 notifications to the `NONMEMmonitor` topic on [ntfy.sh](ntfy.sh). Just
-like how `submit_nonmem_model` can feed additional information to the
+like how `submit_slurm_job` can feed additional information to the
 template with `slurm_template_opts`, we can add an alerter feature to
 nmm with `alerter_opts`. If we go to ntfy.sh we can see that to send a
 message to ntfy we can run
@@ -205,13 +205,13 @@ command = 'ntfy.sh/NONMEMmonitor'
 message_flag = 'd'
 ```
 
-When we re-run the `submit_nonmem_model` call we will now get ntfy
+When we re-run the `submit_slurm_job` call we will now get ntfy
 notifications. One thing to note is that `nmm` will print full paths in
 the log, but will only send notifications with the `model_number` (or
 `model_number.file_extension`).
 
 ```{r}
-submission_nmm <- slurmtools::submit_nonmem_model( 
+submission_nmm <- slurmtools::submit_slurm_job( 
   mod, 
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
@@ -237,8 +237,12 @@ jobs <- get_slurm_jobs(user = "matthews") %>%
   dplyr::pull(job_id)
 
 for (job in jobs) {
-  cancel_slurm_job(job)
+  tryCatch({
+    cancel_slurm_job(job, confirm = FALSE)  
+  }, error = function(e) {}
+  )
 }
+
 
 unlink(file.path(nonmem, "1001"), recursive = TRUE)
 unlink(file.path(nonmem, "1001.yaml"))

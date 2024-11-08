@@ -37,7 +37,7 @@ navbar:
 reference:
 - title: Data Processing Functions
   contents:
-  - submit_nonmem_model
+  - submit_slurm_job
   - generate_nmm_config
   - get_slurm_jobs
   - cancel_slurm_job
