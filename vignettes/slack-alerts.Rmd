@@ -146,7 +146,7 @@ jobs <- get_slurm_jobs(user = "matthews") %>%
   dplyr::pull(job_id)
 
 for (job in jobs) {
-  cancel_slurm_job(job)
+  cancel_slurm_job(job, confirm = FALSE)
 }
 
 unlink(file.path(nonmem, "1001"), recursive = TRUE)
