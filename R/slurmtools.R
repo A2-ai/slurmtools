@@ -18,7 +18,7 @@
 #'
 #' @section cancelling jobs:
 #' \itemize{
-#'  \item \code{\link{cancel_job}}: Cancels the specified job
+#'  \item \code{\link{cancel_slurm_job}}: Cancels the specified job
 #' }
 #'
 #' @section slurm partitions:

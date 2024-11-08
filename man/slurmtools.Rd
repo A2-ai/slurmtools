@@ -29,7 +29,7 @@ that shows status and other information given with \code{squeue}
 \section{cancelling jobs}{
 
 \itemize{
-\item \code{\link{cancel_job}}: Cancels the specified job
+\item \code{\link{cancel_slurm_job}}: Cancels the specified job
 }
 }
 
