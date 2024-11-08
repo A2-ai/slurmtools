@@ -10,7 +10,7 @@
 #' @examples \dontrun{
 #' cancel_job(243)
 #' }
-cancel_job <- function(job_id, user = NULL) {
+cancel_slurm_job <- function(job_id, user = NULL) {
 
   current_user = if (is.null(Sys.getenv("USER"))) Sys.info()['user'] else Sys.getenv("USER")
 
