@@ -93,8 +93,10 @@
 <span><span class="co">#&gt; ✔ slurmtools.slurm_jon_template_path: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/slurm-job-bbi.tmpl</span></span>
 <span><span class="co">#&gt; ✔ slurmtools.submission_root: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</span></span>
 <span><span class="co">#&gt; ✔ slurmtools.bbi_config_path: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml</span></span></code></pre></div>
+<p>This block reads in a nonmem model with bbr and submits the job to slurm:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://metrumresearchgroup.github.io/bbr" class="external-link">bbr</a></span><span class="op">)</span></span>
+<span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
 <span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">bbr</span><span class="fu">::</span><span class="fu"><a href="https://metrumresearchgroup.github.io/bbr/reference/read_model.html" class="external-link">read_model</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="va">mod_number</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/submit_slurm_job.html">submit_slurm_job</a></span><span class="op">(</span><span class="va">mod</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -109,6 +111,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $timeout</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<p>This block shows recently submitted and completed jobs:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span>user <span class="op">=</span> <span class="st">'matthews'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
