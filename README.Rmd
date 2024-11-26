@@ -45,14 +45,14 @@ options('slurmtools.slurm_job_template_path' = file.path(nonmem, 'slurm-job-bbi.
 
 library(slurmtools)
 ```
-
+This block reads in a nonmem model with bbr and submits the job to slurm:
 ```{r submit}
 mod_number <- "1001"
 mod <- bbr::read_model(file.path(nonmem, mod_number))
 
 submit_slurm_job(mod, overwrite = TRUE)
 ```
-
+This block shows recently submitted and completed jobs:
 
 ```{r get}
 knitr::kable(get_slurm_jobs(user = 'matthews'))
