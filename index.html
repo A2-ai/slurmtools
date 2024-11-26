@@ -58,7 +58,15 @@
 </h1></div>
 <!-- badges: start -->
 
-<p><code>slurmtools</code> is a collection of utility functions suitable for interacting with slurm and submitting nonmem jobs.</p>
+<p><code>slurmtools</code> is a collection of utility functions suitable for interacting with slurm and submitting nonmem jobs. There are three main functions of <code>slurmtools</code></p>
+<ol style="list-style-type: decimal">
+<li>
+<code>submit_slurm_jobs</code> - submits a job to slurm via <code>sbatch</code>. The job is defined by a template file that is filled in during the call of this function</li>
+<li>
+<code>get_slurm_jobs</code> - gives a tibble of currently runing jobs via <code>squeue</code>.</li>
+<li>
+<code>cancel_slurm_jobs</code> - cancels a running slurm job via <code>scancel</code>.</li>
+</ol>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -68,17 +76,41 @@
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span><span class="st">"a2-ai/slurmtools"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
+<p>This block sets up options used by slurmtools:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">slurmtools</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── Needed slurmtools options ───────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; ✖ option('slurmtools.slurm_job_template_path') is not set.</span></span>
-<span><span class="co">#&gt; ✖ option('slurmtools.submission_root') is not set.</span></span>
-<span><span class="co">#&gt; ✖ option('slurmtools.bbi_config_path') is not set.</span></span>
-<span><span class="co">#&gt; ℹ Please set all options for job submission defaults to work.</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">nonmem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"vignettes"</span>, <span class="st">"model"</span>, <span class="st">"nonmem"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">'slurmtools.submission_root'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"submission-log"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">'slurmtools.bbi_config_path'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">"bbi.yaml"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">'slurmtools.slurm_job_template_path'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="st">'slurm-job-bbi.tmpl'</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">slurmtools</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Set slurmtools options ──────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ✔ slurmtools.slurm_jon_template_path: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/slurm-job-bbi.tmpl</span></span>
+<span><span class="co">#&gt; ✔ slurmtools.submission_root: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</span></span>
+<span><span class="co">#&gt; ✔ slurmtools.bbi_config_path: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
+<span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">bbr</span><span class="fu">::</span><span class="fu"><a href="https://metrumresearchgroup.github.io/bbr/reference/read_model.html" class="external-link">read_model</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="va">mod_number</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/submit_slurm_job.html">submit_slurm_job</a></span><span class="op">(</span><span class="va">mod</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $status</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $stdout</span></span>
+<span><span class="co">#&gt; [1] "Submitted batch job 608\n"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $stderr</span></span>
+<span><span class="co">#&gt; [1] ""</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $timeout</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span>user <span class="op">=</span> <span class="st">'matthews'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="8%">
@@ -110,144 +142,46 @@
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="right">87</td>
+<td align="right">606</td>
 <td align="left">cpu2mem4gb</td>
 <td align="left">matthews</td>
 <td align="left">FAILED</td>
-<td align="left">2 secs</td>
+<td align="left">00:00:01</td>
 <td align="right">1</td>
 <td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-87.out</td>
-<td align="left">2024-11-01 15:20:24</td>
-<td align="left">2024-11-01 15:20:24</td>
-<td align="left">2024-11-01 15:20:26</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-606.out</td>
+<td align="left">2024-11-26 13:42:50</td>
+<td align="left">2024-11-26 13:42:50</td>
+<td align="left">2024-11-26 13:42:51</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</td>
 </tr>
 <tr class="even">
-<td align="right">88</td>
+<td align="right">607</td>
 <td align="left">cpu2mem4gb</td>
 <td align="left">matthews</td>
 <td align="left">COMPLETED</td>
-<td align="left">1 secs</td>
+<td align="left">00:00:16</td>
 <td align="right">1</td>
 <td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-88.out</td>
-<td align="left">2024-11-01 15:20:24</td>
-<td align="left">2024-11-01 15:20:25</td>
-<td align="left">2024-11-01 15:20:26</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-607.out</td>
+<td align="left">2024-11-26 13:43:50</td>
+<td align="left">2024-11-26 13:43:50</td>
+<td align="left">2024-11-26 13:44:06</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</td>
 </tr>
 <tr class="odd">
-<td align="right">89</td>
+<td align="right">608</td>
 <td align="left">cpu2mem4gb</td>
 <td align="left">matthews</td>
-<td align="left">FAILED</td>
-<td align="left">0 secs</td>
+<td align="left">PENDING</td>
+<td align="left">00:00:00</td>
 <td align="right">1</td>
 <td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-89.out</td>
-<td align="left">2024-11-01 15:20:25</td>
-<td align="left">2024-11-01 15:20:26</td>
-<td align="left">2024-11-01 15:20:26</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
-</tr>
-<tr class="even">
-<td align="right">90</td>
-<td align="left">cpu2mem4gb</td>
-<td align="left">matthews</td>
-<td align="left">FAILED</td>
-<td align="left">0 secs</td>
-<td align="right">1</td>
-<td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-90.out</td>
-<td align="left">2024-11-01 15:20:25</td>
-<td align="left">2024-11-01 15:24:06</td>
-<td align="left">2024-11-01 15:24:06</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
-</tr>
-<tr class="odd">
-<td align="right">91</td>
-<td align="left">cpu2mem4gb</td>
-<td align="left">matthews</td>
-<td align="left">FAILED</td>
-<td align="left">0 secs</td>
-<td align="right">1</td>
-<td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-91.out</td>
-<td align="left">2024-11-01 15:20:26</td>
-<td align="left">2024-11-01 15:20:26</td>
-<td align="left">2024-11-01 15:20:26</td>
-<td align="left">/tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log</td>
-</tr>
-<tr class="even">
-<td align="right">92</td>
-<td align="left">cpu2mem4gb</td>
-<td align="left">matthews</td>
-<td align="left">FAILED</td>
-<td align="left">1 secs</td>
-<td align="right">1</td>
-<td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-92.out</td>
-<td align="left">2024-11-01 15:20:49</td>
-<td align="left">2024-11-01 15:24:06</td>
-<td align="left">2024-11-01 15:24:07</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
-</tr>
-<tr class="odd">
-<td align="right">93</td>
-<td align="left">cpu2mem4gb</td>
-<td align="left">matthews</td>
-<td align="left">COMPLETED</td>
-<td align="left">0 secs</td>
-<td align="right">1</td>
-<td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-93.out</td>
-<td align="left">2024-11-01 15:20:50</td>
-<td align="left">2024-11-01 15:20:52</td>
-<td align="left">2024-11-01 15:20:52</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
-</tr>
-<tr class="even">
-<td align="right">94</td>
-<td align="left">cpu2mem4gb</td>
-<td align="left">matthews</td>
-<td align="left">FAILED</td>
-<td align="left">0 secs</td>
-<td align="right">1</td>
-<td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-94.out</td>
-<td align="left">2024-11-01 15:20:51</td>
-<td align="left">2024-11-01 15:20:52</td>
-<td align="left">2024-11-01 15:20:52</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
-</tr>
-<tr class="odd">
-<td align="right">95</td>
-<td align="left">cpu2mem4gb</td>
-<td align="left">matthews</td>
-<td align="left">FAILED</td>
-<td align="left">0 secs</td>
-<td align="right">1</td>
-<td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-95.out</td>
-<td align="left">2024-11-01 15:20:52</td>
-<td align="left">2024-11-01 15:20:52</td>
-<td align="left">2024-11-01 15:20:52</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
-</tr>
-<tr class="even">
-<td align="right">96</td>
-<td align="left">cpu2mem4gb</td>
-<td align="left">matthews</td>
-<td align="left">FAILED</td>
-<td align="left">0 secs</td>
-<td align="right">1</td>
-<td align="left">/dev/null</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-96.out</td>
-<td align="left">2024-11-01 15:20:54</td>
-<td align="left">2024-11-01 15:20:55</td>
-<td align="left">2024-11-01 15:20:55</td>
-<td align="left">/tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-608.out</td>
+<td align="left">2024-11-26 13:46:41</td>
+<td align="left">1970-01-01 00:00:00</td>
+<td align="left">1970-01-01 00:00:00</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</td>
 </tr>
 </tbody>
 </table>
