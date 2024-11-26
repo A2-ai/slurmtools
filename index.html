@@ -95,8 +95,7 @@
 <span><span class="co">#&gt; ✔ slurmtools.bbi_config_path: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml</span></span></code></pre></div>
 <p>This block reads in a nonmem model with bbr and submits the job to slurm:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://metrumresearchgroup.github.io/bbr" class="external-link">bbr</a></span><span class="op">)</span></span>
-<span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
+<code class="sourceCode R"><span><span class="va">mod_number</span> <span class="op">&lt;-</span> <span class="st">"1001"</span></span>
 <span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">bbr</span><span class="fu">::</span><span class="fu"><a href="https://metrumresearchgroup.github.io/bbr/reference/read_model.html" class="external-link">read_model</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">nonmem</span>, <span class="va">mod_number</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/submit_slurm_job.html">submit_slurm_job</a></span><span class="op">(</span><span class="va">mod</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -104,7 +103,7 @@
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stdout</span></span>
-<span><span class="co">#&gt; [1] "Submitted batch job 608\n"</span></span>
+<span><span class="co">#&gt; [1] "Submitted batch job 612\n"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $stderr</span></span>
 <span><span class="co">#&gt; [1] ""</span></span>
@@ -114,24 +113,26 @@
 <p>This block shows recently submitted and completed jobs:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="reference/get_slurm_jobs.html">get_slurm_jobs</a></span><span class="op">(</span>user <span class="op">=</span> <span class="st">'matthews'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
 </colgroup>
 <thead><tr class="header">
 <th align="right">job_id</th>
 <th align="left">partition</th>
+<th align="left">job_name</th>
 <th align="left">user_name</th>
 <th align="left">job_state</th>
 <th align="left">time</th>
@@ -145,43 +146,61 @@
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="right">606</td>
+<td align="right">609</td>
 <td align="left">cpu2mem4gb</td>
+<td align="left">1001-nonmem-run</td>
 <td align="left">matthews</td>
-<td align="left">FAILED</td>
-<td align="left">00:00:01</td>
+<td align="left">COMPLETED</td>
+<td align="left">00:00:14</td>
 <td align="right">1</td>
 <td align="left">/dev/null</td>
-<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-606.out</td>
-<td align="left">2024-11-26 13:42:50</td>
-<td align="left">2024-11-26 13:42:50</td>
-<td align="left">2024-11-26 13:42:51</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-609.out</td>
+<td align="left">2024-11-26 13:51:15</td>
+<td align="left">2024-11-26 13:51:15</td>
+<td align="left">2024-11-26 13:51:29</td>
 <td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</td>
 </tr>
 <tr class="even">
-<td align="right">607</td>
+<td align="right">610</td>
 <td align="left">cpu2mem4gb</td>
+<td align="left">1001-nonmem-run</td>
 <td align="left">matthews</td>
 <td align="left">COMPLETED</td>
-<td align="left">00:00:16</td>
+<td align="left">00:00:14</td>
 <td align="right">1</td>
 <td align="left">/dev/null</td>
-<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-607.out</td>
-<td align="left">2024-11-26 13:43:50</td>
-<td align="left">2024-11-26 13:43:50</td>
-<td align="left">2024-11-26 13:44:06</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-610.out</td>
+<td align="left">2024-11-26 13:52:17</td>
+<td align="left">2024-11-26 13:52:17</td>
+<td align="left">2024-11-26 13:52:31</td>
 <td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</td>
 </tr>
 <tr class="odd">
-<td align="right">608</td>
+<td align="right">611</td>
 <td align="left">cpu2mem4gb</td>
+<td align="left">1001-nonmem-run</td>
+<td align="left">matthews</td>
+<td align="left">COMPLETED</td>
+<td align="left">00:00:15</td>
+<td align="right">1</td>
+<td align="left">/dev/null</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-611.out</td>
+<td align="left">2024-11-26 13:52:40</td>
+<td align="left">2024-11-26 13:52:40</td>
+<td align="left">2024-11-26 13:52:55</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</td>
+</tr>
+<tr class="even">
+<td align="right">612</td>
+<td align="left">cpu2mem4gb</td>
+<td align="left">1001-nonmem-run</td>
 <td align="left">matthews</td>
 <td align="left">PENDING</td>
 <td align="left">00:00:00</td>
 <td align="right">1</td>
 <td align="left">/dev/null</td>
-<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-608.out</td>
-<td align="left">2024-11-26 13:46:41</td>
+<td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-612.out</td>
+<td align="left">2024-11-26 13:54:48</td>
 <td align="left">1970-01-01 00:00:00</td>
 <td align="left">1970-01-01 00:00:00</td>
 <td align="left">/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log</td>
