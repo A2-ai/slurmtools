@@ -9,7 +9,15 @@
 <!-- badges: end -->
 
 `slurmtools` is a collection of utility functions suitable for
-interacting with slurm and submitting nonmem jobs.
+interacting with slurm and submitting nonmem jobs. There are three main
+functions of `slurmtools`
+
+1.  `submit_slurm_jobs` - submits a job to slurm via `sbatch`. The job
+    is defined by a template file that is filled in during the call of
+    this function
+2.  `get_slurm_jobs` - gives a tibble of currently runing jobs via
+    `squeue`.
+3.  `cancel_slurm_jobs` - cancels a running slurm job via `scancel`.
 
 ## Installation
 
@@ -21,29 +29,50 @@ You can install the development version of slurmtools from
 pak::pkg_install("a2-ai/slurmtools")
 ```
 
-## Example
+## Examples
 
-This is a basic example which shows you how to solve a common problem:
+This block sets up options used by slurmtools:
 
 ``` r
+nonmem = file.path(here::here(), "vignettes", "model", "nonmem")
+
+options('slurmtools.submission_root' = file.path(nonmem, "submission-log"))
+options('slurmtools.bbi_config_path' = file.path(nonmem, "bbi.yaml"))
+options('slurmtools.slurm_job_template_path' = file.path(nonmem, 'slurm-job-bbi.tmpl'))
+
 library(slurmtools)
-#> ── Needed slurmtools options ───────────────────────────────────────────────────
-#> ✖ option('slurmtools.slurm_job_template_path') is not set.
-#> ✖ option('slurmtools.submission_root') is not set.
-#> ✖ option('slurmtools.bbi_config_path') is not set.
-#> ℹ Please set all options for job submission defaults to work.
-knitr::kable(get_slurm_jobs())
+#> 
+#> 
+#> ── Set slurmtools options ──────────────────────────────────────────────────────
+#> ✔ slurmtools.slurm_jon_template_path: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/slurm-job-bbi.tmpl
+#> ✔ slurmtools.submission_root: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log
+#> ✔ slurmtools.bbi_config_path: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml
+```
+
+``` r
+mod_number <- "1001"
+mod <- bbr::read_model(file.path(nonmem, mod_number))
+
+submit_slurm_job(mod, overwrite = TRUE)
+#> $status
+#> [1] 0
+#> 
+#> $stdout
+#> [1] "Submitted batch job 608\n"
+#> 
+#> $stderr
+#> [1] ""
+#> 
+#> $timeout
+#> [1] FALSE
+```
+
+``` r
+knitr::kable(get_slurm_jobs(user = 'matthews'))
 ```
 
 | job_id | partition | user_name | job_state | time | cpus | standard_input | standard_output | submit_time | start_time | end_time | current_working_directory |
 |---:|:---|:---|:---|:---|---:|:---|:---|:---|:---|:---|:---|
-| 87 | cpu2mem4gb | matthews | FAILED | 2 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-87.out | 2024-11-01 15:20:24 | 2024-11-01 15:20:24 | 2024-11-01 15:20:26 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
-| 88 | cpu2mem4gb | matthews | COMPLETED | 1 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-88.out | 2024-11-01 15:20:24 | 2024-11-01 15:20:25 | 2024-11-01 15:20:26 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
-| 89 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-89.out | 2024-11-01 15:20:25 | 2024-11-01 15:20:26 | 2024-11-01 15:20:26 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
-| 90 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-90.out | 2024-11-01 15:20:25 | 2024-11-01 15:24:06 | 2024-11-01 15:24:06 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
-| 91 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log/slurm-91.out | 2024-11-01 15:20:26 | 2024-11-01 15:20:26 | 2024-11-01 15:20:26 | /tmp/Rtmpci7qIE/Rbuild1941e339490588/slurmtools/vignettes/model/nonmem/submission-log |
-| 92 | cpu2mem4gb | matthews | FAILED | 1 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-92.out | 2024-11-01 15:20:49 | 2024-11-01 15:24:06 | 2024-11-01 15:24:07 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
-| 93 | cpu2mem4gb | matthews | COMPLETED | 0 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-93.out | 2024-11-01 15:20:50 | 2024-11-01 15:20:52 | 2024-11-01 15:20:52 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
-| 94 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-94.out | 2024-11-01 15:20:51 | 2024-11-01 15:20:52 | 2024-11-01 15:20:52 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
-| 95 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-95.out | 2024-11-01 15:20:52 | 2024-11-01 15:20:52 | 2024-11-01 15:20:52 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
-| 96 | cpu2mem4gb | matthews | FAILED | 0 secs | 1 | /dev/null | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log/slurm-96.out | 2024-11-01 15:20:54 | 2024-11-01 15:20:55 | 2024-11-01 15:20:55 | /tmp/Rtmp5NSlzS/file187f0067bd515b/slurmtools.Rcheck/vign_test/slurmtools/vignettes/model/nonmem/submission-log |
+| 606 | cpu2mem4gb | matthews | FAILED | 00:00:01 | 1 | /dev/null | /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-606.out | 2024-11-26 13:42:50 | 2024-11-26 13:42:50 | 2024-11-26 13:42:51 | /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log |
+| 607 | cpu2mem4gb | matthews | COMPLETED | 00:00:16 | 1 | /dev/null | /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-607.out | 2024-11-26 13:43:50 | 2024-11-26 13:43:50 | 2024-11-26 13:44:06 | /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log |
+| 608 | cpu2mem4gb | matthews | PENDING | 00:00:00 | 1 | /dev/null | /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log/slurm-608.out | 2024-11-26 13:46:41 | 1970-01-01 00:00:00 | 1970-01-01 00:00:00 | /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log |

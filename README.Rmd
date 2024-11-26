@@ -19,7 +19,11 @@ knitr::opts_chunk$set(
 [![R-CMD-check](https://github.com/A2-ai/slurmtools/actions/workflows/RunChecks.yaml/badge.svg)](https://github.com/A2-ai/slurmtools/actions/workflows/RunChecks.yaml)
 <!-- badges: end -->
 
-`slurmtools` is a collection of utility functions suitable for interacting with slurm and submitting nonmem jobs.
+`slurmtools` is a collection of utility functions suitable for interacting with slurm and submitting nonmem jobs. There are three main functions of `slurmtools`
+
+1. `submit_slurm_jobs` - submits a job to slurm via `sbatch`. The job is defined by a template file that is filled in during the call of this function
+2. `get_slurm_jobs` - gives a tibble of currently runing jobs via `squeue`. 
+3. `cancel_slurm_jobs` - cancels a running slurm job via `scancel`.
 
 ## Installation
 
@@ -30,11 +34,26 @@ You can install the development version of slurmtools from [GitHub](https://gith
 pak::pkg_install("a2-ai/slurmtools")
 ```
 
-## Example
+## Examples
+This block sets up options used by slurmtools:
+```{r setup}
+nonmem = file.path(here::here(), "vignettes", "model", "nonmem")
 
-This is a basic example which shows you how to solve a common problem:
+options('slurmtools.submission_root' = file.path(nonmem, "submission-log"))
+options('slurmtools.bbi_config_path' = file.path(nonmem, "bbi.yaml"))
+options('slurmtools.slurm_job_template_path' = file.path(nonmem, 'slurm-job-bbi.tmpl'))
 
-```{r example}
 library(slurmtools)
-knitr::kable(get_slurm_jobs())
+```
+
+```{r submit}
+mod_number <- "1001"
+mod <- bbr::read_model(file.path(nonmem, mod_number))
+
+submit_slurm_job(mod, overwrite = TRUE)
+```
+
+
+```{r get}
+knitr::kable(get_slurm_jobs(user = 'matthews'))
 ```
