@@ -31,6 +31,7 @@ parse_job_to_row <- function(job) {
   tibble::tibble(
     job_id = job$job_id,
     job_state = job_state,
+    job_name = job$name,
     cpus = job$cpus$number,
     partition = job$partition,
     standard_input = job$standard_input,
@@ -55,6 +56,7 @@ parse_jobs_json <- function(.json) {
     empty <- tibble::tibble(
       job_id = "",
       job_state = "",
+      job_name = "",
       cpus = "",
       partition = "",
       standard_input = "",
@@ -105,7 +107,7 @@ get_slurm_jobs <- function(user = NULL){
     )
 
   res_df <- res_df %>%
-    dplyr::select("job_id", "partition", "user_name", "job_state", "time", dplyr::everything())
+    dplyr::select("job_id", "partition", "job_name", "user_name", "job_state", "time", "cpus", dplyr::everything())
 
   if (!is.null(user)) {
     df <- tryCatch(
