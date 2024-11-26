@@ -48,8 +48,9 @@ library(slurmtools)
 #> ✔ slurmtools.submission_root: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/submission-log
 #> ✔ slurmtools.bbi_config_path: /cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml
 ```
-
+This block reads in a nonmem model with bbr and submits the job to slurm:
 ``` r
+library(bbr)
 mod_number <- "1001"
 mod <- bbr::read_model(file.path(nonmem, mod_number))
 
@@ -66,7 +67,7 @@ submit_slurm_job(mod, overwrite = TRUE)
 #> $timeout
 #> [1] FALSE
 ```
-
+This block shows recently submitted and completed jobs:
 ``` r
 knitr::kable(get_slurm_jobs(user = 'matthews'))
 ```
