@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">slurmtools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,6 +68,8 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">slurmtools</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in get(paste0(generic, ".", class), envir = get_method_env()) : </span></span>
+<span><span class="co">#&gt;   object 'type_sum.accel' not found</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Needed slurmtools options</span> ───────────────────────────────────────────────────</span></span>
@@ -132,6 +134,8 @@ messaging.</p>
 <span>  <span class="va">mod</span>, </span>
 <span>  watched_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress"</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  bbi_config_path <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml"</span>,</span>
 <span>  alerter_opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    alerter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="st">'~/.local/bin/snt'</span><span class="op">)</span>, <span class="co">#binary location of nmm,</span></span>
 <span>    command <span class="op">=</span> <span class="st">"slack"</span>,</span>
@@ -139,7 +143,7 @@ messaging.</p>
 <span>    use_stdout <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co">#captures output of snt -- which will include --timestamp aksfl;ajklajl;</span></span>
 <span>    args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>email <span class="op">=</span> <span class="st">"matthews@a2-ai.com"</span>, config <span class="op">=</span> <span class="st">"/cluster-data/user-homes/matthews/.local/bin/slack_notifier_settings.yaml"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in normalizePath("~/.local/bin/snt"):</span></span>
 <span><span class="co">#&gt; path[1]="/home/runner/.local/bin/snt": No such file or directory</span></span></code></pre></div>
 <p>This generates the following toml file:</p>
