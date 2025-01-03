@@ -57,6 +57,10 @@ generate_nmm_config <- function(
     }
   }
 
+  if (length(files_to_track) == 1) {
+    files_to_track <- array(files_to_track, 1)
+  }
+
   toml <- list(
     model_number = model_number,
     files_to_track = files_to_track,
