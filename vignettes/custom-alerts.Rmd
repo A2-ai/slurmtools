@@ -94,7 +94,10 @@ output_dir = '/cluster-data/user-homes/matthews/Packages/slurmtools/model/nonmem
 slurmtools::generate_nmm_config( 
   mod, 
   watched_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem",
-  output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress")
+  output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress",
+  bbi_config_path = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml"
+  )
+
 ```
 
 This updates the `1001.toml` config file to:

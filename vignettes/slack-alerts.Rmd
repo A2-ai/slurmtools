@@ -85,6 +85,8 @@ slurmtools::generate_nmm_config(
   mod, 
   watched_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem",
   output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress",
+  overwrite = TRUE,
+  bbi_config_path = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml",
   alerter_opts = list(
     alerter = normalizePath('~/.local/bin/snt'), #binary location of nmm,
     command = "slack",
@@ -92,7 +94,7 @@ slurmtools::generate_nmm_config(
     use_stdout = TRUE, #captures output of snt -- which will include --timestamp aksfl;ajklajl;
     args = list(email = "matthews@a2-ai.com", config = "/cluster-data/user-homes/matthews/.local/bin/slack_notifier_settings.yaml")
   )
-  )
+)
 ```
 
 This generates the following toml file:
