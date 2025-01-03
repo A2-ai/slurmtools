@@ -14,6 +14,8 @@ generate_nmm_config(
   poll_duration = NULL,
   level = NULL,
   threads = NULL,
+  overwrite = FALSE,
+  bbi_config_path = NULL,
   alerter_opts = list()
 )
 }
@@ -35,6 +37,10 @@ generate_nmm_config(
 \item{level}{What level to log at. Available options are Trace, Debug, Info, Warn, Fatal if left blank, nmm will use Info}
 
 \item{threads}{number of threads if running a parallel job. If left blank nmm will use 1}
+
+\item{overwrite}{bool whether to overwrite existing run.}
+
+\item{bbi_config_path}{the path to bbi.yaml file}
 
 \item{alerter_opts}{a list for setting up an alerter fields needed are alerter, command, message_flag, use_stdout, args (list of additional args to be passed to alerter)}
 }
