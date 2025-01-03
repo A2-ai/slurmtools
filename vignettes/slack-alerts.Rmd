@@ -86,6 +86,7 @@ slurmtools::generate_nmm_config(
   watched_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem",
   output_dir = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/in_progress",
   overwrite = TRUE,
+  files_to_track = c("ext"),
   bbi_config_path = "/cluster-data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml",
   alerter_opts = list(
     alerter = normalizePath('~/.local/bin/snt'), #binary location of nmm,
@@ -128,7 +129,6 @@ submission_nmm <- slurmtools::submit_slurm_job(
   overwrite = TRUE,
   slurm_job_template_path = file.path(nonmem, "slurm-job-nmm.tmpl"),
   slurm_template_opts = list(
-    nmm_exe_path = normalizePath("~/.local/bin/nmm")
   )
 )
 
