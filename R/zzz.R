@@ -12,7 +12,7 @@
 #' }
 toggle_logger <- function(quiet = FALSE) {
   log_level <- c("DEBUG", "INFO", "WARN", "ERROR", "FATAL")
-  verbosity <- Sys.getenv("SLURMTOOLS_VERBOSE", unset = "WARN")
+  verbosity <- toupper(Sys.getenv("SLURMTOOLS_VERBOSE", unset = "WARN"))
   if (!(verbosity %in% log_level)) {
     cat(
       "Invalid verbosity level. Available options are:",
