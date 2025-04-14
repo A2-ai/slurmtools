@@ -11,8 +11,8 @@
 #' cancel_job(243)
 #' }
 cancel_slurm_job <- function(job_id, confirm = TRUE) {
-
-  current_user = if (is.null(Sys.getenv("USER"))) Sys.info()['user'] else Sys.getenv("USER")
+  current_user = if (is.null(Sys.getenv("USER"))) Sys.info()['user'] else
+    Sys.getenv("USER")
 
   jobs <- get_slurm_jobs(user = current_user)
 
@@ -22,7 +22,10 @@ cancel_slurm_job <- function(job_id, confirm = TRUE) {
     }
     message(paste0("Below are the available jobs for you to cancel:"))
     print(get_slurm_jobs(user = current_user))
-    stop(paste0("Please ensure the job id is associated your user_name: ", current_user))
+    stop(paste0(
+      "Please ensure the job id is associated your user_name: ",
+      current_user
+    ))
   }
 
   job_id_filtered <- jobs %>% dplyr::filter(.data$job_id == .env$job_id)
@@ -32,7 +35,11 @@ cancel_slurm_job <- function(job_id, confirm = TRUE) {
 
   if (confirm) {
     continue <- readline(
-      paste0("You are about to cancel job: ", job_id, ". Are you sure you want to cancel? [Y/n]\n")
+      paste0(
+        "You are about to cancel job: ",
+        job_id,
+        ". Are you sure you want to cancel? [Y/n]\n"
+      )
     )
   } else {
     continue <- "Y"
