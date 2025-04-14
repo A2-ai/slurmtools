@@ -288,11 +288,16 @@ submit_slurm_job <-
       slurm_template_opts
     )
     log4r::info(
-      .le$logger,
-      paste0(
-        "filling slurm job template file with: ",
-        paste(template_list, collapse = ",")
+    .le$logger,
+    paste0(
+      "filling slurm job template file with: \n\t",
+      paste(
+        sapply(names(template_list), function(name) {
+          paste0(name, ": ", template_list[[name]])
+        }),
+        collapse = "\n\t"
       )
+    )
     )
 
     template_script <-
