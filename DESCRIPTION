@@ -3,7 +3,8 @@ Title: slurm tooling
 Version: 0.1.3
 Authors@R: c(person("Devin", "Pastoor", , "devin@a2-ai.com", role = c("aut", "cre")),
     person("Jenna", "Elwing", email = "jenna@a2-ai.com", role = "aut"),
-    person("Matthew", "Smith", email = "matthews@a2-ai.com", role = "aut"))
+    person("Matthew", "Smith", email = "matthews@a2-ai.com", role = "aut"),
+    person("Jacob", "Dumbleton", email = "jacob@a2-ai.com", role = "aut"))
 Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Encoding: UTF-8

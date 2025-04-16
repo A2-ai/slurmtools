@@ -48,6 +48,7 @@ Authors:
 \itemize{
   \item Jenna Elwing \email{jenna@a2-ai.com}
   \item Matthew Smith \email{matthews@a2-ai.com}
+  \item Jacob Dumbleton \email{jacob@a2-ai.com}
 }
 
 }
