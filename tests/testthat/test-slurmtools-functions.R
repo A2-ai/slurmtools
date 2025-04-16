@@ -31,3 +31,11 @@ test_that("check_slurm_partitions errors when 100 cpus are requested for cpu32me
 test_that("check_slurm_partitions doesn't error when 2 cpus are requested for cpu2mem4gb", {
   expect_no_error(check_slurm_partitions(2, "cpu2mem4gb"))
 })
+
+test_that("toggle_logger messages what log level you've set", {
+  initial_message <- "logging now at WARN level"
+  expect_message(toggle_logger(), initial_message, fixed = TRUE)
+  Sys.setenv("SLURMTOOLS_VERBOSE" = "debug")
+  new_message <- "logging now at DEBUG level"
+  expect_message(toggle_logger(), new_message, fixed = TRUE)
+})
