@@ -18,17 +18,16 @@
 #' @keywords internal
 submit_nonmem_model <-
   function(
-    .mod,
-    partition = get_slurm_partitions(),
-    ncpu = 1,
-    overwrite = FALSE,
-    dry_run = FALSE,
-    ...,
-    slurm_job_template_path = getOption("slurmtools.slurm_job_template_path"),
-    submission_root = getOption("slurmtools.submission_root"),
-    bbi_config_path = getOption("slurmtools.bbi_config_path"),
-    slurm_template_opts = list()
-  ) {
+      .mod,
+      partition = get_slurm_partitions(),
+      ncpu = 1,
+      overwrite = FALSE,
+      dry_run = FALSE,
+      ...,
+      slurm_job_template_path = getOption("slurmtools.slurm_job_template_path"),
+      submission_root = getOption("slurmtools.submission_root"),
+      bbi_config_path = getOption("slurmtools.bbi_config_path"),
+      slurm_template_opts = list()) {
     lifecycle::deprecate_soft(
       "0.1.0",
       "submit_nonmem_model()",
@@ -168,17 +167,16 @@ submit_nonmem_model <-
 #' @export
 submit_slurm_job <-
   function(
-    .mod,
-    partition = get_slurm_partitions(),
-    ncpu = 1,
-    overwrite = FALSE,
-    dry_run = FALSE,
-    ...,
-    slurm_job_template_path = getOption("slurmtools.slurm_job_template_path"),
-    submission_root = getOption("slurmtools.submission_root"),
-    bbi_config_path = getOption("slurmtools.bbi_config_path"),
-    slurm_template_opts = list()
-  ) {
+      .mod,
+      partition = get_slurm_partitions(),
+      ncpu = 1,
+      overwrite = FALSE,
+      dry_run = FALSE,
+      ...,
+      slurm_job_template_path = getOption("slurmtools.slurm_job_template_path"),
+      submission_root = getOption("slurmtools.submission_root"),
+      bbi_config_path = getOption("slurmtools.bbi_config_path"),
+      slurm_template_opts = list()) {
     log4r::debug(
       .le$logger,
       paste(
@@ -288,16 +286,16 @@ submit_slurm_job <-
       slurm_template_opts
     )
     log4r::info(
-    .le$logger,
-    paste0(
-      "filling slurm job template file with: \n\t",
-      paste(
-        sapply(names(template_list), function(name) {
-          paste0(name, ": ", template_list[[name]])
-        }),
-        collapse = "\n\t"
+      .le$logger,
+      paste0(
+        "filling slurm job template file with: \n\t",
+        paste(
+          sapply(names(template_list), function(name) {
+            paste0(name, ": ", template_list[[name]])
+          }),
+          collapse = "\n\t"
+        )
       )
-    )
     )
 
     template_script <-
