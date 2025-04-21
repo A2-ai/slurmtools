@@ -11,12 +11,15 @@ parse_job_to_row <- function(job) {
   # check options for squeue version
   # alter parsing based on result
 
-  if (package_version(getOption("squeue.version"))[1, 1:2] > package_version("23.02")) {
+  if (
+    package_version(getOption("squeue.version"))[1, 1:2] >
+      package_version("23.02")
+  ) {
     submit_time <- job$submit_time$number
     start_time <- job$start_time$number
     end_time <- job$end_time$number
     ### This is "hacky", it looks like for configuring model the list is 3 {"Running", "Configuring", "Power_up_node"}
-    if (length(job$job_state) == 3){
+    if (length(job$job_state) == 3) {
       job_state <- job$job_state[[2]]
     } else {
       job_state <- job$job_state[[1]]
@@ -82,15 +85,19 @@ parse_jobs_json <- function(.json) {
 #' @examples \dontrun{
 #' get_slurm_jobs()
 #' }
-get_slurm_jobs <- function(user = NULL){
-
+get_slurm_jobs <- function(user = NULL) {
   cmd <- list(cmd = Sys.which("squeue"), args = "--json")
   res <- processx::run(cmd$cmd, args = cmd$args)
   if (res$status != 0) {
     # todo: better handle returning why
-    rlang::abort("unable to get slurm jobs, test what the output would be by running `squeue --json`")
+    rlang::abort(
+      "unable to get slurm jobs, test what the output would be by running `squeue --json`"
+    )
   }
-  res_df <- parse_jobs_json(jsonlite::fromJSON(res$stdout, simplifyVector = FALSE))
+  res_df <- parse_jobs_json(jsonlite::fromJSON(
+    res$stdout,
+    simplifyVector = FALSE
+  ))
   if (all(sapply(res_df, function(column) all(is.na(column) | column == "")))) {
     return(res_df)
   }
@@ -103,11 +110,21 @@ get_slurm_jobs <- function(user = NULL){
         job_state == "RUNNING" ~ round(Sys.time()) - round(start_time),
         job_state == "CONFIGURING" ~ round(Sys.time()) - round(submit_time),
         TRUE ~ round(end_time) - round(start_time)
-      ) %>% hms::as_hms()
+      ) %>%
+        hms::as_hms()
     )
 
   res_df <- res_df %>%
-    dplyr::select("job_id", "partition", "job_name", "user_name", "job_state", "time", "cpus", dplyr::everything())
+    dplyr::select(
+      "job_id",
+      "partition",
+      "job_name",
+      "user_name",
+      "job_state",
+      "time",
+      "cpus",
+      dplyr::everything()
+    )
 
   if (!is.null(user)) {
     df <- tryCatch(

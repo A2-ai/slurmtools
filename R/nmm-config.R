@@ -20,18 +20,18 @@
 #'   generate_nmm_config(.mod)
 #' }
 generate_nmm_config <- function(
-    .mod,
-    model_number = NULL,
-    files_to_track = NULL,
-    tmp_dir = NULL,
-    watched_dir = file.path("model", "nonmem"),
-    output_dir = file.path(watched_dir, "in_progress"),
-    poll_duration = NULL,
-    level = NULL,
-    threads = NULL,
-    overwrite = FALSE,
-    bbi_config_path = NULL,
-    alerter_opts = list()
+  .mod,
+  model_number = NULL,
+  files_to_track = NULL,
+  tmp_dir = NULL,
+  watched_dir = file.path("model", "nonmem"),
+  output_dir = file.path(watched_dir, "in_progress"),
+  poll_duration = NULL,
+  level = NULL,
+  threads = NULL,
+  overwrite = FALSE,
+  bbi_config_path = NULL,
+  alerter_opts = list()
 ) {
   if (is.null(model_number)) {
     model_number <- basename(.mod$absolute_model_path)
@@ -53,7 +53,9 @@ generate_nmm_config <- function(
     if (!is.null(bbi_option_path)) {
       bbi_config_path <- bbi_option_path
     } else {
-      warning("bbi.yaml path not supplied through options('slurmtools.bbi_config_path') or through arguments")
+      warning(
+        "bbi.yaml path not supplied through options('slurmtools.bbi_config_path') or through arguments"
+      )
     }
   }
 
@@ -80,11 +82,14 @@ generate_nmm_config <- function(
 
   if (length(alerter_opts) != 0) {
     if ("args" %in% names(alerter_opts)) {
-      write_file(to_toml(
-        toml,
-        alerter = alerter_opts[names(alerter_opts) != "args"],
-        alerter.args = alerter_opts$args),
-        config_toml_path)
+      write_file(
+        to_toml(
+          toml,
+          alerter = alerter_opts[names(alerter_opts) != "args"],
+          alerter.args = alerter_opts$args
+        ),
+        config_toml_path
+      )
     } else {
       write_file(to_toml(toml, alerter = alerter_opts), config_toml_path)
     }

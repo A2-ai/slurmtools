@@ -1,7 +1,6 @@
 # This is pulled from the rextendr package commit c698bf3
 # https://github.com/extendr/rextendr/blob/main/R/toml_serialization.R
 
-
 #' Convert R `list()` into toml-compatible format.
 #'
 #' [to_toml()] can be used to build `Cargo.toml`.
@@ -31,10 +30,12 @@
 #' # using explicitly set `dim`
 #' to_toml(lib = list(`crate-type` = array("cdylib", 1)))
 #' @noRd
-to_toml <- function(...,
-                    .str_as_literal = TRUE,
-                    .format_int = "%d",
-                    .format_dbl = "%g") {
+to_toml <- function(
+  ...,
+  .str_as_literal = TRUE,
+  .format_int = "%d",
+  .format_dbl = "%g"
+) {
   args <- dots_list(
     ...,
     .preserve_empty = TRUE,
@@ -115,17 +116,17 @@ format_toml <- function(x, ..., .top_level = FALSE) UseMethod("format_toml")
 
 #' @export
 format_toml.default <- function(x, ..., .top_level = FALSE) {
-  cli::cli_abort(c(
-    get_toml_err_msg(),
-    "x" = "{.code {class(x)}} cannot be converted to toml."
-  ), class = "rextendr_error")
+  cli::cli_abort(
+    c(
+      get_toml_err_msg(),
+      "x" = "{.code {class(x)}} cannot be converted to toml."
+    ),
+    class = "rextendr_error"
+  )
 }
 
 #' @export
-format_toml.data.frame <- function(x,
-                                   ...,
-                                   .tbl_name,
-                                   .top_level = FALSE) {
+format_toml.data.frame <- function(x, ..., .tbl_name, .top_level = FALSE) {
   rows <- nrow(x)
   header <- glue("[[{.tbl_name}]]")
   if (rows == 0L) {
@@ -193,10 +194,7 @@ format_toml.NULL <- function(x, ..., .top_level = FALSE) {
   }
 }
 
-format_toml_atomic <- function(x,
-                               ...,
-                               .top_level = FALSE,
-                               .formatter) {
+format_toml_atomic <- function(x, ..., .top_level = FALSE, .formatter) {
   # Cache dimensions because slicing drops attributes
   dims <- dim(x)
   x <- x[!is.na(x)]
@@ -221,10 +219,12 @@ escape_dbl_quotes <- function(x) {
 }
 
 #' @export
-format_toml.character <- function(x,
-                                  ...,
-                                  .str_as_literal = TRUE,
-                                  .top_level = FALSE) {
+format_toml.character <- function(
+  x,
+  ...,
+  .str_as_literal = TRUE,
+  .top_level = FALSE
+) {
   if (isTRUE(.str_as_literal)) {
     .formatter <- ~ glue("'{.x}'")
   } else {
@@ -240,10 +240,12 @@ format_toml.character <- function(x,
 }
 
 #' @export
-format_toml.integer <- function(x,
-                                ...,
-                                .format_int = "%d",
-                                .top_level = FALSE) {
+format_toml.integer <- function(
+  x,
+  ...,
+  .format_int = "%d",
+  .top_level = FALSE
+) {
   format_toml_atomic(
     x,
     ...,
@@ -254,10 +256,7 @@ format_toml.integer <- function(x,
 }
 
 #' @export
-format_toml.double <- function(x,
-                               ...,
-                               .format_dbl = "%g",
-                               .top_level = FALSE) {
+format_toml.double <- function(x, ..., .format_dbl = "%g", .top_level = FALSE) {
   format_toml_atomic(
     x,
     ...,
@@ -268,9 +267,7 @@ format_toml.double <- function(x,
 }
 
 #' @export
-format_toml.logical <- function(x,
-                                ...,
-                                .top_level = FALSE) {
+format_toml.logical <- function(x, ..., .top_level = FALSE) {
   format_toml_atomic(
     x,
     ...,
