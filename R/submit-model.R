@@ -181,9 +181,14 @@ submit_slurm_job <-
   ) {
     log4r::debug(
       .le$logger,
-      paste(
-        "Starting submit_slurm_job for .mod: ",
-        paste(.mod, collapse = ", ")
+      paste0(
+        "Starting submit_slurm_job for .mod:\n\t",
+        paste(
+          sapply(names(.mod), function(name) {
+            paste0(name, ": ", .mod[[name]])
+          }),
+          collapse = "\n\t"
+        )
       )
     )
 
