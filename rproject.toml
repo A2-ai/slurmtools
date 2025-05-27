@@ -14,5 +14,6 @@ dependencies = [
     {name = "slurmtools", dependencies_only = true, path = ".", install_suggestions = true},
     "pkgbuild",
     "pkgdown",
+    "rcmdcheck",
 ]
 
