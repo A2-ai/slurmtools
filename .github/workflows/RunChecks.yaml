@@ -18,8 +18,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          - {os: ubuntu-latest,   r: '4.5'}
+          - {os: ubuntu-latest,   r: '4.4'}
           - {os: ubuntu-latest,   r: '4.3'}
-          - {os: ubuntu-latest,   r: '4.2'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -63,15 +64,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            metrumresearchgroup/mrgmisc
-            metrumresearchgroup/nmrec
-            metrumresearchgroup/bbr
-            any::rcmdcheck
-          needs: check
-
+      - uses: a2-ai/setup-rv@main
+      - name: replace-rversion
+        run: |
+          # we need to replace r_version = "4.x" with the matrixed R version
+          sed -i -E 's|^r_version = "4\.[0-9\.]+"$|r_version = "'"${{ matrix.config.r }}"'"|' rproject.toml
+      - name: rv-plan
+        run: |
+          rv plan
+      - name: rv-sync
+        run: |
+          rv sync
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
