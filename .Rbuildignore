@@ -9,3 +9,6 @@
 ^doc$
 ^Meta$
 ^README\.Rmd$
+^rv$
+^rproject\.toml$
+^rv\.lock$
