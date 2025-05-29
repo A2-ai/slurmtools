@@ -12,3 +12,5 @@
 ^rv$
 ^rproject\.toml$
 ^rv\.lock$
+^\.Rprofile$
+
