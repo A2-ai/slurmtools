@@ -29,6 +29,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
+          r-version: 4.4
 
       - name: Download mocked binaries
         run: |
@@ -58,15 +59,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            metrumresearchgroup/mrgmisc
-            metrumresearchgroup/nmrec
-            metrumresearchgroup/bbr
-            any::pkgdown
-            local::.
-          needs: website
+      - uses: a2-ai/setup-rv@main
+#      - name: replace-rversion
+#        run: |
+#          # we need to replace r_version = "4.x" with the matrixed R version
+#          sed -i -E 's|^r_version = "4\.[0-9\.]+"$|r_version = "'"${{ matrix.config.r }}"'"|' rproject.toml
+      - name: rv-plan
+        run: |
+          rv plan
+      - name: rv-sync
+        run: |
+          rv sync
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
