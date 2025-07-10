@@ -21,7 +21,7 @@ slurmtools_options_message <- function() {
   } else {
     set_options <- c(
       set_options,
-      paste("slurmtools.slurm_jon_template_path:", tmpl_path)
+      paste("slurmtools.slurm_job_template_path:", tmpl_path)
     )
   }
 
