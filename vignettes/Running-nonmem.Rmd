@@ -51,10 +51,6 @@ By default these values are provided to the slurm template file:
 
 -   `model_path` is determined from the `.mod` argument supplied to `submit_slurm_job`
 
--   `config_toml_path` is determined from the `.mod` argument supplied to `submit_slurm_job` and is required to use `nmm` (NONMEM monitor)
-
--   `nmm_exe_path` is determined via `Sys.which("nmm")`
-
 If you need to feed more arguments to the template you simply supply them in the `slurm_template_opts` argument as a list. More on that later.
 
 ``` r
@@ -67,9 +63,7 @@ default_template_list = list(
   project_name = project_name,
   bbi_exe_path = Sys.which("bbi"),
   bbi_config_path = bbi_config_path,
-  model_path = .mod$absolute_model_path,
-  config_toml_path = config_toml_path,
-  nmm_exe_path = Sys.which("nmm")
+  model_path = .mod$absolute_model_path
 )
 ```
 
@@ -262,7 +256,6 @@ for (job in jobs) {
 
 unlink(file.path(nonmem, "1001"), recursive = TRUE)
 unlink(file.path(nonmem, "1001.yaml"))
-unlink(file.path(nonmem, "1001.toml"))
 unlink(file.path(nonmem, "submission-log"), recursive = TRUE)
 unlink(file.path(nonmem, "in_progress"), recursive = TRUE)
 ```

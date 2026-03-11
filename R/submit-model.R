@@ -70,17 +70,6 @@ submit_nonmem_model <-
       fs::dir_delete(.mod$absolute_model_path)
     }
 
-    config_toml_path <- paste0(.mod$absolute_model_path, ".toml")
-    # if (!fs::file_exists(config_toml_path)) {
-    #  rlang::warn(sprintf("config.toml file not found, if submitting the job with nmm this is required. Please run generate_nmm_config()"))
-    # }
-
-    if (is.null(slurm_template_opts$nmm_exe_path)) {
-      nmm_exe_path <- Sys.which("nmm")
-    } else {
-      nmm_exe_path <- slurm_template_opts$nmm_exe_path
-    }
-
     if (is.null(slurm_template_opts$bbi_exe_path)) {
       bbi_exe_path <- Sys.which("bbi")
     } else {
@@ -107,9 +96,7 @@ submit_nonmem_model <-
       project_name = project_name,
       bbi_exe_path = bbi_exe_path,
       bbi_config_path = bbi_config_path,
-      model_path = .mod$absolute_model_path,
-      config_toml_path = config_toml_path,
-      nmm_exe_path = nmm_exe_path
+      model_path = .mod$absolute_model_path
     )
 
     template_list <- c(
@@ -241,18 +228,6 @@ submit_slurm_job <-
       fs::dir_delete(.mod$absolute_model_path)
     }
 
-    config_toml_path <- paste0(.mod$absolute_model_path, ".toml")
-    # if (!fs::file_exists(config_toml_path)) {
-    #  rlang::warn(sprintf("config.toml file not found, if submitting the job with nmm this is required. Please run generate_nmm_config()"))
-    # }
-
-    if (is.null(slurm_template_opts$nmm_exe_path)) {
-      nmm_exe_path <- Sys.which("nmm")
-    } else {
-      nmm_exe_path <- slurm_template_opts$nmm_exe_path
-    }
-    log4r::debug(.le$logger, paste0("nmm_exe_path set to: ", nmm_exe_path))
-
     if (is.null(slurm_template_opts$bbi_exe_path)) {
       bbi_exe_path <- Sys.which("bbi")
     } else {
@@ -283,9 +258,7 @@ submit_slurm_job <-
       project_name = project_name,
       bbi_exe_path = bbi_exe_path,
       bbi_config_path = bbi_config_path,
-      model_path = .mod$absolute_model_path,
-      config_toml_path = config_toml_path,
-      nmm_exe_path = nmm_exe_path
+      model_path = .mod$absolute_model_path
     )
 
     template_list <- c(

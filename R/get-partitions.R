@@ -117,17 +117,40 @@ get_slurm_partitions <- function(cache = TRUE) {
 #' @param ncpu number of CPUs requested by user
 #' @param partition name of partition requested by user
 #' @param avail_cpus_table table of partitions with respective number of CPUs and memory
+#' @param underutilized whether the advice is for an underutilization warning
 #' @param cache optional argument to forgo caching
 #'
-#' @return string with suggestion upon [check_slurm_partitions()] error
+#' @return string with suggestion upon [check_slurm_partitions()] error or warning
 #'
 #' @keywords internal
 #' @noRd
-partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
+partition_advice <- function(
+  ncpu,
+  partition,
+  avail_cpus_table,
+  underutilized = FALSE,
+  cache
+) {
   sorted_table <- avail_cpus_table %>%
     dplyr::filter(CPUS >= ncpu) %>%
     dplyr::arrange(CPUS, MEMORY)
   list_of_partitions <- sorted_table$PARTITION
+
+  if (underutilized) {
+    suggested_partitions <- list_of_partitions[list_of_partitions != partition]
+    if (length(suggested_partitions) > 1) {
+      return(glue::glue(
+        "Consider increasing `ncpu` or using a smaller partition\nYou might try {suggested_partitions[1]} or {suggested_partitions[2]}"
+      ))
+    } else if (length(suggested_partitions) == 1) {
+      return(glue::glue(
+        "Consider increasing `ncpu` or using a smaller partition\nYou might try {suggested_partitions[1]}"
+      ))
+    } else {
+      return("Consider increasing `ncpu`")
+    }
+  }
+
   if (length(list_of_partitions) > 1) {
     return(glue::glue(
       "You might try {list_of_partitions[1]} or {list_of_partitions[2]}"
@@ -182,5 +205,17 @@ check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
     rlang::abort(glue::glue(
       "number of requested CPUs ({ncpu}) greater than number of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"
     ))
+  } else if (ncpu < 0.5 * num_avail_cpus) {
+    suggestion <- partition_advice(
+      ncpu,
+      partition,
+      avail_cpus_table,
+      underutilized = TRUE,
+      cache
+    )
+    rlang::warn(glue::glue(
+      "number of requested CPUs ({ncpu}) less than 50% of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"
+    ))
   }
+
 }
