@@ -3,3 +3,5 @@ docs
 /doc/
 /Meta/
 .Rhistory
+
+.DS_Store

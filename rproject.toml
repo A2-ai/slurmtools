@@ -1,0 +1,17 @@
+use_lockfile = false
+
+[project]
+name = "hyperion"
+r_version = "4.5"
+
+repositories = [
+  { alias = "prism", url = "https://prism.dev.a2-ai.cloud/rpkgs/stratus/2026-01-14" },
+]
+
+dependencies = [
+  "devtools",
+  { name = "covr", install_suggestions = true },
+  #{ name = "starlightr", git = "https://github.com/a2-ai/starlightr", branch = "main" },
+
+  { name = "slurmtools", path = ".", dependencies_only = true, install_suggestions = true },
+]

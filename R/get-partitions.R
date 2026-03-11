@@ -29,10 +29,10 @@ run_sinfo <- function() {
 
 #' get table of each partition's number of CPUs and memory
 #'
-#' * gets the raw string output from [run_sinfo()]
+#' * gets the raw string output from `run_sinfo()`
 #' * converts to a data frame
 #' * reorders and removes `*` from default partition with
-#'    [process_slurm_partitions()]
+#'    `process_slurm_partitions()`
 #'
 #' @param cache optional argument to forgo caching
 #' @return the processed table of each partition's
@@ -107,7 +107,7 @@ get_slurm_partitions <- function(cache = TRUE) {
 #'
 #' In a call to `submit_slurm_model()`, if the number of requested CPUs exceeds
 #' the number of CPUs available in the requested partition,
-#' [check_slurm_partitions()] errors. <br />
+#' `check_slurm_partitions()` errors. <br />
 #' This function follows up with a message providing one or two suggestions for
 #' the partition with the smallest sufficient number of CPUs and least amount
 #' of memory. <br />
@@ -118,16 +118,39 @@ get_slurm_partitions <- function(cache = TRUE) {
 #' @param partition name of partition requested by user
 #' @param avail_cpus_table table of partitions with respective number of CPUs and memory
 #' @param cache optional argument to forgo caching
+#' @param underutilized whether the advice is for an underutilization warning
 #'
-#' @return string with suggestion upon [check_slurm_partitions()] error
+#' @return string with suggestion upon `check_slurm_partitions()` error or warning
 #'
 #' @keywords internal
 #' @noRd
-partition_advice <- function(ncpu, partition, avail_cpus_table, cache) {
+partition_advice <- function(
+  ncpu,
+  partition,
+  avail_cpus_table,
+  cache,
+  underutilized = FALSE
+) {
   sorted_table <- avail_cpus_table %>%
     dplyr::filter(CPUS >= ncpu) %>%
     dplyr::arrange(CPUS, MEMORY)
   list_of_partitions <- sorted_table$PARTITION
+
+  if (underutilized) {
+    suggested_partitions <- list_of_partitions[list_of_partitions != partition]
+    if (length(suggested_partitions) > 1) {
+      return(glue::glue(
+        "Consider increasing `ncpu` or using a smaller partition\nYou might try {suggested_partitions[1]} or {suggested_partitions[2]}"
+      ))
+    } else if (length(suggested_partitions) == 1) {
+      return(glue::glue(
+        "Consider increasing `ncpu` or using a smaller partition\nYou might try {suggested_partitions[1]}"
+      ))
+    } else {
+      return("Consider increasing `ncpu`")
+    }
+  }
+
   if (length(list_of_partitions) > 1) {
     return(glue::glue(
       "You might try {list_of_partitions[1]} or {list_of_partitions[2]}"
@@ -182,5 +205,17 @@ check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
     rlang::abort(glue::glue(
       "number of requested CPUs ({ncpu}) greater than number of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"
     ))
+  } else if (ncpu < 0.5 * num_avail_cpus) {
+    suggestion <- partition_advice(
+      ncpu,
+      partition,
+      avail_cpus_table,
+      cache = cache,
+      underutilized = TRUE
+    )
+    rlang::warn(glue::glue(
+      "number of requested CPUs ({ncpu}) less than 50% of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"
+    ))
   }
+
 }

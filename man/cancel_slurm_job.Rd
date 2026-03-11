@@ -4,12 +4,12 @@
 \alias{cancel_slurm_job}
 \title{Cancels a running job}
 \usage{
-cancel_slurm_job(job_id, confirm = TRUE)
+cancel_slurm_job(job_id, auto_confirm = FALSE)
 }
 \arguments{
 \item{job_id}{job id to cancel}
 
-\item{confirm}{requires confirmation to cancel job}
+\item{auto_confirm}{does not prompt user before cancelling job}
 }
 \description{
 Cancels a running job

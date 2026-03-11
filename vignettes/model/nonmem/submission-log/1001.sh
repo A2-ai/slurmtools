@@ -1,13 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name="{{job_name}}"
+#SBATCH --job-name="1001-nonmem-run"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task={{ncpu}}
-#SBATCH --partition={{partition}}
-#SBATCH --account={{project_name}}
+#SBATCH --cpus-per-task=1
+#SBATCH --partition=cpu2mem4gb
+#SBATCH --account=slurmtools
 
-#{{project_path}}
-
+#/data/user-homes/matthews/Packages/slurmtools
 unset SLURM_NODELIST
 unset SLURM_JOB_NODELIST
 unset SLURM_JOB_USER
@@ -40,12 +39,8 @@ unset SLURM_JOB_NAME
 unset SLURM_JOB_GID
 unset SLURM_JOB_NODELIST
 
-{{#ntfy}}
-curl -d "Starting model run: {{job_name}} $JOBID" ntfy.sh/{{ntfy}}
-{{/ntfy}}
+# submit_nonmem_model uses the whisker package to populate template files
+# https://github.com/edwindj/whisker
 
-{{nmm_exe_path}} -c {{config_toml_path}} run
 
-{{#ntfy}}
-curl -d "Finished model run: {{job_name}} $JOBID" ntfy.sh/{{ntfy}}
-{{/ntfy}}
+/usr/local/bin/bbi nonmem run local /data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/1001.mod --config /data/user-homes/matthews/Packages/slurmtools/vignettes/model/nonmem/bbi.yaml

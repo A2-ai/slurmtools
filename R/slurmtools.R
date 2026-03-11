@@ -6,8 +6,6 @@
 #' @section submitting jobs:
 #' \itemize{
 #'  \item \code{\link{submit_slurm_job}}: Submits a job to slurm
-#'  \item \code{\link{generate_nmm_config}}: Generates a NONMEMmonitor config
-#'  file
 #' }
 #'
 #' @section monitoring jobs:
@@ -47,20 +45,9 @@
 #' @importFrom glue glue_collapse
 #' @importFrom jsonlite fromJSON
 #' @importFrom processx run
-#' @importFrom purrr discard
-#' @importFrom purrr flatten_chr
 #' @importFrom purrr list_rbind
 #' @importFrom purrr map
-#' @importFrom purrr map_if
-#' @importFrom purrr map2
-#' @importFrom purrr map2_chr
 #' @importFrom rlang abort
-#' @importFrom rlang as_function
-#' @importFrom rlang dots_list
-#' @importFrom rlang is_atomic
-#' @importFrom rlang is_missing
-#' @importFrom rlang names2
-#' @importFrom stringi stri_replace_all_regex
 #' @importFrom tibble tibble
 #' @importFrom utils globalVariables
 #' @importFrom utils read.table

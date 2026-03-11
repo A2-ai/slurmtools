@@ -13,8 +13,6 @@ on slurm.
 
 \itemize{
 \item \code{\link{submit_slurm_job}}: Submits a job to slurm
-\item \code{\link{generate_nmm_config}}: Generates a NONMEMmonitor config
-file
 }
 }
 
