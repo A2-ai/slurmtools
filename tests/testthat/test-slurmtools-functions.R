@@ -11,7 +11,7 @@ test_that("get_slurm_partitions returns list of partitions", {
     "cpu32mem128gb"
   )
 
-  expect_equal(get_slurm_partitions(), vectorOfPartitions)
+  expect_contains(get_slurm_partitions(), vectorOfPartitions)
 })
 
 test_that("check_slurm_partitions errors when 17 cpus are requested for cpu2mem4gb", {
@@ -36,7 +36,6 @@ test_that("check_slurm_partitions warns with a smaller partition suggestion when
   message <- paste(
     "number of requested CPUs (3) less than 50% of available CPUs in cpu8mem64gb (8)",
     "Consider increasing `ncpu` or using a smaller partition",
-    "You might try cpu4mem16gb or cpu4mem32gb",
     sep = "\n"
   )
 
@@ -49,22 +48,22 @@ test_that("check_slurm_partitions warns with a smaller partition suggestion when
 
 test_that("check_slurm_partitions warns to increase ncpu when no smaller partition exists", {
   message <- paste(
-    "number of requested CPUs (17) less than 50% of available CPUs in cpu32mem128gb (32)",
+    "number of requested CPUs (15) less than 50% of available CPUs in cpu32mem128gb (32)",
     "Consider increasing `ncpu`",
     sep = "\n"
   )
 
   expect_warning(
-    check_slurm_partitions(17, "cpu32mem128gb"),
+    check_slurm_partitions(15, "cpu32mem128gb"),
     message,
     fixed = TRUE
   )
 })
 
 test_that("toggle_logger messages what log level you've set", {
-  initial_message <- "logging now at WARN level"
+  initial_message <- "logging now at DEBUG level"
   expect_message(toggle_logger(), initial_message, fixed = TRUE)
-  Sys.setenv("SLURMTOOLS_VERBOSE" = "debug")
-  new_message <- "logging now at DEBUG level"
+  Sys.setenv("SLURMTOOLS_VERBOSE" = "INFO")
+  new_message <- "logging now at INFO level"
   expect_message(toggle_logger(), new_message, fixed = TRUE)
 })

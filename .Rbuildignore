@@ -6,6 +6,20 @@
 ^docs$
 ^pkgdown$
 
+^rv$
+^rproject\.toml$
+^rv\.lock$
+^\.Rprofile$
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^pharos\.toml$
+^lefthook\.yaml$
+^\.vscode$
+^\.claude$
+
+
+^Meta$
 ^doc$
 ^Meta$
 ^README\.Rmd$

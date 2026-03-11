@@ -117,8 +117,8 @@ get_slurm_partitions <- function(cache = TRUE) {
 #' @param ncpu number of CPUs requested by user
 #' @param partition name of partition requested by user
 #' @param avail_cpus_table table of partitions with respective number of CPUs and memory
-#' @param underutilized whether the advice is for an underutilization warning
 #' @param cache optional argument to forgo caching
+#' @param underutilized whether the advice is for an underutilization warning
 #'
 #' @return string with suggestion upon [check_slurm_partitions()] error or warning
 #'
@@ -128,8 +128,8 @@ partition_advice <- function(
   ncpu,
   partition,
   avail_cpus_table,
-  underutilized = FALSE,
-  cache
+  cache,
+  underutilized = FALSE
 ) {
   sorted_table <- avail_cpus_table %>%
     dplyr::filter(CPUS >= ncpu) %>%
