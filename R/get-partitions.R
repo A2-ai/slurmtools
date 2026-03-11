@@ -29,10 +29,10 @@ run_sinfo <- function() {
 
 #' get table of each partition's number of CPUs and memory
 #'
-#' * gets the raw string output from [run_sinfo()]
+#' * gets the raw string output from `run_sinfo()`
 #' * converts to a data frame
 #' * reorders and removes `*` from default partition with
-#'    [process_slurm_partitions()]
+#'    `process_slurm_partitions()`
 #'
 #' @param cache optional argument to forgo caching
 #' @return the processed table of each partition's
@@ -107,7 +107,7 @@ get_slurm_partitions <- function(cache = TRUE) {
 #'
 #' In a call to `submit_slurm_model()`, if the number of requested CPUs exceeds
 #' the number of CPUs available in the requested partition,
-#' [check_slurm_partitions()] errors. <br />
+#' `check_slurm_partitions()` errors. <br />
 #' This function follows up with a message providing one or two suggestions for
 #' the partition with the smallest sufficient number of CPUs and least amount
 #' of memory. <br />
@@ -120,7 +120,7 @@ get_slurm_partitions <- function(cache = TRUE) {
 #' @param cache optional argument to forgo caching
 #' @param underutilized whether the advice is for an underutilization warning
 #'
-#' @return string with suggestion upon [check_slurm_partitions()] error or warning
+#' @return string with suggestion upon `check_slurm_partitions()` error or warning
 #'
 #' @keywords internal
 #' @noRd
@@ -210,8 +210,8 @@ check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
       ncpu,
       partition,
       avail_cpus_table,
-      underutilized = TRUE,
-      cache
+      cache = cache,
+      underutilized = TRUE
     )
     rlang::warn(glue::glue(
       "number of requested CPUs ({ncpu}) less than 50% of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"
