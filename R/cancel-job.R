@@ -1,7 +1,7 @@
 #' Cancels a running job
 #'
 #' @param job_id job id to cancel
-#' @param confirm requires confirmation to cancel job
+#' @param auto_confirm does not prompt user before cancelling job
 #' @importFrom rlang .data
 #' @importFrom rlang .env
 #'
@@ -10,7 +10,7 @@
 #' @examples \dontrun{
 #' cancel_job(243)
 #' }
-cancel_slurm_job <- function(job_id, confirm = TRUE) {
+cancel_slurm_job <- function(job_id, auto_confirm = FALSE) {
   current_user <- if (is.null(Sys.getenv("USER"))) {
     Sys.info()["user"]
   } else {
@@ -38,7 +38,7 @@ cancel_slurm_job <- function(job_id, confirm = TRUE) {
     stop(paste0("Job: ", job_id, " is not running"))
   }
 
-  if (confirm) {
+  if (!auto_confirm) {
     continue <- readline(
       paste0(
         "You are about to cancel job: ",
@@ -46,6 +46,7 @@ cancel_slurm_job <- function(job_id, confirm = TRUE) {
         ". Are you sure you want to cancel? [Y/n]\n"
       )
     )
+    continue <- toupper(continue)
   } else {
     continue <- "Y"
   }

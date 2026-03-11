@@ -61,7 +61,7 @@ test_that("check_slurm_partitions warns to increase ncpu when no smaller partiti
 })
 
 test_that("toggle_logger messages what log level you've set", {
-  initial_message <- "logging now at DEBUG level"
+  initial_message <- "logging now at WARN level"
   expect_message(toggle_logger(), initial_message, fixed = TRUE)
   Sys.setenv("SLURMTOOLS_VERBOSE" = "INFO")
   new_message <- "logging now at INFO level"
