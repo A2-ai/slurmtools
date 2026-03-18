@@ -313,6 +313,19 @@ jobs:
       # NOTE: remember to add steps for each OS type required 
       # by the platforms specified in the matrix.
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      
+      - name: rv-sysdeps-install
+        run: |
+          dnf install -y epel-release
+          MISSING_DEPS="$(rv sysdeps --only-absent --ignore 'libgit2_1.7-devel' --ignore pandoc) libgit2-devel libcurl-devel"
+          if [ -n "$MISSING_DEPS" ]; then
+            echo "Found missing system dependencies:"
+            echo "$MISSING_DEPS"
+            echo "Installing..."
+            echo "$MISSING_DEPS" | xargs dnf install -y
+          else
+            echo "All system dependencies are present"
+          fi
 
       - name: replace-rversion
         run: |
