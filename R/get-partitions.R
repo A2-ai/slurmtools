@@ -206,16 +206,8 @@ check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
       "number of requested CPUs ({ncpu}) greater than number of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"
     ))
   } else if (ncpu < 0.5 * num_avail_cpus) {
-    suggestion <- partition_advice(
-      ncpu,
-      partition,
-      avail_cpus_table,
-      cache = cache,
-      underutilized = TRUE
-    )
     rlang::warn(glue::glue(
       "number of requested CPUs ({ncpu}) less than 50% of available CPUs in {partition} ({num_avail_cpus})\nAlternative submission strategies may result in more optimized resource usage."
     ))
   }
-
 }

@@ -84,7 +84,7 @@ jobs:
           # FIXME: Add more entries for other platforms into the JSON array.
           MATRIX_JSON=$(cat <<'JSON'
           [
-            {"os":"ubuntu-latest", "os_name":"almalinux8", "arch":"x86_64", "r":"4.4", "container":"almalinux:8"}
+            {"os":"ubuntu-latest", "os_name":"almalinux8", "arch":"x86_64", "r":"4.4", "container":"almalinux:8"},
             {"os":"ubuntu-latest", "os_name":"almalinux8", "arch":"x86_64", "r":"4.3", "container":"almalinux:8"}
           ]
           JSON
