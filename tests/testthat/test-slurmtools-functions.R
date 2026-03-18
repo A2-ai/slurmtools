@@ -35,7 +35,7 @@ test_that("check_slurm_partitions doesn't error when 2 cpus are requested for cp
 test_that("check_slurm_partitions warns with a smaller partition suggestion when underutilized", {
   message <- paste(
     "number of requested CPUs (3) less than 50% of available CPUs in cpu8mem64gb (8)",
-    "Consider increasing `ncpu` or using a smaller partition",
+    "Alternative submission strategies may result in more optimized resource usage.",
     sep = "\n"
   )
 
@@ -49,7 +49,7 @@ test_that("check_slurm_partitions warns with a smaller partition suggestion when
 test_that("check_slurm_partitions warns to increase ncpu when no smaller partition exists", {
   message <- paste(
     "number of requested CPUs (15) less than 50% of available CPUs in cpu32mem128gb (32)",
-    "Consider increasing `ncpu`",
+    "Alternative submission strategies may result in more optimized resource usage.",
     sep = "\n"
   )
 
