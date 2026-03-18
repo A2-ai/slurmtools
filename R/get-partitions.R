@@ -214,7 +214,7 @@ check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
       underutilized = TRUE
     )
     rlang::warn(glue::glue(
-      "number of requested CPUs ({ncpu}) less than 50% of available CPUs in {partition} ({num_avail_cpus})\n{suggestion}"
+      "number of requested CPUs ({ncpu}) less than 50% of available CPUs in {partition} ({num_avail_cpus})\nAlternative submission strategies may result in more optimized resource usage."
     ))
   }
 
