@@ -205,8 +205,19 @@ submit_slurm_job <-
       )
       log4r::debug(
         .le$logger,
-        paste0("converted mod to bbi structrue: ", paste(.mod, collapse = ","))
+        paste0("converted mod to bbi structure: ", paste(.mod, collapse = ","))
       )
+    }
+
+    if (file.exists(paste0(.mod$absolute_model_path, ".mod"))) {
+      model_path <- paste0(.mod$absolute_model_path, ".mod")
+    } else if (file.exists(paste0(.mod$absolute_model_path, ".ctl"))) {
+      model_path <- paste0(.mod$absolute_model_path, ".ctl")
+    } else {
+      rlang::abort(sprintf(
+        "no .mod or .ctl file found at: `%s`",
+        .mod$absolute_model_path
+      ))
     }
     parallel <- if (ncpu > 1) {
       TRUE
@@ -258,7 +269,7 @@ submit_slurm_job <-
       project_name = project_name,
       bbi_exe_path = bbi_exe_path,
       bbi_config_path = bbi_config_path,
-      model_path = .mod$absolute_model_path
+      model_path = model_path
     )
 
     template_list <- c(
