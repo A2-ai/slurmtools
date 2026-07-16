@@ -23,3 +23,14 @@
 ^doc$
 ^Meta$
 ^README\.Rmd$
+^generics-plan\.qmd$
+^generics-plan\.html$
+^generics-plan_files$
+^workflow-demo\.qmd$
+^workflow-demo\.html$
+^workflow-demo_files$
+^after-dispatch\.qmd$
+^after-dispatch\.html$
+^after-dispatch_files$
+^manual-test$
+^air\.toml$

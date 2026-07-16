@@ -5,3 +5,12 @@ docs
 .Rhistory
 
 .DS_Store
+
+# accessory docs (design notes / demos) and their quarto render artifacts —
+# not part of the package. README.md / LICENSE.md / man/*.Rd stay tracked.
+/*.qmd
+/*.html
+*_files/
+
+# manual submission-testing scratch — all products of the step-by-step guide
+/manual-test/

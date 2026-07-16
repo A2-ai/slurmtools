@@ -28,10 +28,11 @@ Imports:
     hms,
     lifecycle,
     log4r
-Suggests: 
+Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    bbr
+    bbr,
+    hyperion
 Config/testthat/edition: 3
 VignetteBuilder: knitr
