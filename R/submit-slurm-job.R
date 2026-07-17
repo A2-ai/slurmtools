@@ -1,186 +1,135 @@
 #' Submit a job to slurm
 #'
 #' @description
-#' `submit_slurm_job()` submits work to slurm. It is an S3 generic: what runs
-#' on the compute node is decided by what you pass as `.mod`, and each method
-#' only exposes the inputs relevant to that kind of job.
+#' `submit_slurm_job()` submits work to slurm. It is an S3 generic: what runs on
+#' the compute node is decided by what you pass as `input`, and the command
+#' itself lives in the job **template**, not in this function. Each method's only
+#' job is to assemble the variables a template needs and hand them to the shared
+#' renderer.
 #'
-#' * a **bbr/bbi model** (`bbi_nonmem_model`) runs NONMEM via
-#'   `bbi nonmem run local`, rendered into the slurm job template at
-#'   `options('slurmtools.slurm_job_template_path')`.
+#' * a **bbr/bbi model** (`bbi_nonmem_model`) renders the shipped
+#'   `nonmem-bbi` template (a `bbi nonmem run local` command).
 #' * a **hyperion model** (`hyperion_nonmem_model`) is handed to
-#'   `hyperion::submit_model_to_slurm()`, which carries its own job template
-#'   and discovers the pharos config itself, so no slurmtools options are
-#'   involved.
-#' * a **path to a script** submits a general (non-NONMEM) job based on the
-#'   file extension: `.R` runs `Rscript <path>`, `.qmd` runs
-#'   `quarto render <path>`. The command is rendered into a general job
-#'   template shipped with slurmtools. A bare path is *not* treated as a
-#'   NONMEM model; pass `.mod`/`.ctl` files through `bbr::read_model()` or
-#'   `hyperion::read_model()` instead.
-#' * **any other file type** (say, a python script) can be submitted by
-#'   supplying your own `slurm_job_template_path` that lays out the tool
-#'   call, plus whatever variables it needs via `slurm_template_opts`.
-#'   With a user-supplied template, `submit_slurm_job()`'s job drops to
-#'   filling in the template and calling `sbatch` on it. In addition to
-#'   your `slurm_template_opts`, the template can use `{{partition}}`,
-#'   `{{ncpu}}`, `{{parallel}}`, `{{job_name}}`, `{{script_path}}`,
-#'   `{{workdir}}`, `{{project_path}}`, `{{project_name}}`, and
-#'   `{{command}}` (built for `.R`/`.qmd`, or passed as
-#'   `slurm_template_opts$command`).
+#'   `hyperion::submit_model_to_slurm()`, which carries its own template and
+#'   discovers its own pharos config.
+#' * a **path to a script** renders a shipped template by file extension:
+#'   `.R` uses `rscript`, `.qmd` uses `quarto`. A character vector of paths
+#'   submits one job per path. A bare `.mod`/`.ctl` path is refused — read it
+#'   into a model object first.
+#' * **any other file type** can be submitted by supplying your own `template`
+#'   plus whatever variables it needs via `template_opts`.
 #'
-#' @param .mod what to submit: a `bbi_nonmem_model`, a
-#'   `hyperion_nonmem_model`, or a path to a `.R`/`.qmd` file
-#' @param partition name of the partition to submit the job to
-#' @param ncpu number of cpus to run the job against
-#' @param overwrite whether to overwrite existing model results
+#' Shipped templates live in `system.file("templates", package = "slurmtools")`
+#' and are based on the pharos slurm template. Besides your own `template_opts`,
+#' a template can use `{{job_name}}`, `{{partition}}`, `{{ncpu}}`,
+#' `{{parallel}}`, `{{num_mpi_cpus}}`, `{{account}}`, `{{log_path}}`, and
+#' (per method) `{{model_path}}`, `{{config_path}}`, or `{{script_path}}`.
+#'
+#' @param input what to submit: a `bbi_nonmem_model`, a `hyperion_nonmem_model`,
+#'   or a path (or vector of paths) to a `.R`/`.qmd` file
+#' @param partition name of the partition to submit to. The default passes the
+#'   full set of partitions; the first is selected.
+#' @param ncpu number of cpus to request
 #' @param dry_run return the command that would have been invoked, without
 #'   invoking
+#' @param submission_root directory to track job submission scripts and output
+#' @param template path to a whisker job template. `NULL` selects the shipped
+#'   template for the input type; supplying your own is the power-user contract.
+#' @param template_opts named list of extra variables to render into the
+#'   template (these override the values a method builds)
 #' @param ... additional arguments passed on to the method; the bbi and
 #'   character methods forward them to [processx::run()], the hyperion method
 #'   forwards them to `hyperion::submit_model_to_slurm()`
-#' @param slurm_job_template_path path to slurm job template. The bbi method
-#'   defaults to `options('slurmtools.slurm_job_template_path')`; the
-#'   character method defaults to the general template shipped with slurmtools
-#' @param submission_root directory to track job submission scripts and output
-#' @param bbi_config_path path to bbi.yaml file for bbi configuration
-#' @param slurm_template_opts named list of extra variables to render into the
-#'   job template (and overrides for `bbi_exe_path`, `project_path`,
-#'   `project_name`)
 #'
-#' @return for a dry run, a list with the sbatch command, its args, the
-#'   rendered script, and the partition; otherwise the result of submitting
-#'   the job
+#' @return for a dry run, a list with the sbatch command, its args, the rendered
+#'   script, and the partition; otherwise the result of submitting the job
 #'
 #' @examples
 #' \dontrun{
 #' # a bbr model
 #' mod <- bbr::read_model("model/nonmem/1001")
-#' submit_slurm_job(mod, partition = "cpu2mem4gb", ncpu = 2)
+#' submit_slurm_job(mod, partition = "cpu2mem4gb", ncpu = 2, config_path = "bbi.yaml")
 #'
 #' # a hyperion model
 #' mod <- hyperion::read_model("model/nonmem/1001.ctl")
 #' submit_slurm_job(mod, partition = "cpu2mem4gb", ncpu = 2)
 #'
-#' # a plain R script or quarto document
+#' # scripts (one or many)
 #' submit_slurm_job("scripts/big-simulation.R", ncpu = 4)
-#' submit_slurm_job("reports/analysis.qmd")
+#' submit_slurm_job(c("a.R", "b.R", "report.qmd"))
 #'
-#' # anything else: bring your own template laying out the tool call
+#' # anything else: bring your own template laying out the command
 #' submit_slurm_job(
 #'   "scripts/train.py",
-#'   slurm_job_template_path = "slurm-python.tmpl",
-#'   slurm_template_opts = list(conda_env = "ml")
+#'   template = "slurm-python.tmpl",
+#'   template_opts = list(conda_env = "ml")
 #' )
 #' }
 #' @export
-submit_slurm_job <- function(.mod, ...) {
+submit_slurm_job <- function(
+  input,
+  partition = get_slurm_partitions(),
+  ncpu = 1,
+  dry_run = FALSE,
+  submission_root = getOption("slurmtools.submission_root"),
+  template = NULL,
+  template_opts = list(),
+  ...
+) {
   UseMethod("submit_slurm_job")
 }
 
 #' @rdname submit_slurm_job
+#' @param config_path path to the engine config file (e.g. `bbi.yaml` or a
+#'   pharos config); defaults to `options('slurmtools.config_path')` so it can be
+#'   set globally or scoped with [withr::with_options()]
+#' @param account slurm account (`--account`); omitted when `NULL`
+#' @param overwrite whether to delete existing model results first
 #' @export
 submit_slurm_job.bbi_nonmem_model <- function(
-  .mod,
+  input,
   partition = get_slurm_partitions(),
   ncpu = 1,
-  overwrite = FALSE,
   dry_run = FALSE,
-  ...,
-  slurm_job_template_path = getOption("slurmtools.slurm_job_template_path"),
   submission_root = getOption("slurmtools.submission_root"),
-  bbi_config_path = getOption("slurmtools.bbi_config_path"),
-  slurm_template_opts = list()
+  template = NULL,
+  template_opts = list(),
+  ...,
+  config_path = getOption("slurmtools.config_path"),
+  account = NULL,
+  overwrite = FALSE
 ) {
-  log4r::debug(
-    .le$logger,
-    paste0(
-      "Starting submit_slurm_job for .mod:\n\t",
-      paste(
-        sapply(names(.mod), function(name) {
-          paste0(name, ": ", .mod[[name]])
-        }),
-        collapse = "\n\t"
-      )
-    )
-  )
-
-  partition <- validate_partition(partition, ncpu)
-  model_path <- .mod$absolute_model_path
+  partition <- validate_partition(partition)
+  check_slurm_partitions(ncpu, partition)
+  model_path <- input$absolute_model_path
 
   if (overwrite && fs::dir_exists(model_path)) {
-    log4r::info(
-      .le$logger,
-      paste0("Deleting existing directory: ", model_path)
-    )
+    log4r::info(.le$logger, paste0("Deleting existing directory: ", model_path))
     fs::dir_delete(model_path)
   }
 
-  parallel <- ncpu > 1
-
-  if (is.null(slurm_template_opts$bbi_exe_path)) {
-    bbi_exe_path <- Sys.which("bbi")
-  } else {
-    bbi_exe_path <- slurm_template_opts$bbi_exe_path
-  }
-  log4r::debug(.le$logger, paste0("bbi_exe_path set to: ", bbi_exe_path))
-
-  if (is.null(slurm_template_opts$project_path)) {
-    project_path <- here::here()
-  } else {
-    project_path <- slurm_template_opts$project_path
-  }
-  log4r::debug(.le$logger, paste0("project_path set to: ", project_path))
-
-  if (is.null(slurm_template_opts$project_name)) {
-    project_name <- here::here() %>% basename()
-  } else {
-    project_name <- slurm_template_opts$project_name
-  }
-  log4r::debug(.le$logger, paste0("project_name set to: ", project_name))
-
-  command <- if (parallel) {
-    sprintf(
-      "%s nonmem run local %s.mod --parallel --threads=%s --config %s",
-      bbi_exe_path,
-      model_path,
-      ncpu,
-      bbi_config_path
-    )
-  } else {
-    sprintf(
-      "%s nonmem run local %s.mod --config %s",
-      bbi_exe_path,
-      model_path,
-      bbi_config_path
+  if (is.null(template)) {
+    template <- system.file(
+      "templates",
+      "nonmem-bbi.tmpl",
+      package = "slurmtools"
     )
   }
 
-  default_template_list <- list(
-    partition = partition,
-    parallel = parallel,
-    ncpu = ncpu,
-    job_name = sprintf("%s-nonmem-run", basename(model_path)),
-    project_path = project_path,
-    project_name = project_name,
-    bbi_exe_path = bbi_exe_path,
-    bbi_config_path = bbi_config_path,
-    model_path = model_path,
-    command = command,
-    workdir = dirname(model_path)
-  )
-
-  template_list <- c(
-    default_template_list,
-    slurm_template_opts
+  job_name <- sprintf("%s-nonmem-run", basename(model_path))
+  template_list <- utils::modifyList(
+    c(
+      base_template_list(job_name, partition, ncpu, account, submission_root),
+      list(model_path = model_path, config_path = config_path)
+    ),
+    template_opts
   )
 
   submit_rendered_job(
     template_list = template_list,
     script_name = sprintf("%s.sh", basename(model_path)),
-    slurm_job_template_path = slurm_job_template_path,
+    template = template,
     submission_root = submission_root,
-    render_dir = dirname(model_path),
     dry_run = dry_run,
     ...
   )
@@ -189,31 +138,33 @@ submit_slurm_job.bbi_nonmem_model <- function(
 #' @rdname submit_slurm_job
 #' @export
 submit_slurm_job.hyperion_nonmem_model <- function(
-  .mod,
+  input,
   partition = get_slurm_partitions(),
   ncpu = 1,
-  overwrite = FALSE,
   dry_run = FALSE,
-  ...
+  submission_root = getOption("slurmtools.submission_root"),
+  template = NULL,
+  template_opts = list(),
+  ...,
+  overwrite = FALSE
 ) {
   if (!requireNamespace("hyperion", quietly = TRUE)) {
     rlang::abort(
       "the hyperion package must be installed to submit hyperion models"
     )
   }
-  partition <- validate_partition(partition, ncpu)
+  partition <- validate_partition(partition)
+  check_slurm_partitions(ncpu, partition)
 
   log4r::debug(
     .le$logger,
-    paste0(
-      "delegating hyperion model submission to hyperion::submit_model_to_slurm"
-    )
+    "delegating hyperion model submission to hyperion::submit_model_to_slurm"
   )
 
-  # hyperion carries its own job template and discovers the pharos config
-  # itself, so no slurmtools template/config options apply here
+  # hyperion carries its own template and discovers its own pharos config, so
+  # slurmtools' template/submission_root/template_opts do not apply here.
   hyperion::submit_model_to_slurm(
-    .mod,
+    input,
     overwrite = overwrite,
     dry_run = dry_run,
     ncpu = ncpu,
@@ -225,119 +176,78 @@ submit_slurm_job.hyperion_nonmem_model <- function(
 #' @rdname submit_slurm_job
 #' @export
 submit_slurm_job.character <- function(
-  .mod,
+  input,
   partition = get_slurm_partitions(),
   ncpu = 1,
   dry_run = FALSE,
-  ...,
-  slurm_job_template_path = NULL,
   submission_root = getOption("slurmtools.submission_root"),
-  slurm_template_opts = list()
+  template = NULL,
+  template_opts = list(),
+  ...,
+  account = NULL
 ) {
-  if (length(.mod) != 1) {
-    rlang::abort("`.mod` must be a single file path")
+  # a vector of paths submits one job per path
+  if (length(input) > 1) {
+    return(lapply(input, function(one) {
+      submit_slurm_job(
+        one,
+        partition = partition,
+        ncpu = ncpu,
+        dry_run = dry_run,
+        submission_root = submission_root,
+        template = template,
+        template_opts = template_opts,
+        account = account,
+        ...
+      )
+    }))
   }
-  if (!fs::file_exists(.mod)) {
-    rlang::abort(sprintf("no such file: `%s`", .mod))
+
+  if (!fs::file_exists(input)) {
+    rlang::abort(sprintf("no such file: `%s`", input))
   }
 
-  script_path <- fs::path_abs(.mod)
-  ext <- tolower(fs::path_ext(script_path))
+  ext <- tolower(fs::path_ext(input))
+  if (ext %in% c("mod", "ctl")) {
+    rlang::abort(c(
+      sprintf("`%s` is a bare NONMEM control stream, not a submittable object", input),
+      i = "read it into a model object first, then submit that:",
+      i = "bbr::read_model() or hyperion::read_model()"
+    ))
+  }
 
-  # a user-supplied template is the power-user contract: they lay out the
-  # tool call and any variables themselves (via slurm_template_opts), and
-  # submit_slurm_job only fills in the template and calls sbatch on it
-  custom_template <- !is.null(slurm_job_template_path)
+  partition <- validate_partition(partition)
+  check_slurm_partitions(ncpu, partition)
 
-  command <- slurm_template_opts$command
-  if (is.null(command)) {
-    command <- switch(
+  if (is.null(template)) {
+    template <- switch(
       ext,
-      r = sprintf("%s %s", Sys.which("Rscript"), script_path),
-      qmd = sprintf("%s render %s", Sys.which("quarto"), script_path),
-      mod = ,
-      ctl = if (custom_template) {
-        NULL
-      } else {
-        rlang::abort(
-          c(
-            sprintf(
-              "a bare path is not treated as a NONMEM model: `%s`",
-              .mod
-            ),
-            i = "read it first, then submit the model object:",
-            i = "bbr::read_model() or hyperion::read_model()"
-          )
-        )
-      },
-      if (custom_template) {
-        NULL
-      } else {
-        rlang::abort(
-          c(
-            sprintf(
-              "don't know how to submit a `.%s` file to slurm (supported: .R, .qmd)",
-              ext
-            ),
-            i = "for other file types, supply your own slurm_job_template_path laying out the tool call"
-          )
-        )
-      }
-    )
-  }
-  log4r::debug(
-    .le$logger,
-    paste0(
-      "command set to: ",
-      if (is.null(command)) "<laid out in template>" else command
-    )
-  )
-
-  partition <- validate_partition(partition, ncpu)
-
-  if (!custom_template) {
-    slurm_job_template_path <- system.file(
-      "templates",
-      "slurm-job-generic.tmpl",
-      package = "slurmtools"
+      r = system.file("templates", "rscript.tmpl", package = "slurmtools"),
+      qmd = system.file("templates", "quarto.tmpl", package = "slurmtools"),
+      rlang::abort(c(
+        sprintf(
+          "don't know how to submit a `.%s` file (supported: .R, .qmd)",
+          ext
+        ),
+        i = "for other file types, supply your own `template` laying out the command"
+      ))
     )
   }
 
-  if (is.null(slurm_template_opts$project_path)) {
-    project_path <- here::here()
-  } else {
-    project_path <- slurm_template_opts$project_path
-  }
-
-  if (is.null(slurm_template_opts$project_name)) {
-    project_name <- here::here() %>% basename()
-  } else {
-    project_name <- slurm_template_opts$project_name
-  }
-
-  default_template_list <- list(
-    partition = partition,
-    parallel = ncpu > 1,
-    ncpu = ncpu,
-    job_name = basename(script_path),
-    project_path = project_path,
-    project_name = project_name,
-    script_path = script_path,
-    workdir = dirname(script_path)
-  )
-  default_template_list$command <- command
-
-  template_list <- c(
-    default_template_list,
-    slurm_template_opts
+  job_name <- basename(input)
+  template_list <- utils::modifyList(
+    c(
+      base_template_list(job_name, partition, ncpu, account, submission_root),
+      list(script_path = input)
+    ),
+    template_opts
   )
 
   submit_rendered_job(
     template_list = template_list,
-    script_name = sprintf("%s.sh", basename(script_path)),
-    slurm_job_template_path = slurm_job_template_path,
+    script_name = sprintf("%s.sh", job_name),
+    template = template,
     submission_root = submission_root,
-    render_dir = dirname(script_path),
     dry_run = dry_run,
     ...
   )
@@ -345,14 +255,44 @@ submit_slurm_job.character <- function(
 
 #' @rdname submit_slurm_job
 #' @export
-submit_slurm_job.default <- function(.mod, ...) {
-  rlang::abort(
-    c(
-      sprintf(
-        "don't know how to submit an object of class <%s> to slurm",
-        paste(class(.mod), collapse = "/")
-      ),
-      i = "supply a bbr model, a hyperion model, or a path to a .R/.qmd file"
-    )
+submit_slurm_job.default <- function(input, ...) {
+  rlang::abort(c(
+    sprintf(
+      "don't know how to submit an object of class <%s> to slurm",
+      paste(class(input), collapse = "/")
+    ),
+    i = "supply a bbr model, a hyperion model, or a path to a .R/.qmd file"
+  ))
+}
+
+#' Assemble the template variables common to every shipped template
+#'
+#' The bbi and character methods need the same core set of whisker variables;
+#' this keeps that shape defined in one place. Method-specific values
+#' (`model_path`, `config_path`, `script_path`, …) are layered on by the caller.
+#'
+#' @param job_name job name, also used to derive the log path
+#' @param partition resolved partition name
+#' @param ncpu number of cpus requested (drives `parallel` / `num_mpi_cpus`)
+#' @param account slurm account, or `NULL`
+#' @param submission_root directory the job log is written under
+#' @return a flat named list of the shared template variables
+#' @keywords internal
+#' @noRd
+base_template_list <- function(
+  job_name,
+  partition,
+  ncpu,
+  account,
+  submission_root
+) {
+  list(
+    job_name = job_name,
+    partition = partition,
+    ncpu = ncpu,
+    parallel = ncpu > 1,
+    num_mpi_cpus = ncpu,
+    account = account,
+    log_path = file.path(submission_root, sprintf("%s.out", job_name))
   )
 }

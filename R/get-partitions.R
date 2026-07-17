@@ -165,10 +165,67 @@ partition_advice <- function(
 }
 
 
-#' throws error if the number of requested CPUs exceeds the number of CPUs available in the requested partition
+#' load the (cached) partition / cpu / memory table
+#'
+#' Shared by [get_slurm_partitions()]-adjacent helpers so the cache-lookup lives
+#' in one place.
+#'
+#' @param cache optional argument to forgo caching
+#' @return the processed partition table
+#' @keywords internal
+#' @noRd
+cached_partition_table <- function(cache = TRUE) {
+  # if get_slurm_partitions has already run (which it usually has), the table
+  # will be cached
+  if (cache) {
+    if (is.null(partition_cache[["partition_by_cpu"]])) {
+      partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu(cache)
+    }
+    partition_cache[["partition_by_cpu"]]
+  } else {
+    lookup_partitions_by_cpu()
+  }
+}
+
+#' resolve and validate the requested partition
+#'
+#' Resolves the `partition = get_slurm_partitions()` default (the whole vector of
+#' partitions, of which the first / smallest is taken) and confirms the choice is
+#' a real partition. This is the *validate* half; [check_slurm_partitions()] is
+#' the *check* half that confirms a requested cpu count fits the resolved
+#' partition.
+#'
+#' @param partition name of the partition, or the vector of available partitions
+#' @param cache optional argument to forgo caching
+#' @return the single, validated partition name
+#' @keywords internal
+#' @noRd
+validate_partition <- function(partition, cache = TRUE) {
+  avail_cpus_table <- cached_partition_table(cache)
+
+  if (is.null(partition)) {
+    rlang::abort("no partition selected")
+  }
+  if (length(partition) > 1) {
+    partition <- partition[[1]]
+  }
+  if (!partition %in% avail_cpus_table$PARTITION) {
+    rlang::abort(glue::glue(
+      "`{partition}` is not an available partition.\nAvailable: {toString(avail_cpus_table$PARTITION)}"
+    ))
+  }
+
+  partition
+}
+
+#' check the requested cpu count against the resolved partition
+#'
+#' Errors if the number of requested CPUs exceeds the partition's CPUs, and warns
+#' if the request uses less than half of them (underutilization). Expects
+#' `partition` to already be resolved and validated by [validate_partition()].
 #'
 #' @param ncpu number of CPUs requested by user
-#' @param partition name of partition requested by user
+#' @param partition name of the (already-validated) partition
 #' @param cache optional argument to forgo caching
 #'
 #' @keywords internal
@@ -183,16 +240,7 @@ partition_advice <- function(
 #' check_slurm_partitions(2, "cpu2mem4gb")
 #' }
 check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
-  # if get_slurm_partitions has already run (which it definitely has),
-  # the table will be cached
-  avail_cpus_table <- if (cache) {
-    if (is.null(partition_cache[["partition_by_cpu"]])) {
-      partition_cache[["partition_by_cpu"]] <- lookup_partitions_by_cpu(cache)
-    }
-    partition_cache[["partition_by_cpu"]]
-  } else {
-    lookup_partitions_by_cpu()
-  }
+  avail_cpus_table <- cached_partition_table(cache)
 
   # look up # of cpus in partition from table
   num_avail_cpus <- avail_cpus_table[
@@ -210,4 +258,6 @@ check_slurm_partitions <- function(ncpu, partition, cache = TRUE) {
       "number of requested CPUs ({ncpu}) less than 50% of available CPUs in {partition} ({num_avail_cpus})\nAlternative submission strategies may result in more optimized resource usage."
     ))
   }
+
+  invisible(partition)
 }

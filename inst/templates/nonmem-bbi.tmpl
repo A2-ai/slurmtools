@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH --job-name="{{job_name}}"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task={{ncpu}}
+#SBATCH --partition={{partition}}
+{{#account}}
+#SBATCH --account={{account}}
+{{/account}}
+#SBATCH --output={{log_path}}
+
+{{#parallel}}
+exec bbi nonmem run local {{model_path}}.mod --parallel --threads={{ncpu}} --config {{config_path}}
+{{/parallel}}
+{{^parallel}}
+exec bbi nonmem run local {{model_path}}.mod --config {{config_path}}
+{{/parallel}}
