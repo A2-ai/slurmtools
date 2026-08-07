@@ -23,3 +23,9 @@
 ^doc$
 ^Meta$
 ^README\.Rmd$
+^WORK-SUMMARY\.md$
+^air\.toml$
+^manual-test$
+^[^/]+\.qmd$
+^[^/]+\.html$
+^[^/]+_files$

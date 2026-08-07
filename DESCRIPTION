@@ -22,7 +22,6 @@ Imports:
     utils,
     whisker,
     withr,
-    here,
     cli,
     hms,
     log4r
@@ -31,6 +30,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     bbr,
+    here,
     hyperion
 Config/testthat/edition: 3
 VignetteBuilder: knitr
