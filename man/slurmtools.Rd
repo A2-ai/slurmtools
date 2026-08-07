@@ -44,6 +44,7 @@ partitions a user can submit jobs to.
 
 Authors:
 \itemize{
+  \item Devin Pastoor \email{devin@a2-ai.com}
   \item Jenna Elwing \email{jenna@a2-ai.com}
   \item Matthew Smith \email{matthews@a2-ai.com}
   \item Jacob Dumbleton \email{jacob@a2-ai.com}

@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --job-name="{{job_name}}"
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task={{ncpu}}
+#SBATCH --partition={{partition}}
+{{#account}}
+#SBATCH --account={{account}}
+{{/account}}
+#SBATCH --output={{log_path}}
+
+{{rscript_exe_path}} {{script_path}}

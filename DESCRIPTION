@@ -9,7 +9,6 @@ Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports: 
     brio,
     dplyr,
@@ -23,15 +22,16 @@ Imports:
     utils,
     whisker,
     withr,
-    here,
     cli,
     hms,
-    lifecycle,
     log4r
-Suggests: 
+Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    bbr
+    bbr,
+    here,
+    hyperion
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

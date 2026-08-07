@@ -11,20 +11,7 @@ slurmtools_options_message <- function() {
   set_options <- c()
   unset_options <- c()
 
-  # Check for each used options
-  tmpl_path <- getOption('slurmtools.slurm_job_template_path')
-  if (is.null(tmpl_path)) {
-    unset_options <- c(
-      unset_options,
-      "options('slurmtools.slurm_job_template_path') is not set."
-    )
-  } else {
-    set_options <- c(
-      set_options,
-      paste("slurmtools.slurm_jon_template_path:", tmpl_path)
-    )
-  }
-
+  # Check for each used option
   root <- getOption('slurmtools.submission_root')
   if (is.null(root)) {
     unset_options <- c(
@@ -33,19 +20,6 @@ slurmtools_options_message <- function() {
     )
   } else {
     set_options <- c(set_options, paste("slurmtools.submission_root:", root))
-  }
-
-  bbi_config <- getOption("slurmtools.bbi_config_path")
-  if (is.null(bbi_config)) {
-    unset_options <- c(
-      unset_options,
-      "options('slurmtools.bbi_config_path') is not set."
-    )
-  } else {
-    set_options <- c(
-      set_options,
-      paste("slurmtools.bbi_config_path:", bbi_config)
-    )
   }
 
   #format .onAttach message

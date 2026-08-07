@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --job-name="{{job_name}}"
+#SBATCH --nodes=1
+{{#parallel}}
+#SBATCH --ntasks={{num_mpi_cpus}}
+#SBATCH --cpus-per-task=1
+{{/parallel}}
+{{^parallel}}
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+{{/parallel}}
+#SBATCH --partition={{partition}}
+{{#account}}
+#SBATCH --account={{account}}
+{{/account}}
+#SBATCH --output={{log_path}}
+
+{{#parallel}}
+pharos nonmem --config-file={{config_path}} run {{model_path}} {{run_flags}} --parallel --num-mpi-cpus {{num_mpi_cpus}}
+{{/parallel}}
+{{^parallel}}
+pharos nonmem --config-file={{config_path}} run {{model_path}} {{run_flags}}
+{{/parallel}}
