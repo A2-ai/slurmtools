@@ -119,7 +119,15 @@ Shipped templates live in \code{system.file("templates", package = "slurmtools")
 and are based on the pharos slurm template. Besides your own \code{template_opts},
 a template can use \code{{{job_name}}}, \code{{{partition}}}, \code{{{ncpu}}},
 \code{{{parallel}}}, \code{{{num_mpi_cpus}}}, \code{{{account}}}, \code{{{log_path}}}, and
-(per method) \code{{{model_path}}}, \code{{{config_path}}}, or \code{{{script_path}}}.
+(per method) \code{{{model_path}}}, \code{{{config_path}}}, \code{{{bbi_exe_path}}},
+\code{{{rscript_exe_path}}}, \code{{{quarto_exe_path}}}, or \code{{{script_path}}}.
+
+When a shipped template is selected, its \verb{*_exe_path} variable is resolved
+at submit time to the absolute path \code{Sys.which()} finds, so the rendered
+script names the exact binary that will run; submission errors early if the
+tool cannot be found. Supplying \code{template_opts = list(bbi_exe_path = ...)}
+(etc.) skips the lookup. With your own \code{template}, set any \verb{*_exe_path}
+you use via \code{template_opts}.
 }
 \examples{
 \dontrun{

@@ -19,13 +19,26 @@ local_stub_sbatch <- function(env = parent.frame()) {
   stub_dir
 }
 
+local_stub_bin <- function(name, env = parent.frame()) {
+  # a stub tool on the PATH so Sys.which() resolution is deterministic and
+  # works on machines (like CI) where the real tool is not installed
+  stub_dir <- withr::local_tempdir(.local_envir = env)
+  path <- file.path(stub_dir, name)
+  brio::write_file("#!/bin/bash\n", path)
+  fs::file_chmod(path, "0755")
+  withr::local_path(stub_dir, action = "prefix", .local_envir = env)
+  path
+}
+
 test_that("a .R path renders the shipped rscript template", {
   local_submission_root()
+  rscript <- local_stub_bin("Rscript")
   script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
 
   cmd <- submit_slurm_job(script, partition = "cpu2mem4gb", dry_run = TRUE)
 
-  expect_match(cmd$template_script, "exec Rscript", fixed = TRUE)
+  # the exe is the absolute path resolved at submit time
+  expect_match(cmd$template_script, sprintf("\n%s", rscript), fixed = TRUE)
   expect_match(cmd$template_script, script, fixed = TRUE)
   expect_match(cmd$template_script, "#SBATCH --partition=cpu2mem4gb", fixed = TRUE)
   # no unset block anymore
@@ -36,16 +49,18 @@ test_that("a .R path renders the shipped rscript template", {
 
 test_that("a .qmd path renders the shipped quarto template", {
   local_submission_root()
+  quarto <- local_stub_bin("quarto")
   script <- withr::local_tempfile(fileext = ".qmd", lines = "# a report")
 
   cmd <- submit_slurm_job(script, partition = "cpu2mem4gb", dry_run = TRUE)
 
-  expect_match(cmd$template_script, "exec quarto render", fixed = TRUE)
+  expect_match(cmd$template_script, sprintf("\n%s render", quarto), fixed = TRUE)
   expect_match(cmd$template_script, script, fixed = TRUE)
 })
 
 test_that("paths are passed through untouched (no absolute-path massaging)", {
   local_submission_root()
+  rscript <- local_stub_bin("Rscript")
   work <- withr::local_tempdir()
   withr::local_dir(work)
   fs::dir_create("scripts")
@@ -54,11 +69,17 @@ test_that("paths are passed through untouched (no absolute-path massaging)", {
   cmd <- submit_slurm_job("scripts/sim.R", partition = "cpu2mem4gb", dry_run = TRUE)
 
   # the relative path the caller gave is what lands in the command
-  expect_match(cmd$template_script, "exec Rscript scripts/sim.R", fixed = TRUE)
+  expect_match(
+    cmd$template_script,
+    sprintf("\n%s scripts/sim.R", rscript),
+    fixed = TRUE
+  )
 })
 
 test_that("a character vector submits one job per path", {
   local_submission_root()
+  local_stub_bin("Rscript")
+  local_stub_bin("quarto")
   a <- withr::local_tempfile(fileext = ".R", lines = "1")
   b <- withr::local_tempfile(fileext = ".qmd", lines = "# b")
 
@@ -89,7 +110,7 @@ test_that("relative submission_root and template are tolerated (no dir switch)",
   fs::dir_create("subroot")
   fs::dir_create("scripts")
   brio::write_file("print('hi')\n", "scripts/sim.R")
-  brio::write_file("#!/bin/bash\nexec Rscript {{script_path}}\n", "job.tmpl")
+  brio::write_file("#!/bin/bash\nRscript {{script_path}}\n", "job.tmpl")
 
   res <- submit_slurm_job(
     "scripts/sim.R",
@@ -198,6 +219,7 @@ test_that("submit_slurm_job.default rejects unknown classes", {
 
 test_that("a bbi model renders the shipped bbi template", {
   local_submission_root()
+  local_stub_bin("bbi")
   model_dir <- withr::local_tempdir()
   mod <- structure(
     list(absolute_model_path = file.path(model_dir, "1001")),
@@ -217,6 +239,62 @@ test_that("a bbi model renders the shipped bbi template", {
   expect_match(cmd$template_script, "--parallel --threads=2", fixed = TRUE)
   expect_match(cmd$template_script, "--config /opt/bbi/bbi.yaml", fixed = TRUE)
   expect_match(cmd$template_script, "1001-nonmem-run", fixed = TRUE)
+})
+
+test_that("bbi_exe_path resolves at submit time and is overridable", {
+  local_submission_root()
+  bbi <- local_stub_bin("bbi")
+  model_dir <- withr::local_tempdir()
+  mod <- structure(
+    list(absolute_model_path = file.path(model_dir, "1001")),
+    class = c("bbi_nonmem_model", "bbi_base_model", "bbi_model", "list")
+  )
+
+  cmd <- submit_slurm_job(
+    mod,
+    partition = "cpu2mem4gb",
+    dry_run = TRUE,
+    config_path = "bbi.yaml"
+  )
+  expect_match(
+    cmd$template_script,
+    sprintf("\n%s nonmem run local", bbi),
+    fixed = TRUE
+  )
+
+  cmd <- submit_slurm_job(
+    mod,
+    partition = "cpu2mem4gb",
+    dry_run = TRUE,
+    config_path = "bbi.yaml",
+    template_opts = list(bbi_exe_path = "/opt/custom/bbi")
+  )
+  expect_match(
+    cmd$template_script,
+    "\n/opt/custom/bbi nonmem run local",
+    fixed = TRUE
+  )
+})
+
+test_that("submission fails fast when the tool is not on the PATH", {
+  local_submission_root()
+  get_slurm_partitions() # warm the partition cache before PATH is emptied
+  empty_dir <- withr::local_tempdir()
+  withr::local_envvar(c(PATH = empty_dir))
+  mod <- structure(
+    list(absolute_model_path = "1001"),
+    class = c("bbi_nonmem_model", "list")
+  )
+
+  expect_error(
+    submit_slurm_job(
+      mod,
+      partition = "cpu2mem4gb",
+      dry_run = TRUE,
+      config_path = "bbi.yaml"
+    ),
+    "could not find `bbi` on the PATH"
+  )
 })
 
 test_that("hyperion models require the hyperion package", {

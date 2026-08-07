@@ -23,7 +23,15 @@
 #' and are based on the pharos slurm template. Besides your own `template_opts`,
 #' a template can use `{{job_name}}`, `{{partition}}`, `{{ncpu}}`,
 #' `{{parallel}}`, `{{num_mpi_cpus}}`, `{{account}}`, `{{log_path}}`, and
-#' (per method) `{{model_path}}`, `{{config_path}}`, or `{{script_path}}`.
+#' (per method) `{{model_path}}`, `{{config_path}}`, `{{bbi_exe_path}}`,
+#' `{{rscript_exe_path}}`, `{{quarto_exe_path}}`, or `{{script_path}}`.
+#'
+#' When a shipped template is selected, its `*_exe_path` variable is resolved
+#' at submit time to the absolute path `Sys.which()` finds, so the rendered
+#' script names the exact binary that will run; submission errors early if the
+#' tool cannot be found. Supplying `template_opts = list(bbi_exe_path = ...)`
+#' (etc.) skips the lookup. With your own `template`, set any `*_exe_path`
+#' you use via `template_opts`.
 #'
 #' @param input what to submit: a `bbi_nonmem_model`, a `hyperion_nonmem_model`,
 #'   or a path (or vector of paths) to a `.R`/`.qmd` file
@@ -108,19 +116,24 @@ submit_slurm_job.bbi_nonmem_model <- function(
     fs::dir_delete(model_path)
   }
 
+  exe_vars <- list()
   if (is.null(template)) {
     template <- system.file(
       "templates",
       "nonmem-bbi.tmpl",
       package = "slurmtools"
     )
+    if (is.null(template_opts$bbi_exe_path)) {
+      exe_vars$bbi_exe_path <- resolve_exe_path("bbi")
+    }
   }
 
   job_name <- sprintf("%s-nonmem-run", basename(model_path))
   template_list <- utils::modifyList(
     c(
       base_template_list(job_name, partition, ncpu, account, submission_root),
-      list(model_path = model_path, config_path = config_path)
+      list(model_path = model_path, config_path = config_path),
+      exe_vars
     ),
     template_opts
   )
@@ -219,6 +232,7 @@ submit_slurm_job.character <- function(
   partition <- validate_partition(partition)
   check_slurm_partitions(ncpu, partition)
 
+  exe_vars <- list()
   if (is.null(template)) {
     template <- switch(
       ext,
@@ -232,13 +246,19 @@ submit_slurm_job.character <- function(
         i = "for other file types, supply your own `template` laying out the command"
       ))
     )
+    exe_var <- switch(ext, r = "rscript_exe_path", qmd = "quarto_exe_path")
+    exe_cmd <- switch(ext, r = "Rscript", qmd = "quarto")
+    if (is.null(template_opts[[exe_var]])) {
+      exe_vars[[exe_var]] <- resolve_exe_path(exe_cmd)
+    }
   }
 
   job_name <- basename(input)
   template_list <- utils::modifyList(
     c(
       base_template_list(job_name, partition, ncpu, account, submission_root),
-      list(script_path = input)
+      list(script_path = input),
+      exe_vars
     ),
     template_opts
   )
@@ -263,6 +283,32 @@ submit_slurm_job.default <- function(input, ...) {
     ),
     i = "supply a bbr model, a hyperion model, or a path to a .R/.qmd file"
   ))
+}
+
+#' Resolve a tool to the absolute path the rendered script will invoke
+#'
+#' The shipped templates name the exact binary — resolved at submit time on
+#' the submitting host — rather than trusting the compute node's PATH.
+#' Failing here beats submitting a script that dies on the node.
+#'
+#' @param exe command name to resolve, e.g. `"bbi"` or `"Rscript"`
+#' @return the absolute path `Sys.which()` found
+#' @keywords internal
+#' @noRd
+resolve_exe_path <- function(exe) {
+  path <- unname(Sys.which(exe))
+  if (!nzchar(path)) {
+    rlang::abort(c(
+      sprintf("could not find `%s` on the PATH", exe),
+      i = sprintf(
+        "install %s, or point at a binary via `template_opts = list(%s_exe_path = \"/path/to/%s\")`",
+        exe,
+        tolower(exe),
+        exe
+      )
+    ))
+  }
+  path
 }
 
 #' Assemble the template variables common to every shipped template

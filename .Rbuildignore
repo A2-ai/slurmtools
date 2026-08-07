@@ -24,6 +24,7 @@
 ^Meta$
 ^README\.Rmd$
 ^WORK-SUMMARY\.md$
+^PR-EVIDENCE\.md$
 ^air\.toml$
 ^manual-test$
 ^[^/]+\.qmd$

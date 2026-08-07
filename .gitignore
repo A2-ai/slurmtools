@@ -14,3 +14,7 @@ docs
 
 # manual submission-testing scratch — all products of the step-by-step guide
 /manual-test/
+
+# NONMEM outputs from running the vignette model manually (bbi writes them
+# next to the model); the vignette itself runs in R CMD build's temp copy
+/vignettes/model/nonmem/1001/

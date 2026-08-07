@@ -15,10 +15,9 @@
 {{/account}}
 #SBATCH --output={{log_path}}
 
-# Replace the bash process with pharos so SLURM signals go straight to it
 {{#parallel}}
-exec pharos nonmem --config-file={{config_path}} run {{model_path}} {{run_flags}} --parallel --num-mpi-cpus {{num_mpi_cpus}}
+pharos nonmem --config-file={{config_path}} run {{model_path}} {{run_flags}} --parallel --num-mpi-cpus {{num_mpi_cpus}}
 {{/parallel}}
 {{^parallel}}
-exec pharos nonmem --config-file={{config_path}} run {{model_path}} {{run_flags}}
+pharos nonmem --config-file={{config_path}} run {{model_path}} {{run_flags}}
 {{/parallel}}

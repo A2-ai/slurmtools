@@ -9,4 +9,4 @@
 {{/account}}
 #SBATCH --output={{log_path}}
 
-exec Rscript {{script_path}}
+{{rscript_exe_path}} {{script_path}}

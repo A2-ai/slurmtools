@@ -9,4 +9,4 @@
 {{/account}}
 #SBATCH --output={{log_path}}
 
-exec quarto render {{script_path}}
+{{quarto_exe_path}} render {{script_path}}
