@@ -2,152 +2,89 @@
 % Please edit documentation in R/submit-slurm-job.R
 \name{submit_slurm_job}
 \alias{submit_slurm_job}
-\alias{submit_slurm_job.bbi_nonmem_model}
-\alias{submit_slurm_job.hyperion_nonmem_model}
-\alias{submit_slurm_job.character}
-\alias{submit_slurm_job.default}
 \title{Submit a job to slurm}
 \usage{
 submit_slurm_job(
-  input,
+  file,
+  template,
   partition = get_slurm_partitions(),
   ncpu = 1,
-  dry_run = FALSE,
-  submission_root = getOption("slurmtools.submission_root"),
-  template = NULL,
+  account = NULL,
+  submission_root = getOption("slurmtools.submission_root", default = "submission-log"),
   template_opts = list(),
+  dry_run = FALSE,
   ...
 )
-
-\method{submit_slurm_job}{bbi_nonmem_model}(
-  input,
-  partition = get_slurm_partitions(),
-  ncpu = 1,
-  dry_run = FALSE,
-  submission_root = getOption("slurmtools.submission_root"),
-  template = NULL,
-  template_opts = list(),
-  ...,
-  config_path = getOption("slurmtools.config_path"),
-  account = NULL,
-  overwrite = FALSE
-)
-
-\method{submit_slurm_job}{hyperion_nonmem_model}(
-  input,
-  partition = get_slurm_partitions(),
-  ncpu = 1,
-  dry_run = FALSE,
-  submission_root = getOption("slurmtools.submission_root"),
-  template = NULL,
-  template_opts = list(),
-  ...,
-  overwrite = FALSE
-)
-
-\method{submit_slurm_job}{character}(
-  input,
-  partition = get_slurm_partitions(),
-  ncpu = 1,
-  dry_run = FALSE,
-  submission_root = getOption("slurmtools.submission_root"),
-  template = NULL,
-  template_opts = list(),
-  ...,
-  account = NULL
-)
-
-\method{submit_slurm_job}{default}(input, ...)
 }
 \arguments{
-\item{input}{what to submit: a \code{bbi_nonmem_model}, a \code{hyperion_nonmem_model},
-or a path (or vector of paths) to a \code{.R}/\code{.qmd} file}
+\item{file}{path to the file to submit — the value rendered into the
+template's \code{{{file}}}}
+
+\item{template}{path to the whisker job template for this workflow; see
+\code{\link[=create_slurm_template]{create_slurm_template()}}}
 
 \item{partition}{name of the partition to submit to. The default passes the
 full set of partitions; the first is selected.}
 
 \item{ncpu}{number of cpus to request}
 
+\item{account}{slurm account (\code{--account}); omitted when \code{NULL}}
+
+\item{submission_root}{directory to track job submission scripts and
+output; defaults to \code{options('slurmtools.submission_root')}, falling back
+to \code{"submission-log"} under the calling directory}
+
+\item{template_opts}{named list of extra variables to render into the
+template (these override the built-in values)}
+
 \item{dry_run}{return the command that would have been invoked, without
 invoking}
 
-\item{submission_root}{directory to track job submission scripts and output}
-
-\item{template}{path to a whisker job template. \code{NULL} selects the shipped
-template for the input type; supplying your own is the power-user contract.}
-
-\item{template_opts}{named list of extra variables to render into the
-template (these override the values a method builds)}
-
-\item{...}{additional arguments passed on to the method; the bbi and
-character methods forward them to \code{\link[processx:run]{processx::run()}}, the hyperion method
-forwards them to \code{hyperion::submit_model_to_slurm()}}
-
-\item{config_path}{path to the engine config file (e.g. \code{bbi.yaml} or a
-pharos config); defaults to \code{options('slurmtools.config_path')} so it can be
-set globally or scoped with \code{\link[withr:with_options]{withr::with_options()}}}
-
-\item{account}{slurm account (\code{--account}); omitted when \code{NULL}}
-
-\item{overwrite}{whether to delete existing model results first}
+\item{...}{additional arguments passed on to \code{\link[processx:run]{processx::run()}}}
 }
 \value{
 for a dry run, a list with the sbatch command, its args, the rendered
 script, and the partition; otherwise the result of submitting the job
 }
 \description{
-\code{submit_slurm_job()} submits work to slurm. It is an S3 generic: what runs on
-the compute node is decided by what you pass as \code{input}, and the command
-itself lives in the job \strong{template}, not in this function. Each method's only
-job is to assemble the variables a template needs and hand them to the shared
-renderer.
-\itemize{
-\item a \strong{bbr/bbi model} (\code{bbi_nonmem_model}) renders the shipped
-\code{nonmem-bbi} template (a \verb{bbi nonmem run local} command).
-\item a \strong{hyperion model} (\code{hyperion_nonmem_model}) is handed to
-\code{hyperion::submit_model_to_slurm()}, which carries its own template and
-discovers its own pharos config.
-\item a \strong{path to a script} renders a shipped template by file extension:
-\code{.R} uses \code{rscript}, \code{.qmd} uses \code{quarto}. A character vector of paths
-submits one job per path. A bare \code{.mod}/\code{.ctl} path is refused — read it
-into a model object first.
-\item \strong{any other file type} can be submitted by supplying your own \code{template}
-plus whatever variables it needs via \code{template_opts}.
-}
+\code{submit_slurm_job()} submits a file to slurm: it fills a job \strong{template}
+with the file and the slurm settings, writes the resulting script under
+\code{submission_root}, and hands it to \code{sbatch}. The command that runs on the
+compute node lives in the template, not in this function — slurmtools knows
+nothing about the tool you are running.
 
-Shipped templates live in \code{system.file("templates", package = "slurmtools")}
-and are based on the pharos slurm template. Besides your own \code{template_opts},
-a template can use \code{{{job_name}}}, \code{{{partition}}}, \code{{{ncpu}}},
-\code{{{parallel}}}, \code{{{num_mpi_cpus}}}, \code{{{account}}}, \code{{{log_path}}}, and
-(per method) \code{{{model_path}}}, \code{{{config_path}}}, \code{{{bbi_exe_path}}},
-\code{{{rscript_exe_path}}}, \code{{{quarto_exe_path}}}, or \code{{{script_path}}}.
+There is no default template. Every workflow gets its own, created once
+with \code{\link[=create_slurm_template]{create_slurm_template()}} (or written by hand) and reused for every
+submission after that. A template is a plain bash script with whisker
+\code{{{variables}}}.
 
-When a shipped template is selected, its \verb{*_exe_path} variable is resolved
-at submit time to the absolute path \code{Sys.which()} finds, so the rendered
-script names the exact binary that will run; submission errors early if the
-tool cannot be found. Supplying \code{template_opts = list(bbi_exe_path = ...)}
-(etc.) skips the lookup. With your own \code{template}, set any \verb{*_exe_path}
-you use via \code{template_opts}.
+Every template can use \code{{{file}}}, \code{{{job_name}}}, \code{{{partition}}},
+\code{{{ncpu}}}, \code{{{parallel}}} (true when \code{ncpu > 1}), \code{{{num_mpi_cpus}}},
+\code{{{account}}}, and \code{{{log_path}}}. Anything else a template references is
+supplied through \code{template_opts}, which also overrides any of the
+built-ins. Paths flow into the script exactly as you wrote them — the
+template owns any path handling.
 }
 \examples{
 \dontrun{
-# a bbr model
-mod <- bbr::read_model("model/nonmem/1001")
-submit_slurm_job(mod, partition = "cpu2mem4gb", ncpu = 2, config_path = "bbi.yaml")
+# one-time setup: a template for running R scripts
+create_slurm_template("rscript.tmpl", command = "Rscript", args = "{{file}}")
 
-# a hyperion model
-mod <- hyperion::read_model("model/nonmem/1001.ctl")
-submit_slurm_job(mod, partition = "cpu2mem4gb", ncpu = 2)
+# then submit any R script through it
+submit_slurm_job("scripts/big-simulation.R", template = "rscript.tmpl", ncpu = 4)
 
-# scripts (one or many)
-submit_slurm_job("scripts/big-simulation.R", ncpu = 4)
-submit_slurm_job(c("a.R", "b.R", "report.qmd"))
-
-# anything else: bring your own template laying out the command
+# a NONMEM-via-bbi workflow: the config travels via template_opts
+create_slurm_template(
+  "bbi-nonmem.tmpl",
+  command = "bbi",
+  args = c("nonmem", "run", "local", "{{file}}", "--config", "{{config_path}}"),
+  parallel_args = c("--parallel", "--threads={{ncpu}}")
+)
 submit_slurm_job(
-  "scripts/train.py",
-  template = "slurm-python.tmpl",
-  template_opts = list(conda_env = "ml")
+  "model/nonmem/1001.mod",
+  template = "bbi-nonmem.tmpl",
+  ncpu = 2,
+  template_opts = list(config_path = "model/nonmem/bbi.yaml")
 )
 }
 }

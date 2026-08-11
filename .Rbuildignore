@@ -30,3 +30,6 @@
 ^[^/]+\.qmd$
 ^[^/]+\.html$
 ^[^/]+_files$
+^POC\.md$
+^demo\.R$
+^POC-MANUAL-TEST\.md$

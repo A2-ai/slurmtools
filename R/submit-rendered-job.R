@@ -1,12 +1,11 @@
 #' Render a slurm job script and submit it with sbatch
 #'
-#' This is the shared worker behind every [submit_slurm_job()] method. It fills
-#' a whisker template with `template_list`, writes the rendered script to
-#' `submission_root`, and submits it via `sbatch`. It knows nothing about what
-#' runs on the node: the command lives in the template, and every value it needs
-#' (including any paths) is already resolved into `template_list` by the calling
-#' method. Paths flow through untouched — pharos-style, the template owns any
-#' path handling.
+#' This is the worker behind [submit_slurm_job()]. It fills a whisker template
+#' with `template_list`, writes the rendered script to `submission_root`, and
+#' submits it via `sbatch`. It knows nothing about what runs on the node: the
+#' command lives in the template, and every value it needs (including any
+#' paths) is already resolved into `template_list` by the caller. Paths flow
+#' through untouched, the template owns any path handling.
 #'
 #' @param template_list a flat named list of variables to render into the
 #'   template. Must include `partition` and `ncpu` for the partition check.
