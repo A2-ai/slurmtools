@@ -24,7 +24,8 @@ Imports:
     withr,
     cli,
     hms,
-    log4r
+    log4r,
+    S7
 Suggests:
     knitr,
     rmarkdown,

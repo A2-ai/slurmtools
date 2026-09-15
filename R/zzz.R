@@ -42,6 +42,7 @@ my_layout <- function(level, ...) {
 }
 
 .onLoad <- function(libname, pkgname) {
+  S7::methods_register()
   result <- tryCatch(
     {
       processx::run(Sys.which("squeue"), args = "--version")

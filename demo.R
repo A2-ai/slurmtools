@@ -12,20 +12,15 @@ demo_dir <- file.path(tempdir(), "slurmtools-poc-demo")
 dir.create(demo_dir, showWarnings = FALSE)
 setwd(demo_dir)
 
-banner <- function(x) cat("\n", cli::rule(left = cli::style_bold(x)), "\n", sep = "")
-
 ## 1 — no required options anymore -------------------------------------------
-banner("1. no options required")
 cat(slurmtools_options_message())
 # submission_root falls back to ./submission-log; setting the option still works.
 
 ## 2 — one-time setup: create the template for a workflow ---------------------
-banner("2. create_slurm_template(): an R-script workflow")
 create_slurm_template("rscript.tmpl", command = "Rscript", args = "{{file}}")
 cat(brio::read_file("rscript.tmpl"))
 
 ## 3 — then submit files through it -------------------------------------------
-banner("3. submit_slurm_job(file, template): dry run")
 writeLines("x <- mean(rnorm(1e6))", "sim.R")
 cmd <- submit_slurm_job(
   "sim.R",
@@ -36,7 +31,6 @@ cmd <- submit_slurm_job(
 cat(cmd$template_script)
 
 ## 4 — a NONMEM/bbi workflow, with a parallel variant --------------------------
-banner("4. a bbi workflow: parallel_args switch on when ncpu > 1")
 create_slurm_template(
   "bbi-nonmem.tmpl",
   command = "bbi",
@@ -55,7 +49,6 @@ cmd <- submit_slurm_job(
 cat(cmd$template_script)
 
 ## 5 — the template is a plain bash file the user owns -------------------------
-banner("5. edit the template freely: add a notification")
 tmpl <- readLines("rscript.tmpl")
 writeLines(
   append(tmpl, 'curl -d "job {{job_name}} done" ntfy.sh/{{ntfy}}', after = length(tmpl)),
@@ -70,10 +63,14 @@ cmd <- submit_slurm_job(
 )
 cat(cmd$template_script)
 
+##7 - generalizable ------------------------------------------------------------
+
+create_slurm_template("python.tmpl", command = "python3", args = "{{file}}")
+writeLines(c("with open('py-out.txt', 'w') as f:", "    f.write('this is what it sounds like when doves cry')"), "prince.py")
+res <- submit_slurm_job("prince.py", template = "python.tmpl", partition = "cpu2mem4gb")
+cat(res$stdout)
+
 ## 6 — the guardrails -----------------------------------------------------------
-banner("6. errors are early and actionable")
 try(submit_slurm_job("sim.R", partition = "cpu2mem4gb", dry_run = TRUE))
 try(create_slurm_template("nope.tmpl", command = "not-a-real-tool"))
 try(submit_slurm_job("sim.R", template = "rscript.tmpl", partition = "not-a-partition", dry_run = TRUE))
-
-banner("done — nothing was submitted")
