@@ -36,11 +36,6 @@ submit_rendered_job <- function(
   if (!fs::file_exists(template)) {
     rlang::abort(sprintf("slurm job template not found: `%s`", template))
   }
-  if (is.null(submission_root)) {
-    rlang::abort(
-      "no submission root supplied; set options('slurmtools.submission_root') or pass submission_root"
-    )
-  }
 
   log4r::info(
     .le$logger,
@@ -56,13 +51,55 @@ submit_rendered_job <- function(
   )
 
   rendered <- whisker::whisker.render(brio::read_file(template), template_list)
+  sbatch_script(
+    rendered,
+    script_name = script_name,
+    submission_root = submission_root,
+    partition = template_list$partition,
+    dry_run = dry_run,
+    ...
+  )
+}
+
+#' Write a rendered job script under `submission_root` and hand it to sbatch
+#'
+#' The last step shared by both forms of [submit_slurm_job()].
+#'
+#' @param rendered the complete job script, as one string
+#' @param script_name file name (not path) of the script to write
+#' @param submission_root directory the script (and the job's logs) live in
+#' @param partition the partition the header requests, echoed in the dry-run
+#'   result; may be `NULL`
+#' @param dry_run return the command that would have been invoked, without
+#'   invoking
+#' @param sbatch_args flags placed before the script path, e.g. `"--parsable"`
+#' @param ... arguments to pass to [processx::run()]
+#' @return for a dry run, a list with the sbatch command, its args, the
+#'   rendered script, and the partition; otherwise the result of
+#'   [processx::run()]
+#' @keywords internal
+#' @noRd
+sbatch_script <- function(
+  rendered,
+  script_name,
+  submission_root,
+  partition,
+  dry_run = FALSE,
+  sbatch_args = character(),
+  ...
+) {
+  if (is.null(submission_root)) {
+    rlang::abort(
+      "no submission root supplied; set options('slurmtools.submission_root') or pass submission_root"
+    )
+  }
   script_file_path <- file.path(submission_root, script_name)
 
   cmd <- list(
     cmd = Sys.which("sbatch"),
-    args = script_file_path,
+    args = c(sbatch_args, script_file_path),
     template_script = rendered,
-    partition = template_list$partition
+    partition = partition
   )
   if (dry_run) {
     return(cmd)

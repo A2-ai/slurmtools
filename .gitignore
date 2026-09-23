@@ -8,8 +8,10 @@ docs
 
 # accessory docs (design notes / demos) and their quarto render artifacts —
 # not part of the package. README.md / LICENSE.md / man/*.Rd stay tracked.
-/*.qmd
-/*.html
+# Unanchored so a .qmd/.html in any subdirectory is caught too, not just the
+# repo root: a real quarto vignette would need a `!vignettes/*.qmd` negation.
+*.qmd
+*.html
 *_files/
 
 # manual submission-testing scratch — all products of the step-by-step guide

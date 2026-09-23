@@ -4,28 +4,69 @@
 \alias{Template}
 \title{A slurm job template, built one piece at a time}
 \usage{
-Template(sbatch = character(0))
+Template(
+  sbatch = character(0),
+  fills = list(),
+  optional = character(0),
+  body = character(0),
+  pre_run = character(0),
+  post_run = character(0)
+)
 }
 \arguments{
 \item{sbatch}{named character vector of \verb{#SBATCH} flags in header order,
 e.g. \code{c(partition = "partition", "cpus-per-task" = "ncpu")}. Usually built
 with \code{\link[=with_sbatch]{with_sbatch()}} rather than passed directly.}
+
+\item{fills}{named list of placeholder values already filled in, e.g.
+\code{list(ncpu = 4)}. Usually built with \code{\link[=fill]{fill()}} rather than passed directly.}
+
+\item{optional}{character vector of the flags in \code{sbatch} that are emitted
+only when filled, e.g. \code{"account"}. Usually set through the verbs'
+\code{optional = TRUE} rather than passed directly.}
+
+\item{body}{character vector of script lines that follow the header, one
+per command. Usually built with \code{\link[=with_command]{with_command()}} rather than passed
+directly.}
+
+\item{pre_run, post_run}{character vectors of bash lines run before and
+after the command. Usually built with \code{\link[=with_pre_run]{with_pre_run()}} and
+\code{\link[=with_post_run]{with_post_run()}} rather than passed directly.}
 }
 \description{
 \code{Template()} starts an empty job template. Each \verb{with_*()} verb adds one
-\verb{#SBATCH} line whose value is a \code{{{placeholder}}}, filled later at submit
-time. \code{format()} returns the rendered script lines and \code{print()} shows
-them.
+\verb{#SBATCH} line whose value is a \code{{{placeholder}}}; \code{\link[=fill]{fill()}} gives
+placeholders their values, a few at a time or all at once;
+\code{\link[=write_slurm_template]{write_slurm_template()}} saves the result as a bash file you can read and
+edit. \code{format()} returns the rendered script lines and \code{print()} shows
+them, filled values in place and the rest still as \code{{{placeholders}}}.
+
+A flag added with \code{optional = TRUE} is emitted only if its placeholder gets
+a value. Until then it renders inside a \verb{\{\{#name\}\} … \{\{/name\}\}} section, the
+form \code{\link[=submit_slurm_job]{submit_slurm_job()}} already understands, so \code{--account} can sit in
+every template and appear only for the jobs that set one.
+
+\code{\link[=with_command]{with_command()}} adds the line the job runs, after the header. Its
+arguments may hold \code{{{placeholders}}} of their own — \code{{{file}}} is the one
+you almost always want — and those are filled like any flag's.
+\code{\link[=submit_slurm_job]{submit_slurm_job()}} takes the template, fills whatever is left, and
+refuses to submit while a required placeholder has no value.
+\code{\link[=with_pre_run]{with_pre_run()}} and \code{\link[=with_post_run]{with_post_run()}} add bash lines of your own before
+and after the command. A few placeholders are filled for you —
+\code{{{file_dir}}}, \code{{{file_stem}}}, \code{{{file_ext}}} from \code{file}, \code{{{log_dir}}}
+at submit; see \link{template_builtins}.
 
 Flags are held as a named character vector: names are the sbatch long
 options (\code{partition}, \code{cpus-per-task}), values are the placeholder each is
 filled from. The object validates itself whenever it changes: a flag with
-leading dashes, a duplicated flag, or a placeholder that could not be an R
-argument name is refused on the spot.
+leading dashes, a duplicated flag, a placeholder that could not be an R
+argument name, a fill for a placeholder the template does not have, or a
+value a common flag cannot take (see \link{with_flag}) is refused on the spot.
 }
 \examples{
 Template() |>
   with_sbatch("job-name") |>
   with_sbatch("cpus-per-task", "ncpu") |>
-  with_sbatch("partition")
+  with_sbatch("partition") |>
+  fill(job_name = "10001")
 }

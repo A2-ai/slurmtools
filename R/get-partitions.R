@@ -2,9 +2,9 @@ utils::globalVariables(c("CPUS", "MEMORY"))
 
 partition_cache <- new.env(parent = emptyenv())
 
-#' get list of each partition's number of CPUs and memory
+#' get list of each partition's CPUs, memory and gres
 #'
-#' @return the raw partition-cpu-memory string output from `sinfo`
+#' @return the raw partition-cpu-memory-gres string output from `sinfo`
 #' @keywords internal
 #' @noRd
 run_sinfo <- function() {
@@ -13,7 +13,7 @@ run_sinfo <- function() {
     rlang::abort("could not find sinfo binary")
   }
 
-  res <- processx::run(sinfobin, c("--format", "%P,%c,%m"), )
+  res <- processx::run(sinfobin, c("--format", "%P|%c|%m|%G"), )
   if (res$status != 0) {
     stderrout <- sprintf(
       "failed to get partition info with info:
@@ -50,7 +50,12 @@ lookup_partitions_by_cpu <- function(cache = TRUE) {
   }
 
   # make data frame
-  avail_cpus_table <- read.table(text = avail_cpus, sep = ",", header = T)
+  avail_cpus_table <- read.table(
+    text = avail_cpus,
+    sep = "|",
+    header = T,
+    na.strings = c("NA", "(null)")
+  )
 
   # process
   process_slurm_partitions(avail_cpus_table)

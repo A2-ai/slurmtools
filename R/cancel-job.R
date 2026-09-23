@@ -1,6 +1,6 @@
 #' Cancels a running job
 #'
-#' @param job_id job id to cancel
+#' @param job_id job id to cancel, or the [Job] returned by [submit_slurm_job()]
 #' @param auto_confirm does not prompt user before cancelling job
 #' @importFrom rlang .data
 #' @importFrom rlang .env
@@ -11,6 +11,7 @@
 #' cancel_job(243)
 #' }
 cancel_slurm_job <- function(job_id, auto_confirm = FALSE) {
+  job_id <- slurm_job_id(job_id)
   current_user <- if (is.null(Sys.getenv("USER"))) {
     Sys.info()["user"]
   } else {

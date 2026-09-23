@@ -4,7 +4,7 @@
 \alias{with_sbatch}
 \title{Add an \verb{#SBATCH} flag to a template}
 \usage{
-with_sbatch(template, flag, fill_name = NULL)
+with_sbatch(template, flag, fill_name = NULL, optional = FALSE)
 }
 \arguments{
 \item{template}{a \code{\link[=Template]{Template()}}}
@@ -16,6 +16,10 @@ with_sbatch(template, flag, fill_name = NULL)
 flag with \code{-} replaced by \verb{_}, so \code{"cpus-per-task"} fills from
 \code{{{cpus_per_task}}}. Name it to let one value feed several places:
 \code{with_sbatch("cpus-per-task", "ncpu")}.}
+
+\item{optional}{if \code{TRUE}, the line is emitted only when its placeholder is
+filled; an unfilled optional flag is dropped at submit rather than
+reported as missing}
 }
 \value{
 the template with the flag added
@@ -23,7 +27,9 @@ the template with the flag added
 \description{
 The blanket verb: any sbatch long option becomes the header line
 \verb{#SBATCH --<flag>=\{\{<fill_name>\}\}}. Adding a flag the template already has
-replaces its placeholder in place.
+replaces its placeholder in place, and its \code{optional} setting. The common
+flags also have named verbs, \code{with_partition()} and friends (see
+\link{with_flag}); their fill values are checked whichever verb added the flag.
 }
 \examples{
 Template() |>

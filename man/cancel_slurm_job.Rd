@@ -7,7 +7,7 @@
 cancel_slurm_job(job_id, auto_confirm = FALSE)
 }
 \arguments{
-\item{job_id}{job id to cancel}
+\item{job_id}{job id to cancel, or the \link{Job} returned by \code{\link[=submit_slurm_job]{submit_slurm_job()}}}
 
 \item{auto_confirm}{does not prompt user before cancelling job}
 }
