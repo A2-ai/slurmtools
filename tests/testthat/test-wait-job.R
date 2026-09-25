@@ -63,7 +63,7 @@ test_that("a job sacct never learns about is polled, then times out as 'not in s
 
 test_that("wait_for_slurm_job checks its arguments", {
   expect_error(wait_for_slurm_job(c(2051, 2052)), "waits for one job")
-  expect_error(wait_for_slurm_job(list(1)), "expected the Job")
+  expect_error(wait_for_slurm_job(list(1)), "expected the result")
   expect_error(wait_for_slurm_job(a_job(), poll = 0), "`poll` must be a positive number")
   expect_error(wait_for_slurm_job(a_job(), poll = "10"), "`poll` must be a positive number")
   expect_error(wait_for_slurm_job(a_job(), timeout = 0), "`timeout` must be a positive number")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/create-slurm-template.R
 \name{create_slurm_template}
 \alias{create_slurm_template}
-\title{Create a slurm job template for your workflow}
+\title{Create a slurm job template file for your workflow}
 \usage{
 create_slurm_template(
   path,
@@ -13,57 +13,42 @@ create_slurm_template(
 )
 }
 \arguments{
-\item{path}{where to write the template file}
+\item{path}{where to write the template, e.g. \code{"rscript.tmpl"}}
 
-\item{command}{the program the job runs, e.g. \code{"Rscript"} or \code{"bbi"};
-resolved via \code{Sys.which()} unless it already contains a \code{/}}
+\item{command}{the program to run, e.g. \code{"Rscript"} or \code{"bbi"}; a bare
+name is resolved to an absolute path now, so a missing tool fails here}
 
 \item{args}{character vector of arguments appended to the command, e.g.
 \code{c("nonmem", "run", "local", "{{file}}")}}
 
-\item{parallel_args}{extra arguments appended (after \code{args}) when a job
-requests more than one cpu, e.g. \code{c("--parallel", "--threads={{ncpu}}")};
-\code{NULL} (the default) writes a single unconditional command line}
+\item{parallel_args}{arguments appended only when \code{ncpu > 1}, e.g.
+\code{c("--parallel", "--threads={{ncpu}}")}; \code{NULL} (the default) for none}
 
 \item{overwrite}{whether to replace an existing file at \code{path}}
 }
 \value{
-the path to the written template, invisibly
+\code{path}, invisibly
 }
 \description{
-Scaffolds the job template that \code{\link[=submit_slurm_job]{submit_slurm_job()}} fills at submit time:
-a standard \verb{#SBATCH} header (job name, partition, cpus, optional account,
-log path) followed by your command. The result is a \strong{plain bash file you
-own} — open it, edit it, add whatever your workflow needs (environment
-setup, notifications, cleanup). slurmtools never looks inside it again
-except to fill the \code{{{variables}}}.
+Writes \code{\link[=default_template]{default_template()}} with your command as a plain bash file, for the
+file form of \code{\link[=submit_slurm_job]{submit_slurm_job()}}:
+\code{submit_slurm_job(file, slurm_job_template_path = path)}. The file carries
+the standard header, \verb{#SBATCH --output=\{\{log_path\}\}} and the command, with
+the values the file form supplies left as \code{{{placeholders}}}: \code{file},
+\code{job_name}, \code{partition}, \code{ncpu}, \code{parallel}, \code{account}, \code{log_path}, the
+\link{template_builtins}, and anything given through \code{slurm_template_opts}.
+With \code{parallel_args}, the command has a second form used when \code{ncpu > 1}.
 
-\code{command} is resolved to an absolute path via \code{Sys.which()} when the
-template is created, so the template names the exact binary that will run
-— and you can see (and change) that choice in the file. A \code{command} that
-already contains a \code{/} is taken as given, skipping the lookup.
-
-\code{args} may reference any variable \code{\link[=submit_slurm_job]{submit_slurm_job()}} provides —
-\code{{{file}}} is the one you almost always want — plus anything you pass at
-submit time through \code{template_opts}.
-
-When \code{parallel_args} is supplied, the template gets two variants of the
-command: the plain one, and one with \code{parallel_args} appended, used when a
-job is submitted with \code{ncpu > 1}.
+This is the same as building the template and calling
+\code{\link[=write_slurm_template]{write_slurm_template()}}; the file is yours to edit afterwards.
 }
 \examples{
 \dontrun{
-# R scripts
 create_slurm_template("rscript.tmpl", command = "Rscript", args = "{{file}}")
-
-# quarto reports
-create_slurm_template("quarto.tmpl", command = "quarto", args = c("render", "{{file}}"))
-
-# NONMEM via bbi, parallelising when ncpu > 1
 create_slurm_template(
   "bbi-nonmem.tmpl",
   command = "bbi",
-  args = c("nonmem", "run", "local", "{{file}}", "--config", "{{config_path}}"),
+  args = c("nonmem", "run", "local", "{{file}}", "--config", "{{bbi_config_path}}"),
   parallel_args = c("--parallel", "--threads={{ncpu}}")
 )
 }

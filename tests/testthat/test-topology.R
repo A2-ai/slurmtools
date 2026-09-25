@@ -25,7 +25,7 @@ test_that("a --mem larger than the node's memory is an error naming a partition 
   local_partition_table()
   tmpl <- Template() |>
     with_partition() |>
-    with_sbatch("mem") |>
+    with_sbatch_flag("mem") |>
     fill(partition = "cpu2mem4gb", mem = "8G")
   expect_error(
     check_slurm_topology(tmpl, "cpu2mem4gb"),
@@ -36,28 +36,28 @@ test_that("a --mem larger than the node's memory is an error naming a partition 
 
 test_that("a --mem the node holds passes, and the partition total never enters into it", {
   local_partition_table()
-  fits <- Template() |> with_partition() |> with_sbatch("mem") |>
+  fits <- Template() |> with_partition() |> with_sbatch_flag("mem") |>
     fill(partition = "cpu2mem4gb", mem = "3891")
   expect_no_error(check_slurm_topology(fits, "cpu2mem4gb"))
 })
 
 test_that("--mem=0 asks for the whole node and always fits", {
   local_partition_table()
-  tmpl <- Template() |> with_partition() |> with_sbatch("mem") |>
+  tmpl <- Template() |> with_partition() |> with_sbatch_flag("mem") |>
     fill(partition = "cpu2mem4gb", mem = 0)
   expect_no_error(check_slurm_topology(tmpl, "cpu2mem4gb"))
 })
 
 test_that("an unparseable --mem is left for sbatch to reject", {
   local_partition_table()
-  tmpl <- Template() |> with_partition() |> with_sbatch("mem") |>
+  tmpl <- Template() |> with_partition() |> with_sbatch_flag("mem") |>
     fill(partition = "cpu2mem4gb", mem = "a lot")
   expect_no_error(check_slurm_topology(tmpl, "cpu2mem4gb"))
 })
 
 test_that("the error says so when no partition has enough memory per node", {
   local_partition_table()
-  tmpl <- Template() |> with_partition() |> with_sbatch("mem") |>
+  tmpl <- Template() |> with_partition() |> with_sbatch_flag("mem") |>
     fill(partition = "cpu2mem4gb", mem = "2T")
   expect_error(check_slurm_topology(tmpl, "cpu2mem4gb"), "No existing partition has")
 })
@@ -90,7 +90,7 @@ test_that("the gres error says so when the cluster has no gres at all", {
 
 test_that("a multi-node job that does not fill a node warns, naming what it reserves", {
   local_partition_table()
-  tmpl <- Template() |> with_partition() |> with_nodes() |> with_cpus_per_task("ncpu") |>
+  tmpl <- Template() |> with_partition() |> with_nodes() |> with_cpus_per_task("{{ncpu}}") |>
     fill(partition = "cpu4mem32gb", nodes = 2, ncpu = 2)
   expect_warning(
     check_slurm_topology(tmpl, "cpu4mem32gb"),
@@ -101,14 +101,14 @@ test_that("a multi-node job that does not fill a node warns, naming what it rese
 
 test_that("a multi-node job that fills the node is silent", {
   local_partition_table()
-  tmpl <- Template() |> with_partition() |> with_nodes() |> with_cpus_per_task("ncpu") |>
+  tmpl <- Template() |> with_partition() |> with_nodes() |> with_cpus_per_task("{{ncpu}}") |>
     fill(partition = "cpu4mem32gb", nodes = 4, ncpu = 4)
   expect_no_warning(check_slurm_topology(tmpl, "cpu4mem32gb"))
 })
 
 test_that("a single-node job is not a distributed job, whatever cpus-per-task is", {
   local_partition_table()
-  tmpl <- Template() |> with_partition() |> with_nodes() |> with_cpus_per_task("ncpu") |>
+  tmpl <- Template() |> with_partition() |> with_nodes() |> with_cpus_per_task("{{ncpu}}") |>
     fill(partition = "cpu4mem32gb", nodes = 1, ncpu = 1)
   expect_no_warning(check_slurm_topology(tmpl, "cpu4mem32gb"))
 })
@@ -126,10 +126,10 @@ test_that("submit_slurm_job() stops on an over-memory template before reaching s
   tmpl <- Template() |>
     with_job_name() |>
     with_partition() |>
-    with_sbatch("mem") |>
+    with_sbatch_flag("mem") |>
     with_command("echo", "hi")
   expect_error(
-    submit_slurm_job(tmpl, job_name = "big", partition = "cpu2mem4gb", mem = "8G", dry_run = TRUE),
+    submit_slurm_job(tmpl, partition = "cpu2mem4gb", dry_run = TRUE, slurm_template_opts = list(job_name = "big", mem = "8G")),
     "exceeds cpu2mem4gb's 3891 MB per node"
   )
 })
@@ -138,8 +138,8 @@ test_that("a template without --partition is not topology-checked", {
   local_partition_table()
   tmpl <- Template() |>
     with_job_name() |>
-    with_sbatch("mem") |>
+    with_sbatch_flag("mem") |>
     with_command("echo", "hi")
-  dry <- submit_slurm_job(tmpl, job_name = "big", mem = "8G", dry_run = TRUE)
+  dry <- submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(job_name = "big", mem = "8G"))
   expect_match(dry$template_script, "#SBATCH --mem=8G", fixed = TRUE)
 })

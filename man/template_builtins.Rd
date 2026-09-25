@@ -22,17 +22,18 @@ too, in \code{print()} and in the submitted script; a template that writes only
 \code{{{file_stem}}} still takes \code{file}. \code{{{log_dir}}} is filled at submit and
 stays a \code{{{log_dir}}} tag in a written template file. \code{{{parallel}}}
 follows whichever placeholder \code{\link[=with_cpus_per_task]{with_cpus_per_task()}} (or
-\code{with_sbatch("cpus-per-task", ...)}) was given, so it is a whisker
-\emph{section} rather than a plain tag: write \verb{\{\{#parallel\}\}--parallel --num-mpi-cpus=\{\{ncpu\}\}\{\{/parallel\}\}} in a command or hook line and it
-appears only for \code{ncpu > 1}. Sections resolve at submit time, not in
-\code{print()} — a \verb{\{\{#parallel\}\}…\{\{/parallel\}\}} line still shows its mustache
-tags when you print the template, the same as an unfilled optional
-\verb{#SBATCH} line does. Filling a builtin yourself overrides the derived
+\code{with_sbatch_flag("cpus-per-task", ...)}) was given, so it is a whisker
+\emph{section} rather than a plain tag: give \code{\link[=with_command]{with_command()}} or a hook
+\verb{conditional = "parallel", if_true = c("--parallel", "--threads=\{\{ncpu\}\}")}
+and the parallel form of the line is used only for \code{ncpu > 1}. Sections
+resolve at submit time, not in \code{print()} — a template with a conditional
+still shows both forms and their mustache tags when you print it, the same
+as an unfilled optional \verb{#SBATCH} line does. Filling a builtin yourself overrides the derived
 value. Templates used through the file form get the same names.
 
 The corpus's NONMEM recipe — a flat symlink to the \code{.lst} a run writes into
 its own directory — is one post-run line:
-\code{with_post_run("ln -sf {{file_dir}}/{{file_stem}}/{{file_stem}}.lst {{file_dir}}/{{file_stem}}.lst")}.
+\code{with_post_run("ln", c("-sf", "{{file_dir}}/{{file_stem}}/{{file_stem}}.lst", "{{file_dir}}/{{file_stem}}.lst"))}.
 }
 \seealso{
 \link{with_hooks}, \code{\link[=with_command]{with_command()}}, \code{\link[=fill]{fill()}}

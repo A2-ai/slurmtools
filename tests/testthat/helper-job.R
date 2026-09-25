@@ -1,15 +1,20 @@
-# fixtures shared by the Job lifecycle tests (test-job.R keeps its own copy of a_job())
+# fixtures shared by the job lifecycle tests
 
+# what submit_slurm_job() returns for a Template: sbatch's processx result plus
+# the id and the paths, as a plain list
 a_job <- function(id = "2051", output = sprintf("submission-log/sim-%s.out", id),
                   error = sprintf("submission-log/sim-%s.err", id)) {
-  Job(
+  list(
+    status = 0L,
+    stdout = paste0(id, "\n"),
+    stderr = "",
+    timeout = FALSE,
     job_id = id,
     job_name = "sim",
     partition = "cpu2mem4gb",
     script = "submission-log/sim.sh",
     output = output,
-    error = error,
-    sbatch = list()
+    error = error
   )
 }
 

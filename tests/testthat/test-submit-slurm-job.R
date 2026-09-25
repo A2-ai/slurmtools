@@ -32,7 +32,7 @@ local_stub_bin <- function(name, env = parent.frame()) {
 
 # --- create_slurm_template() ------------------------------------------------
 
-test_that("create_slurm_template writes a header plus the resolved command", {
+test_that("create_slurm_template writes default_template()'s header, --output, and the resolved command", {
   rscript <- local_stub_bin("Rscript")
   path <- file.path(withr::local_tempdir(), "rscript.tmpl")
 
@@ -44,7 +44,9 @@ test_that("create_slurm_template writes a header plus the resolved command", {
   content <- brio::read_file(path)
   # the command names the absolute binary resolved at creation time
   expect_match(content, sprintf("\n%s {{file}}", rscript), fixed = TRUE)
-  expect_match(content, "#SBATCH --job-name=\"{{job_name}}\"", fixed = TRUE)
+  expect_match(content, "#SBATCH --job-name={{job_name}}", fixed = TRUE)
+  expect_match(content, "#SBATCH --cpus-per-task={{ncpu}}", fixed = TRUE)
+  expect_match(content, "{{#account}}\n#SBATCH --account={{account}}\n{{/account}}", fixed = TRUE)
   expect_match(content, "#SBATCH --partition={{partition}}", fixed = TRUE)
   expect_match(content, "#SBATCH --output={{log_path}}", fixed = TRUE)
   # no parallel variant unless asked for
@@ -139,7 +141,7 @@ test_that("submitting renders the template with the file and slurm values", {
 
   cmd <- submit_slurm_job(
     script,
-    template = template,
+    slurm_job_template_path = template,
     partition = "cpu2mem4gb",
     dry_run = TRUE
   )
@@ -149,18 +151,57 @@ test_that("submitting renders the template with the file and slurm values", {
   expect_match(cmd$template_script, "#SBATCH --output=", fixed = TRUE)
   expect_match(
     cmd$template_script,
-    sprintf("--job-name=\"%s\"", basename(script)),
+    sprintf("--job-name=%s", basename(script)),
     fixed = TRUE
   )
 })
 
-test_that("template is required, with a pointer to the scaffolder", {
+test_that("slurm_job_template_path is required, with a pointer to the scaffolder", {
   local_submission_root()
   script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
 
+  withr::local_options(slurmtools.slurm_job_template_path = NULL)
   expect_error(
     submit_slurm_job(script, partition = "cpu2mem4gb", dry_run = TRUE),
     "create_slurm_template"
+  )
+  expect_error(
+    submit_slurm_job(script, partition = "cpu2mem4gb", dry_run = TRUE),
+    "`slurm_job_template_path` is required"
+  )
+})
+
+test_that("the template option serves the file form too", {
+  local_submission_root()
+  template <- local_rscript_template()
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+  withr::local_options(slurmtools.slurm_job_template_path = template)
+  cmd <- submit_slurm_job(script, partition = "cpu2mem4gb", dry_run = TRUE)
+  expect_match(cmd$template_script, script, fixed = TRUE)
+})
+
+test_that("bbi_config_path is a value the file form supplies, from the argument or the option", {
+  local_submission_root()
+  script <- withr::local_tempfile(fileext = ".mod", lines = "$PROBLEM test")
+  template <- withr::local_tempfile(fileext = ".tmpl", lines = c("#!/bin/bash", "bbi run {{file}} --config {{bbi_config_path}}"))
+  cmd <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb", bbi_config_path = "cfg/bbi.yaml", dry_run = TRUE)
+  expect_match(cmd$template_script, "--config cfg/bbi.yaml", fixed = TRUE)
+  withr::local_options(slurmtools.bbi_config_path = "opt/bbi.yaml")
+  cmd <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb", dry_run = TRUE)
+  expect_match(cmd$template_script, "--config opt/bbi.yaml", fixed = TRUE)
+})
+
+test_that("overwrite and an unnamed slurm_template_opts are refused in the file form", {
+  local_submission_root()
+  template <- local_rscript_template()
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+  expect_error(
+    submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb", overwrite = TRUE, dry_run = TRUE),
+    "`overwrite` belongs to the pre-template NONMEM form"
+  )
+  expect_error(
+    submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb", dry_run = TRUE, slurm_template_opts = list("x")),
+    "must be a named list"
   )
 })
 
@@ -174,7 +215,7 @@ test_that("paths are passed through untouched (no absolute-path massaging)", {
 
   cmd <- submit_slurm_job(
     "scripts/sim.R",
-    template = template,
+    slurm_job_template_path = template,
     partition = "cpu2mem4gb",
     dry_run = TRUE
   )
@@ -183,7 +224,7 @@ test_that("paths are passed through untouched (no absolute-path massaging)", {
   expect_match(cmd$template_script, " scripts/sim.R", fixed = TRUE)
 })
 
-test_that("template_opts supply extra variables and override built-in values", {
+test_that("slurm_template_opts supply extra variables and override built-in values", {
   local_submission_root()
   script <- withr::local_tempfile(fileext = ".py", lines = "print('hi')")
   template <- withr::local_tempfile(
@@ -198,10 +239,10 @@ test_that("template_opts supply extra variables and override built-in values", {
 
   cmd <- submit_slurm_job(
     script,
-    template = template,
+    slurm_job_template_path = template,
     partition = "cpu2mem4gb",
     dry_run = TRUE,
-    template_opts = list(conda_env = "ml", job_name = "custom-name")
+    slurm_template_opts = list(conda_env = "ml", job_name = "custom-name")
   )
 
   expect_match(cmd$template_script, "source activate ml", fixed = TRUE)
@@ -223,7 +264,7 @@ test_that("ncpu > 1 flips the template's parallel block on", {
 
   serial <- submit_slurm_job(
     model,
-    template = template,
+    slurm_job_template_path = template,
     partition = "cpu2mem4gb",
     dry_run = TRUE
   )
@@ -231,7 +272,7 @@ test_that("ncpu > 1 flips the template's parallel block on", {
 
   parallel <- submit_slurm_job(
     model,
-    template = template,
+    slurm_job_template_path = template,
     partition = "cpu2mem4gb",
     ncpu = 2,
     dry_run = TRUE
@@ -251,7 +292,7 @@ test_that("the worker writes and chmods the job script when not a dry run", {
 
   res <- submit_slurm_job(
     script,
-    template = template,
+    slurm_job_template_path = template,
     partition = "cpu2mem4gb",
     dry_run = FALSE
   )
@@ -272,7 +313,7 @@ test_that("submission_root defaults to submission-log under the calling director
 
   res <- submit_slurm_job(
     "sim.R",
-    template = template,
+    slurm_job_template_path = template,
     partition = "cpu2mem4gb",
     dry_run = FALSE
   )
@@ -286,7 +327,7 @@ test_that("errors on missing files", {
   template <- local_rscript_template()
 
   expect_error(
-    submit_slurm_job("does-not-exist.R", template = template, dry_run = TRUE),
+    submit_slurm_job("does-not-exist.R", slurm_job_template_path = template, dry_run = TRUE),
     "no such file"
   )
 })
@@ -296,7 +337,7 @@ test_that("non-path inputs are rejected", {
   template <- local_rscript_template()
 
   expect_error(
-    submit_slurm_job(42, template = template, dry_run = TRUE),
+    submit_slurm_job(42, slurm_job_template_path = template, dry_run = TRUE),
     "must be a single path"
   )
 })
@@ -309,14 +350,14 @@ test_that("partition is validated", {
   expect_error(
     submit_slurm_job(
       script,
-      template = template,
+      slurm_job_template_path = template,
       partition = "not-a-partition",
       dry_run = TRUE
     ),
     "not an available partition"
   )
   expect_error(
-    submit_slurm_job(script, template = template, partition = NULL, dry_run = TRUE),
+    submit_slurm_job(script, slurm_job_template_path = template, partition = NULL, dry_run = TRUE),
     "no partition selected"
   )
 })

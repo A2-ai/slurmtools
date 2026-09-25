@@ -14,33 +14,33 @@
 \alias{with_error}
 \title{Add a common \verb{#SBATCH} flag to a template}
 \usage{
-with_job_name(template, fill_name = NULL, optional = FALSE)
+with_job_name(template, value = NULL, optional = FALSE)
 
-with_partition(template, fill_name = NULL, optional = FALSE)
+with_partition(template, value = NULL, optional = FALSE)
 
-with_account(template, fill_name = NULL, optional = FALSE)
+with_account(template, value = NULL, optional = FALSE)
 
-with_cpus_per_task(template, fill_name = NULL, optional = FALSE)
+with_cpus_per_task(template, value = NULL, optional = FALSE)
 
-with_nodes(template, fill_name = NULL, optional = FALSE)
+with_nodes(template, value = NULL, optional = FALSE)
 
-with_ntasks(template, fill_name = NULL, optional = FALSE)
+with_ntasks(template, value = NULL, optional = FALSE)
 
-with_ntasks_per_node(template, fill_name = NULL, optional = FALSE)
+with_ntasks_per_node(template, value = NULL, optional = FALSE)
 
-with_gres(template, fill_name = NULL, optional = FALSE)
+with_gres(template, value = NULL, optional = FALSE)
 
-with_output(template, fill_name = NULL, optional = FALSE)
+with_output(template, value = NULL, optional = FALSE)
 
-with_error(template, fill_name = NULL, optional = FALSE)
+with_error(template, value = NULL, optional = FALSE)
 }
 \arguments{
 \item{template}{a \code{\link[=Template]{Template()}}}
 
-\item{fill_name}{the placeholder the flag is filled from; defaults to the
-flag with \code{-} replaced by \verb{_}, so \code{"cpus-per-task"} fills from
-\code{{{cpus_per_task}}}. Name it to let one value feed several places:
-\code{with_sbatch("cpus-per-task", "ncpu")}.}
+\item{value}{the flag's value, a single string or number; or a
+\code{"{{placeholder}}"} naming the blank the flag is filled from later;
+\code{NULL} (the default) leaves a blank named after the flag, with \code{-}
+replaced by \verb{_}, so \code{"cpus-per-task"} fills from \code{{{cpus_per_task}}}}
 
 \item{optional}{if \code{TRUE}, the line is emitted only when its placeholder is
 filled; an unfilled optional flag is dropped at submit rather than
@@ -50,19 +50,20 @@ reported as missing}
 the template with the flag added
 }
 \description{
-One verb per common sbatch option. Each adds
-\verb{#SBATCH --<flag>=\{\{<fill_name>\}\}} exactly as \code{\link[=with_sbatch]{with_sbatch()}} would, and
-the value is checked when it is filled: \code{--cpus-per-task}, \code{--nodes},
-\code{--ntasks} and \code{--ntasks-per-node} need a positive whole number;
-\code{--partition}, \code{--account}, \code{--gres}, \code{--output} and \code{--error} a non-empty
-string; \code{--job-name} takes any single value. For any other option use
-\code{\link[=with_sbatch]{with_sbatch()}}. Pass \code{optional = TRUE} for a line that should appear only
-when its placeholder is filled — the usual choice for \code{with_account()}.
+One verb per common sbatch option, each exactly \code{\link[=with_sbatch_flag]{with_sbatch_flag()}} with
+the flag fixed: \code{with_nodes(1)} is \verb{#SBATCH --nodes=1}, \code{with_nodes()} is
+\verb{#SBATCH --nodes=\{\{nodes\}\}} to fill later, and \code{with_nodes("{{n}}")} names
+that blank. The value is checked whenever it arrives, here or through
+\code{\link[=fill]{fill()}}: \code{--cpus-per-task}, \code{--nodes}, \code{--ntasks} and \code{--ntasks-per-node}
+need a positive whole number; \code{--partition}, \code{--account}, \code{--gres},
+\code{--output} and \code{--error} a non-empty string; \code{--job-name} takes any single
+value. For any other option use \code{\link[=with_sbatch_flag]{with_sbatch_flag()}}. Pass \code{optional = TRUE}
+for a line that should appear only when its placeholder is filled — the
+usual choice for \code{with_account()}.
 }
 \examples{
 Template() |>
-  with_job_name() |>
-  with_cpus_per_task("ncpu") |>
-  with_partition() |>
-  fill(ncpu = 4)
+  with_job_name("sim") |>
+  with_cpus_per_task(4) |>
+  with_partition()
 }

@@ -1,15 +1,3 @@
-a_job <- function(id = "2051") {
-  Job(
-    job_id = id,
-    job_name = "sim",
-    partition = "cpu2mem4gb",
-    script = "submission-log/sim.sh",
-    output = sprintf("submission-log/sim-%s.out", id),
-    error = sprintf("submission-log/sim-%s.err", id),
-    sbatch = list()
-  )
-}
-
 # a stub sacct on the PATH: records the arguments it was called with, prints `says`
 stub_sacct <- function(says, env = parent.frame()) {
   stub_dir <- withr::local_tempdir(.local_envir = env)
@@ -27,13 +15,13 @@ row_2051 <- "2051|sim|cpu2mem4gb|COMPLETED|0:0|00:00:11|cpu2mem4gb-dy-c7i-large-
 
 # --- slurm_job_id() -----------------------------------------------------------
 
-test_that("slurm_job_id takes a Job or ids, nothing else", {
+test_that("slurm_job_id takes a submit result or ids, nothing else", {
   expect_equal(slurm_job_id(a_job()), "2051")
   expect_equal(slurm_job_id(2051), "2051")
   expect_equal(slurm_job_id(c("2051", "2052")), c("2051", "2052"))
-  expect_error(slurm_job_id(list(1)), "expected the Job")
-  expect_error(slurm_job_id(NULL), "expected the Job")
-  expect_error(slurm_job_id(NA), "expected the Job")
+  expect_error(slurm_job_id(list(1)), "expected the result")
+  expect_error(slurm_job_id(NULL), "expected the result")
+  expect_error(slurm_job_id(NA), "expected the result")
 })
 
 # --- slurm_job_status() -------------------------------------------------------
@@ -87,28 +75,16 @@ test_that("a missing sacct is reported", {
   expect_error(slurm_job_status(a_job()), "could not find sacct")
 })
 
-# --- cancel_slurm_job(<Job>) --------------------------------------------------
+# --- cancel_slurm_job(<submit result>) ------------------------------------------
 
-test_that("cancel_slurm_job resolves a Job to its id before looking it up", {
+test_that("cancel_slurm_job resolves a submit result to its id before looking it up", {
   # an id no queue holds: the lookup fails the same way it does for a bare id,
-  # which is the point — the handle was accepted where an id was
+  # which is the point — the result was accepted where an id was
   expect_error(
     capture.output(suppressMessages(
       cancel_slurm_job(a_job("999999999"), auto_confirm = TRUE)
     )),
     "associated your user_name"
   )
-  expect_error(cancel_slurm_job(list(1)), "expected the Job")
-})
-
-# --- print(<Job>) points at the lifecycle functions ---------------------------
-
-test_that("printing a Job names what to do with it next", {
-  expect_output(print(a_job()), "slurm_job_status(job)", fixed = TRUE)
-  expect_output(print(a_job()), "cancel_slurm_job(job)", fixed = TRUE)
-})
-
-test_that("printing a Job also names wait_for_slurm_job() and slurm_job_log()", {
-  expect_output(print(a_job()), "wait_for_slurm_job(job)", fixed = TRUE)
-  expect_output(print(a_job()), "slurm_job_log(job)", fixed = TRUE)
+  expect_error(cancel_slurm_job(list(1)), "expected the result")
 })

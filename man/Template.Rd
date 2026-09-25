@@ -8,15 +8,15 @@ Template(
   sbatch = character(0),
   fills = list(),
   optional = character(0),
-  body = character(0),
-  pre_run = character(0),
-  post_run = character(0)
+  body = list(),
+  pre_run = list(),
+  post_run = list()
 )
 }
 \arguments{
 \item{sbatch}{named character vector of \verb{#SBATCH} flags in header order,
 e.g. \code{c(partition = "partition", "cpus-per-task" = "ncpu")}. Usually built
-with \code{\link[=with_sbatch]{with_sbatch()}} rather than passed directly.}
+with \code{\link[=with_sbatch_flag]{with_sbatch_flag()}} rather than passed directly.}
 
 \item{fills}{named list of placeholder values already filled in, e.g.
 \code{list(ncpu = 4)}. Usually built with \code{\link[=fill]{fill()}} rather than passed directly.}
@@ -25,13 +25,13 @@ with \code{\link[=with_sbatch]{with_sbatch()}} rather than passed directly.}
 only when filled, e.g. \code{"account"}. Usually set through the verbs'
 \code{optional = TRUE} rather than passed directly.}
 
-\item{body}{character vector of script lines that follow the header, one
-per command. Usually built with \code{\link[=with_command]{with_command()}} rather than passed
-directly.}
+\item{body}{list of the commands that follow the header, one entry per
+line, each the program and its arguments. Built with \code{\link[=with_command]{with_command()}},
+never passed directly.}
 
-\item{pre_run, post_run}{character vectors of bash lines run before and
-after the command. Usually built with \code{\link[=with_pre_run]{with_pre_run()}} and
-\code{\link[=with_post_run]{with_post_run()}} rather than passed directly.}
+\item{pre_run, post_run}{lists of the commands run before and after the
+body, in the same form. Built with \code{\link[=with_pre_run]{with_pre_run()}} and
+\code{\link[=with_post_run]{with_post_run()}}, never passed directly.}
 }
 \description{
 \code{Template()} starts an empty job template. Each \verb{with_*()} verb adds one
@@ -40,21 +40,25 @@ placeholders their values, a few at a time or all at once;
 \code{\link[=write_slurm_template]{write_slurm_template()}} saves the result as a bash file you can read and
 edit. \code{format()} returns the rendered script lines and \code{print()} shows
 them, filled values in place and the rest still as \code{{{placeholders}}}.
+\code{\link[=default_template]{default_template()}} is the usual starting point: the standard header, and
+the command if you give it one.
 
 A flag added with \code{optional = TRUE} is emitted only if its placeholder gets
 a value. Until then it renders inside a \verb{\{\{#name\}\} … \{\{/name\}\}} section, the
 form \code{\link[=submit_slurm_job]{submit_slurm_job()}} already understands, so \code{--account} can sit in
 every template and appear only for the jobs that set one.
 
-\code{\link[=with_command]{with_command()}} adds the line the job runs, after the header. Its
-arguments may hold \code{{{placeholders}}} of their own — \code{{{file}}} is the one
-you almost always want — and those are filled like any flag's.
-\code{\link[=submit_slurm_job]{submit_slurm_job()}} takes the template, fills whatever is left, and
-refuses to submit while a required placeholder has no value.
-\code{\link[=with_pre_run]{with_pre_run()}} and \code{\link[=with_post_run]{with_post_run()}} add bash lines of your own before
-and after the command. A few placeholders are filled for you —
-\code{{{file_dir}}}, \code{{{file_stem}}}, \code{{{file_ext}}} from \code{file}, \code{{{log_dir}}}
-at submit; see \link{template_builtins}.
+\code{\link[=with_command]{with_command()}} adds the line the job runs, after the header, as a program
+and its arguments. The arguments may hold \code{{{placeholders}}} of their own —
+\code{{{file}}} is the one you almost always want — and those are filled like
+any flag's. \code{\link[=submit_slurm_job]{submit_slurm_job()}} takes the template, fills whatever is
+left, and refuses to submit while a required placeholder has no value.
+\code{\link[=with_pre_run]{with_pre_run()}} and \code{\link[=with_post_run]{with_post_run()}} add lines of your own before and
+after the command, in the same program-plus-arguments form. A few
+placeholders are filled for you — \code{{{file_dir}}}, \code{{{file_stem}}},
+\code{{{file_ext}}} from \code{file}, \code{{{log_dir}}} at submit; see
+\link{template_builtins}. \code{\link[=slurm_template_opts]{slurm_template_opts()}} lists a template's
+placeholders, what each feeds, and what it falls back to.
 
 Flags are held as a named character vector: names are the sbatch long
 options (\code{partition}, \code{cpus-per-task}), values are the placeholder each is
@@ -65,8 +69,7 @@ value a common flag cannot take (see \link{with_flag}) is refused on the spot.
 }
 \examples{
 Template() |>
-  with_sbatch("job-name") |>
-  with_sbatch("cpus-per-task", "ncpu") |>
-  with_sbatch("partition") |>
-  fill(job_name = "10001")
+  with_sbatch_flag("job-name", "10001") |>
+  with_sbatch_flag("cpus-per-task", "{{ncpu}}") |>
+  with_sbatch_flag("partition")
 }

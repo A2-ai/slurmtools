@@ -7,7 +7,7 @@
 wait_for_slurm_job(job, poll = 10, timeout = Inf)
 }
 \arguments{
-\item{job}{the \link{Job} returned by \code{\link[=submit_slurm_job]{submit_slurm_job()}}, or one job id}
+\item{job}{the result of \code{\link[=submit_slurm_job]{submit_slurm_job()}}, or one job id}
 
 \item{poll}{seconds between two looks at \code{sacct}}
 
@@ -30,7 +30,7 @@ like any other, so a fresh submission is never mistaken for a missing job.
 }
 \examples{
 \dontrun{
-job <- submit_slurm_job(rscript, file = "sim.R", partition = "cpu2mem4gb")
+job <- submit_slurm_job(rscript, slurm_template_opts = list(file = "sim.R"))
 status <- wait_for_slurm_job(job)
 status$state # "COMPLETED"
 slurm_job_log(job)

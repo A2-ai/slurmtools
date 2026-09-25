@@ -1,6 +1,6 @@
 #' Cancels a running job
 #'
-#' @param job_id job id to cancel, or the [Job] returned by [submit_slurm_job()]
+#' @param job_id job id to cancel, or the result of [submit_slurm_job()]
 #' @param auto_confirm does not prompt user before cancelling job
 #' @importFrom rlang .data
 #' @importFrom rlang .env

@@ -5,120 +5,120 @@
 \title{Submit a job to slurm}
 \usage{
 submit_slurm_job(
-  x,
-  template,
+  .mod,
   partition = get_slurm_partitions(),
   ncpu = 1,
-  account = NULL,
-  submission_root = getOption("slurmtools.submission_root", default = "submission-log"),
-  template_opts = list(),
+  overwrite = FALSE,
   dry_run = FALSE,
-  ...
+  ...,
+  slurm_job_template_path = getOption("slurmtools.slurm_job_template_path"),
+  submission_root = getOption("slurmtools.submission_root", default = "submission-log"),
+  bbi_config_path = getOption("slurmtools.bbi_config_path"),
+  slurm_template_opts = list()
 )
 }
 \arguments{
-\item{x}{a \code{\link[=Template]{Template()}} to submit; or, in the file form, the path to the
-file to submit — the value rendered into the template's \code{{{file}}}}
-
-\item{template}{file form only: path to the whisker job template for this
-workflow; see \code{\link[=create_slurm_template]{create_slurm_template()}}}
+\item{.mod}{what to submit: a \code{\link[=Template]{Template()}}; the path of the file to run
+through \code{slurm_job_template_path}; or a NONMEM model (a
+\code{bbi_nonmem_model}, or a model path) for the pre-template interface}
 
 \item{partition}{name of the partition to submit to. The default passes the
 full set of partitions; the first is selected.}
 
 \item{ncpu}{number of cpus to request}
 
-\item{account}{slurm account (\code{--account}); omitted when \code{NULL}}
-
-\item{submission_root}{directory to track job submission scripts and
-output; defaults to \code{options('slurmtools.submission_root')}, falling back
-to \code{"submission-log"} under the calling directory}
-
-\item{template_opts}{file form only: named list of extra variables to
-render into the template (these override the built-in values)}
+\item{overwrite}{pre-template NONMEM form only: whether to delete the
+model's existing output directory first}
 
 \item{dry_run}{return the command that would have been invoked, without
 invoking}
 
-\item{...}{for a \code{\link[=Template]{Template()}}, the final fills as \code{placeholder = value};
-for the file form, additional arguments passed on to \code{\link[processx:run]{processx::run()}}}
+\item{...}{arguments passed on to \code{\link[processx:run]{processx::run()}} when sbatch is called}
+
+\item{slurm_job_template_path}{file form and NONMEM form: path to the
+whisker job template; defaults to
+\code{options("slurmtools.slurm_job_template_path")}}
+
+\item{submission_root}{directory to track job submission scripts and
+output; defaults to \code{options("slurmtools.submission_root")}, falling back
+to \code{"submission-log"} under the calling directory}
+
+\item{bbi_config_path}{path to a bbi.yaml, filled into
+\code{{{bbi_config_path}}}; defaults to \code{options("slurmtools.bbi_config_path")}}
+
+\item{slurm_template_opts}{named list of \code{placeholder = value} fills for
+the template — \code{file}, and anything else it asks for; see
+\code{\link[=slurm_template_opts]{slurm_template_opts()}}}
 }
 \value{
-for a dry run, a list with the sbatch command, its args, the rendered
-script, and the partition; for a submitted \code{\link[=Template]{Template()}}, a \link{Job} handle;
-for the file form, the result of \code{\link[processx:run]{processx::run()}} on sbatch
+for a dry run, a list with the sbatch command, its args, the
+rendered script, and the partition. Otherwise the result of
+\code{\link[processx:run]{processx::run()}} on sbatch (\code{status}, \code{stdout}, \code{stderr}, \code{timeout}),
+which for a \code{\link[=Template]{Template()}} also carries \code{job_id}, \code{job_name}, \code{partition},
+\code{script}, and the \code{output} and \code{error} log paths with \verb{\%j} resolved. Hand
+it to \code{\link[=slurm_job_status]{slurm_job_status()}}, \code{\link[=wait_for_slurm_job]{wait_for_slurm_job()}}, \code{\link[=slurm_job_log]{slurm_job_log()}} or
+\code{\link[=cancel_slurm_job]{cancel_slurm_job()}}.
 }
 \description{
 \code{submit_slurm_job()} fills a job \strong{template}, writes the resulting script
 under \code{submission_root}, and hands it to \code{sbatch}. The command that runs on
-the compute node lives in the template, not in this function — slurmtools
-knows nothing about the tool you are running.
+the compute node lives in the template, not here — slurmtools knows nothing
+about the tool you are running. The signature is the one the package has
+always had; what has widened is what \code{.mod} may be.
 
-Given a \code{\link[=Template]{Template()}}, the remaining arguments are the final fill:
-\code{submit_slurm_job(template, file = "sim.R", ncpu = 4)}. Every required
-placeholder must have a value by then — pre-filled with \code{\link[=fill]{fill()}} or passed
+\strong{A \code{\link[=Template]{Template()}}}, the usual case, built from \code{\link[=default_template]{default_template()}}.
+\code{slurm_template_opts} holds the final fills, \code{file} first among them:
+\code{submit_slurm_job(template, slurm_template_opts = list(file = "sim.R"))}.
+\code{\link[=slurm_template_opts]{slurm_template_opts()}} lists what a template can take. \code{partition} and
+\code{ncpu} fill placeholders of those names when the template has them; left
+out, they keep their defaults (the first available partition, one cpu), so
+the call above is complete for a default template. \code{bbi_config_path} fills
+a \code{{{bbi_config_path}}} placeholder the same way. Every required
+placeholder must have a value by then — pre-filled with \code{\link[=fill]{fill()}} or given
 here — or the call stops and names the missing ones; a flag added with
-\code{optional = TRUE} is simply left out. \code{partition}, \code{ncpu} and \code{account}
-fill placeholders of those names when the template has them; left out,
-\code{partition} and \code{ncpu} keep their defaults (the first available partition,
-one cpu), so \code{submit_slurm_job(template, file = "sim.R")} is a complete
-call for a \code{\link[=default_template]{default_template()}}. An unfilled
-\code{--job-name} takes the stem of \code{file} (\code{sim.R} -> \code{sim}). The job
-script is written as \verb{<job_name>.sh} when the template has a filled
-\code{--job-name}, \code{slurm-job.sh} otherwise. A template without \code{--output} or
-\code{--error} gets \verb{<submission_root>/<job_name>-\%j.out} and \code{.err}, so two
-submits of the same job never share a log. The call returns a \link{Job}
-handle: the id, and where the script and logs are.
+\code{optional = TRUE} is simply left out. An unfilled \code{--job-name} takes the
+stem of \code{file} (\code{sim.R} -> \code{sim}). The job script is written as
+\verb{<job_name>.sh} (\code{slurm-job.sh} without a job name), and a template without
+\code{--output} or \code{--error} gets \verb{<submission_root>/<job_name>-\%j.out} and
+\code{.err}, so two submits of the same job never share a log.
 
-Given a \strong{file path}, the older form applies: the file is rendered into the
-template's \code{{{file}}} along with the slurm settings below.
+\strong{A file path}, the file form. The path is rendered into a whisker bash
+template's \code{{{file}}} along with \code{job_name} (the file's name), \code{partition},
+\code{ncpu}, \code{parallel}, \code{log_path}, \code{bbi_config_path}, the \link{template_builtins},
+and whatever \code{slurm_template_opts} adds, which also overrides any of those.
+The template is \code{slurm_job_template_path}, written once with
+\code{\link[=create_slurm_template]{create_slurm_template()}} or \code{\link[=write_slurm_template]{write_slurm_template()}}, or by hand.
 
-\code{\link[=default_template]{default_template()}} is the usual starting point for a \code{\link[=Template]{Template()}}; add
-the command and any further flags to it. For the file form, a template
-is a plain bash script with whisker \code{{{variables}}}, created once with
-\code{\link[=create_slurm_template]{create_slurm_template()}} (or written by hand) and reused for every
-submission after that.
+\strong{A NONMEM model}, the pre-template interface. A \code{bbi_nonmem_model} from
+bbr, or a model path with a template written for it (one that takes the
+model through \code{{{model_path}}}), runs the original NONMEM/bbi code
+unchanged, with a once-per-session note pointing at the template way.
 
-Calls written for the pre-template interface keep working: a
-\code{bbi_nonmem_model}, \verb{.mod =}, any of \code{slurm_job_template_path},
-\code{bbi_config_path}, \code{slurm_template_opts} or \code{overwrite}, or a file path
-with no \code{template} while \code{options(slurmtools.slurm_job_template_path)} is
-set, runs the old NONMEM/bbi code unchanged, with a once-per-session
-warning pointing here.
-
-Every template can use \code{{{file}}}, \code{{{job_name}}}, \code{{{partition}}},
-\code{{{ncpu}}}, \code{{{parallel}}} (true when \code{ncpu > 1}), \code{{{num_mpi_cpus}}},
-\code{{{account}}}, and \code{{{log_path}}}. Anything else a template references is
-supplied through \code{template_opts}, which also overrides any of the
-built-ins. Paths flow into the script exactly as you wrote them — the
-template owns any path handling.
+\code{overwrite} belongs to that NONMEM form, where it clears the model's output
+directory. With a template it is refused rather than guessed at: give bbi
+\code{--overwrite} in its arguments, or clear the directory yourself.
 }
 \examples{
 \dontrun{
-# a template object: build once, submit many times
-rscript <- default_template() |>
-  with_command("Rscript", "{{file}}")
-submit_slurm_job(rscript, file = "sim.R", partition = "cpu2mem4gb", ncpu = 2)
+# a template: build once, submit many times
+rscript <- default_template("Rscript", "{{file}}")
+job <- submit_slurm_job(rscript, slurm_template_opts = list(file = "sim.R"))
+job <- submit_slurm_job(rscript, partition = "cpu4mem32gb", ncpu = 4,
+                        slurm_template_opts = list(file = "sim.R"))
+wait_for_slurm_job(job)
+slurm_job_log(job)
 
-# the file form
-# one-time setup: a template for running R scripts
+# NONMEM through bbi, parallel when ncpu > 1
+bbi <- default_template(
+  "bbi", c("nonmem", "run", "local", "{{file}}", "--config", "{{bbi_config_path}}"),
+  conditional = "parallel", if_true = c("--parallel", "--threads={{ncpu}}")
+)
+submit_slurm_job(bbi, ncpu = 2, slurm_template_opts = list(
+  file = "model/nonmem/1001.mod", bbi_config_path = "model/nonmem/bbi.yaml"
+))
+
+# the file form: a template file written once, any file through it
 create_slurm_template("rscript.tmpl", command = "Rscript", args = "{{file}}")
-
-# then submit any R script through it
-submit_slurm_job("scripts/big-simulation.R", template = "rscript.tmpl", ncpu = 4)
-
-# a NONMEM-via-bbi workflow: the config travels via template_opts
-create_slurm_template(
-  "bbi-nonmem.tmpl",
-  command = "bbi",
-  args = c("nonmem", "run", "local", "{{file}}", "--config", "{{config_path}}"),
-  parallel_args = c("--parallel", "--threads={{ncpu}}")
-)
-submit_slurm_job(
-  "model/nonmem/1001.mod",
-  template = "bbi-nonmem.tmpl",
-  ncpu = 2,
-  template_opts = list(config_path = "model/nonmem/bbi.yaml")
-)
+submit_slurm_job("scripts/big-simulation.R", slurm_job_template_path = "rscript.tmpl", ncpu = 4)
 }
 }

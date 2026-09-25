@@ -51,9 +51,9 @@ By default these values are provided to the slurm template file:
 
 -   `config_path` is determined via `getOption("slurmtools.config_path")`, or the `config_path` argument
 
--   `bbi_exe_path` is the absolute path to `bbi`, resolved at submit time via `Sys.which("bbi")` so the rendered script names the exact binary that will run. Submission errors early if `bbi` cannot be found; point at a specific binary with `template_opts = list(bbi_exe_path = "/path/to/bbi")`
+-   `bbi_exe_path` is the absolute path to `bbi`, resolved at submit time via `Sys.which("bbi")` so the rendered script names the exact binary that will run. Submission errors early if `bbi` cannot be found; point at a specific binary with `slurm_template_opts = list(bbi_exe_path = "/path/to/bbi")`
 
-If you need to feed more arguments to the template you simply supply them in the `template_opts` argument as a list. More on that later.
+If you need to feed more arguments to the template you simply supply them in the `slurm_template_opts` argument as a list. More on that later.
 
 ``` r
 default_template_list = list(
@@ -137,7 +137,7 @@ We can now submit the job and point to the template file in `model/nonmem/slurm-
 submission <- slurmtools::submit_slurm_job(
   mod,
   overwrite = TRUE,
-  template = file.path(nonmem, "slurm-job-bbi.tmpl"),
+  slurm_job_template_path = file.path(nonmem, "slurm-job-bbi.tmpl"),
 )
 
 submission
@@ -172,7 +172,7 @@ Because the templates create a bash shell script there is an almost infinite num
 
 Let's add a notification feature that will send a notification when the job has started and finished. We can use [ntfy.sh](ntfy.sh) and add the necessary info to our template to achieve this.
 
-Here is a modified template file that adds a `JOBID=$SLURM_JOBID` and some ntfy calls. To get a notification we can supply `submit_slurm_job` with an `ntfy` variable via `template_opts`. I'll use `ntfy = "ntfy_demo"` for this.
+Here is a modified template file that adds a `JOBID=$SLURM_JOBID` and some ntfy calls. To get a notification we can supply `submit_slurm_job` with an `ntfy` variable via `slurm_template_opts`. I'll use `ntfy = "ntfy_demo"` for this.
 
 ``` slurm-job-bbi-ntfy.tmpl
 #!/bin/bash
@@ -213,9 +213,9 @@ Since we've already run this model we will provide the `overwrite = TRUE` argume
 ```{r}
 submission_ntfy <- slurmtools::submit_slurm_job(
   mod,
-  template = file.path(nonmem, "slurm-job-bbi-ntfy.tmpl"),
+  slurm_job_template_path = file.path(nonmem, "slurm-job-bbi-ntfy.tmpl"),
   overwrite = TRUE,
-  template_opts = list(
+  slurm_template_opts = list(
     ntfy = "ntfy_demo")
 )
 

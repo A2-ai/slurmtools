@@ -22,18 +22,18 @@ file_builtins <- c("file_dir", "file_stem", "file_ext")
 #' `{{file_stem}}` still takes `file`. `{{log_dir}}` is filled at submit and
 #' stays a `{{log_dir}}` tag in a written template file. `{{parallel}}`
 #' follows whichever placeholder [with_cpus_per_task()] (or
-#' `with_sbatch("cpus-per-task", ...)`) was given, so it is a whisker
-#' *section* rather than a plain tag: write `{{#parallel}}--parallel
-#' --num-mpi-cpus={{ncpu}}{{/parallel}}` in a command or hook line and it
-#' appears only for `ncpu > 1`. Sections resolve at submit time, not in
-#' `print()` — a `{{#parallel}}…{{/parallel}}` line still shows its mustache
-#' tags when you print the template, the same as an unfilled optional
-#' `#SBATCH` line does. Filling a builtin yourself overrides the derived
+#' `with_sbatch_flag("cpus-per-task", ...)`) was given, so it is a whisker
+#' *section* rather than a plain tag: give [with_command()] or a hook
+#' `conditional = "parallel", if_true = c("--parallel", "--threads={{ncpu}}")`
+#' and the parallel form of the line is used only for `ncpu > 1`. Sections
+#' resolve at submit time, not in `print()` — a template with a conditional
+#' still shows both forms and their mustache tags when you print it, the same
+#' as an unfilled optional `#SBATCH` line does. Filling a builtin yourself overrides the derived
 #' value. Templates used through the file form get the same names.
 #'
 #' The corpus's NONMEM recipe — a flat symlink to the `.lst` a run writes into
 #' its own directory — is one post-run line:
-#' `with_post_run("ln -sf {{file_dir}}/{{file_stem}}/{{file_stem}}.lst {{file_dir}}/{{file_stem}}.lst")`.
+#' `with_post_run("ln", c("-sf", "{{file_dir}}/{{file_stem}}/{{file_stem}}.lst", "{{file_dir}}/{{file_stem}}.lst"))`.
 #'
 #' @name template_builtins
 #' @seealso [with_hooks], [with_command()], [fill()]

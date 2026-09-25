@@ -20,13 +20,12 @@ write_slurm_template(template, path, overwrite = FALSE)
 Saves the template as it renders now — filled values in place, unfilled
 placeholders as \code{{{name}}} — to a plain bash file you own. Open it, edit it,
 add whatever your workflow needs; slurmtools does not look inside it again
-except to fill the placeholders.
+except to fill the placeholders. Submit through it with
+\code{submit_slurm_job(file, slurm_job_template_path = path)}.
 }
 \examples{
 \dontrun{
-Template() |>
-  with_sbatch("job-name") |>
-  with_sbatch("partition") |>
+default_template("Rscript", "{{file}}") |>
   write_slurm_template("rscript.tmpl")
 }
 }

@@ -141,7 +141,7 @@ test_that("the warning points at the template way", {
   expect_warning(
     submit_slurm_job(l$mod, partition = "cpu2mem4gb", dry_run = TRUE,
                      slurm_job_template_path = l$template, slurm_template_opts = opts),
-    "default_template()",
+    "default_template(\"bbi\"",
     fixed = TRUE
   )
 })
@@ -149,18 +149,34 @@ test_that("the warning points at the template way", {
 test_that("template-form and file-form calls are not routed to the old code", {
   l <- local_legacy()
   withr::local_options(slurmtools.slurm_job_template_path = l$template)
-  tmpl <- default_template() |> with_command("echo", "{{file}}")
+  tmpl <- default_template("echo", "{{file}}")
 
   # a Template is never legacy, even with the old option still set
-  expect_no_warning(submit_slurm_job(tmpl, file = "a.R", partition = "cpu2mem4gb", ncpu = 1, dry_run = TRUE))
-  # nor is the file form once `template` is given
+  expect_no_warning(submit_slurm_job(tmpl, partition = "cpu2mem4gb", ncpu = 1, dry_run = TRUE, slurm_template_opts = list(file = "a.R")))
+  # nor is a model path with a template written for the file form: what
+  # decides is the template, not the argument it came through
   file_tmpl <- file.path(l$dir, "new.tmpl")
   writeLines(c("#!/bin/bash", "echo {{file}}"), file_tmpl)
-  expect_no_warning(submit_slurm_job(l$mod, template = file_tmpl, partition = "cpu2mem4gb", dry_run = TRUE))
+  expect_no_warning(cmd <- submit_slurm_job(l$mod, slurm_job_template_path = file_tmpl, partition = "cpu2mem4gb", dry_run = TRUE))
+  expect_match(cmd$template_script, paste("echo", l$mod), fixed = TRUE)
+  withr::local_options(slurmtools.slurm_job_template_path = file_tmpl)
+  expect_no_warning(submit_slurm_job(l$mod, partition = "cpu2mem4gb", dry_run = TRUE))
+})
+
+test_that("what routes to the old code is a bbr model, or a template that takes {{model_path}}", {
+  l <- local_legacy()
+  expect_true(is_legacy_template(l$template))
+  new_tmpl <- withr::local_tempfile(fileext = ".tmpl", lines = c("#!/bin/bash", "echo {{file}}"))
+  expect_false(is_legacy_template(new_tmpl))
+  expect_false(is_legacy_template(NULL))
+  expect_false(is_legacy_template("no-such-file.tmpl"))
+  expect_true(is_legacy_submit(a_bbr_model(l$model_path), new_tmpl))
+  expect_true(is_legacy_submit(l$mod, l$template))
+  expect_false(is_legacy_submit(l$mod, new_tmpl))
 })
 
 test_that("a path with no template and no old option still asks for a template", {
   l <- local_legacy()
   withr::local_options(slurmtools.slurm_job_template_path = NULL)
-  expect_error(submit_slurm_job(l$mod, partition = "cpu2mem4gb", dry_run = TRUE), "`template` is required")
+  expect_error(submit_slurm_job(l$mod, partition = "cpu2mem4gb", dry_run = TRUE), "`slurm_job_template_path` is required")
 })

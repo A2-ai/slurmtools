@@ -8,6 +8,9 @@ with_command(
   template,
   command,
   args = character(),
+  conditional = NULL,
+  if_true = character(),
+  if_false = character(),
   launcher = NULL,
   launcher_args = character()
 )
@@ -15,10 +18,21 @@ with_command(
 \arguments{
 \item{template}{a \code{\link[=Template]{Template()}}}
 
-\item{command}{the program to run, e.g. \code{"Rscript"} or \code{"bbi"}}
+\item{command}{the program to run: a name such as \code{"Rscript"} or \code{"bbi"},
+a path, or a placeholder such as \code{"{{bbi}}"}. The program alone:
+\code{"Rscript sim.R"} is an error, its arguments go in \code{args}}
 
-\item{args}{character vector of arguments appended to the command, e.g.
-\code{c("nonmem", "run", "local", "{{file}}")}}
+\item{args}{character vector of arguments appended to the command, one
+word each, e.g. \code{c("nonmem", "run", "local", "{{file}}")}. An argument
+containing a space is quoted for the shell}
+
+\item{conditional}{a placeholder that decides between \code{if_true} and
+\code{if_false}, e.g. \code{"parallel"}; \code{NULL} (the default) for a plain line}
+
+\item{if_true, if_false}{character vectors of arguments appended when
+\code{conditional} is true, respectively false, e.g.
+\code{if_true = c("--parallel", "--threads={{ncpu}}")} and
+\code{if_false = character()}}
 
 \item{launcher}{a launcher program that runs \code{command} for you, e.g.
 \code{"mpirun"}; \code{NULL} (the default) runs \code{command} directly}
@@ -30,21 +44,30 @@ launcher, before \code{command}, e.g. \code{c("--bind-to", "core", "--map-by", "
 the template with the command line added
 }
 \description{
-Appends the line that runs on the compute node: \code{command} followed by
-\code{args}, after the \verb{#SBATCH} header. \code{command} is resolved to an absolute
-path with \code{Sys.which()} when the template is built, so the script names
-the exact binary that will run; a \code{command} that already contains a \code{/}
-is taken as given. \code{args} may hold \code{{{placeholders}}} — \code{{{file}}} is the
-one you almost always want — filled with \code{\link[=fill]{fill()}} or at submit time. Call
+Appends the line that runs on the compute node, after the \verb{#SBATCH}
+header: \code{command} followed by \code{args}, one argument per element. An
+argument containing whitespace is quoted for bash, so it reaches the
+program as one word. \code{command} is a program name, a path, or a
+\code{{{placeholder}}}. A bare name is resolved to an absolute path with
+\code{Sys.which()} when the template is built, so the script names the exact
+binary that will run and a missing tool fails here rather than on the
+node; a path is taken as given; a placeholder is filled like any other,
+with a name or a path, and resolved the same way at submit. \code{args} may hold
+\code{{{placeholders}}} — \code{{{file}}} is the one you almost always want. Call
 \code{with_command()} again to run a second command after the first.
 
+A \code{conditional} names a placeholder that switches between two forms of
+the line: with \code{if_true} appended when the placeholder is true, with
+\code{if_false} appended otherwise. The script carries both, in
+\verb{\{\{#conditional\}\}} and \verb{\{\{^conditional\}\}} sections, and the submitted job
+gets the one that applies. The usual switch is the \code{{{parallel}}} builtin,
+true when \code{--cpus-per-task} is filled above one (see \link{template_builtins}).
+
 A distributed tool is usually launcher-plus-binary — \verb{mpirun <flags> distMonolix <flags>} — rather than one program. \code{launcher} and
-\code{launcher_args} prepend that launcher to this command's line, resolved to
-an absolute path the same way \code{command} is: which \code{mpirun} a node finds on
-its own PATH can be the wrong one (a second MPI stack installed alongside
-it), so slurmtools shows the exact one it picked rather than trusting the
-node to find it. Which flags a launcher needs (\code{--bind-to}, \code{--map-by},
-\code{--thread}) is between you and the launcher; slurmtools only places them.
+\code{launcher_args} prepend that launcher to this command's line, resolved the
+same way \code{command} is: which \code{mpirun} a node finds on its own PATH can be
+the wrong one (a second MPI stack installed alongside it), so slurmtools
+shows the exact one it picked rather than trusting the node to find it.
 }
 \examples{
 \dontrun{
@@ -53,11 +76,19 @@ Template() |>
   with_partition() |>
   with_command("Rscript", "{{file}}")
 
+# NONMEM through bbi, parallel only when ncpu > 1
+default_template() |>
+  with_command(
+    "bbi", c("nonmem", "run", "local", "{{file}}", "--config", "{{bbi_config_path}}"),
+    conditional = "parallel",
+    if_true = c("--parallel", "--threads={{ncpu}}")
+  )
+
 # launcher + binary (corpus ex. 2): one line, both resolved and shown
 Template() |>
   with_job_name() |>
   with_nodes(2) |>
-  with_cpus_per_task("ncpu") |>
+  with_cpus_per_task("{{ncpu}}") |>
   with_command(
     "/opt/monolix/MonolixSuite2024R1/lib/distMonolix", c("-p", "{{file}}", "--thread", "{{ncpu}}"),
     launcher = "mpirun", launcher_args = c("--bind-to", "core", "--map-by", "slot:PE={{ncpu}}")

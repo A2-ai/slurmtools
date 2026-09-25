@@ -1,0 +1,17 @@
+bbi <- default_template() |> with_command(
+  "{{bbi}}"/"bbi", #if you want to call from a global exe how does sys which know what to find should be able to accept "bbi" or {{bbi}}
+  args = c("nonmem", "run", "local", "{{model_path}}.mod", "--config", "{{bbi_config_path}}"),
+  conditional_<arg> = "parallalel",
+  true = c("--parallel", "--threads={{ncpu}})
+  false = character()
+)
+
+
+
+{{#parallel}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --config {{bbi_config_path}} --parallel --threads={{ncpu}}
+{{/parallel}}
+
+{{^parallel}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --config {{bbi_config_path}}
+{{/parallel}}

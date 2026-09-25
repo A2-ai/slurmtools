@@ -1,7 +1,7 @@
 # The pre-template interface, kept so projects written against it keep working.
 #
-# submit_slurm_job() routes a call here when it looks like the NONMEM/bbi form
-# (see is_legacy_submit()). The function below is `main`'s submit_slurm_job()
+# submit_slurm_job() routes a call here when it is the NONMEM/bbi form: a bbr
+# model, or a template that takes `{{model_path}}` (see is_legacy_submit()). The function below is `main`'s submit_slurm_job()
 # at e4b747d, moved verbatim apart from its name, the `here` check (here moved
 # to Suggests) and the roxygen block; do not "fix" it — its job is to behave
 # exactly as it did.
@@ -190,24 +190,24 @@ submit_slurm_job_legacy <-
     })
   }
 
-# argument names only the pre-template interface had
-legacy_arg_names <- c(".mod", "overwrite", "slurm_job_template_path", "bbi_config_path", "slurm_template_opts")
+# a template written for the pre-template interface takes the model through
+# `{{model_path}}` (and bbi through `{{bbi_exe_path}}`); one written for the
+# file form takes `{{file}}`
+is_legacy_template <- function(path) {
+  is.character(path) && length(path) == 1 && !is.na(path) && fs::file_exists(path) &&
+    grepl("\\{\\{\\s*(model_path|bbi_exe_path)\\s*\\}\\}", brio::read_file(path))
+}
 
-# does a submit_slurm_job() call look like the pre-template NONMEM/bbi form?
-# `x` is NULL when the call named `.mod` instead; `dot_names` is ...names()
-is_legacy_submit <- function(x, template_missing, dot_names) {
-  any(dot_names %in% legacy_arg_names) ||
-    inherits(x, "bbi_nonmem_model") ||
-    (template_missing &&
-      !S7::S7_inherits(x, Template) &&
-      !is.null(getOption("slurmtools.slurm_job_template_path")))
+# does a submit_slurm_job() call belong to the pre-template NONMEM/bbi code?
+is_legacy_submit <- function(.mod, slurm_job_template_path) {
+  inherits(.mod, "bbi_nonmem_model") || is_legacy_template(slurm_job_template_path)
 }
 
 warn_legacy_submit <- function() {
   rlang::warn(
     c(
-      "`submit_slurm_job()` was called the pre-template way (a model plus `slurmtools.slurm_job_template_path`); running it as before",
-      i = "the template way: submit_slurm_job(default_template() |> with_command(\"bbi\", ...), file = \"model.mod\")"
+      "`submit_slurm_job()` was called the pre-template way (a NONMEM model with a `{{model_path}}` template); running it as before",
+      i = "the template way: default_template(\"bbi\", c(\"nonmem\", \"run\", \"local\", \"{{file}}\", ...)) |> submit_slurm_job(slurm_template_opts = list(file = \"model.mod\"))"
     ),
     .frequency = "once",
     .frequency_id = "slurmtools-legacy-submit"

@@ -4,44 +4,75 @@
 \alias{with_hooks}
 \alias{with_pre_run}
 \alias{with_post_run}
-\title{Run bash lines before or after the command}
+\title{Run commands before or after the job's command}
 \usage{
-with_pre_run(template, lines)
+with_pre_run(
+  template,
+  command,
+  args = character(),
+  conditional = NULL,
+  if_true = character(),
+  if_false = character()
+)
 
-with_post_run(template, lines)
+with_post_run(
+  template,
+  command,
+  args = character(),
+  conditional = NULL,
+  if_true = character(),
+  if_false = character()
+)
 }
 \arguments{
 \item{template}{a \code{\link[=Template]{Template()}}}
 
-\item{lines}{character vector of bash lines, one element per line}
+\item{command}{the program to run: a name such as \code{"curl"}, a path, a
+shell builtin such as \code{"module"}, or a placeholder. The program alone:
+\code{"module load R"} is an error, its arguments go in \code{args}}
+
+\item{args}{character vector of arguments, one word each, e.g.
+\code{c("load", "R/4.5")}}
+
+\item{conditional}{a placeholder that decides between \code{if_true} and
+\code{if_false}, e.g. \code{"parallel"}; \code{NULL} (the default) for a plain line}
+
+\item{if_true, if_false}{character vectors of arguments appended when
+\code{conditional} is true, respectively false, e.g.
+\code{if_true = c("--parallel", "--threads={{ncpu}}")} and
+\code{if_false = character()}}
 }
 \value{
-the template with the lines added
+the template with the line added
 }
 \description{
-Hooks are plain bash lines placed around the command: \code{with_pre_run()}
-lines run before it, \code{with_post_run()} lines after it, whichever order the
-verbs were called in. They go into the script exactly as given — no program
-resolution, no quoting — so anything bash accepts goes: \verb{module load},
-\code{cd}, \code{export}, a \code{curl} to a notification service, \code{ln -sf} to put a
-result where downstream tooling expects it, or \verb{bash my-hook.sh}. Lines may
-hold \code{{{placeholders}}}, filled like any other with \code{\link[=fill]{fill()}} or at submit
-time; \verb{$SLURM_JOB_ID} and the other Slurm variables are there at run time
-as usual. Calling a verb again appends more lines.
+Hooks are lines placed around the command, in the same
+program-plus-arguments form as \code{\link[=with_command]{with_command()}}: \code{with_pre_run()} lines run
+before it, \code{with_post_run()} lines after it, whichever order the verbs
+were called in. A bare program name is looked up on the PATH and written
+as its full path when found; one that is not found — \code{module}, \code{cd},
+\code{export} and the other shell builtins — is written as given, for bash to
+resolve on the node. Arguments may hold \code{{{placeholders}}}, filled like
+any other with \code{\link[=fill]{fill()}} or at submit time, and \verb{$SLURM_JOB_ID} and the
+other Slurm variables are there at run time as usual: an argument with
+whitespace is wrapped in double quotes, so they still expand. Calling a
+verb again appends another line. \code{conditional}, \code{if_true} and \code{if_false}
+work as in \code{\link[=with_command]{with_command()}}.
 
 Post-run lines run however the command ended: this first version has no
-exit-status logic. Chain with \code{&&} / \code{||} yourself where that matters;
-success-only and failure-only hooks are a later, opt-in layer.
+exit-status logic. Success-only and failure-only hooks are a later, opt-in
+layer.
 
 Notifications are a recipe, not a builtin. For ntfy.sh:
-\code{with_post_run("curl -s -d '{{job_name}} finished' ntfy.sh/{{ntfy_topic}}")},
+\code{with_post_run("curl", c("-s", "-d", "{{job_name}} finished", "ntfy.sh/{{ntfy_topic}}"))},
 then \code{ntfy_topic} is filled like any placeholder.
 }
 \examples{
 Template() |>
   with_job_name() |>
   with_partition() |>
-  with_pre_run(c("module load R/4.5", "cd {{work_dir}}")) |>
+  with_pre_run("module", c("load", "R/4.5")) |>
+  with_pre_run("cd", "{{work_dir}}") |>
   with_command("/opt/R/4.5.3/bin/Rscript", "{{file}}") |>
-  with_post_run("echo \"$SLURM_JOB_ID finished\" >> runs.log")
+  with_post_run("echo", "$SLURM_JOB_ID finished")
 }

@@ -20,10 +20,11 @@ Gives placeholders their values: \code{fill(template, ncpu = 4)} renders every
 template until every placeholder has a value. Filling a placeholder again
 replaces the earlier value. A name that is not a placeholder of this
 template is an error, so a typo cannot silently leave a flag empty.
+\code{\link[=slurm_template_opts]{slurm_template_opts()}} lists what there is to fill.
 }
 \examples{
 Template() |>
-  with_sbatch("cpus-per-task", "ncpu") |>
-  with_sbatch("partition") |>
+  with_sbatch_flag("cpus-per-task", "{{ncpu}}") |>
+  with_sbatch_flag("partition") |>
   fill(ncpu = 4, partition = "cpu4mem32gb")
 }

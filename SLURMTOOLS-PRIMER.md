@@ -3,7 +3,7 @@
 This is for someone joining the project who is new to slurm, new to slurmtools,
 or both. It explains what the package is for, how the version on `main` works,
 why it is being redesigned, and how the redesign on `poc/template-first-submit`
-works. If you want to see the two builds side by side, read
+(including the 2026-09-23 review changes) works. If you want to see the two builds side by side, read
 `main-vs-template-builder.qmd` next: it runs the same R input through both
 builds and diffs the job scripts they produce.
 
@@ -130,15 +130,16 @@ one line. The template is ordinary bash, so anything bash can do is possible.
 
 | Piece | What it is |
 |---|---|
-| `default_template()` | The usual starting point: main's header shape (`--job-name`, `--nodes=1`, `--ntasks=1`, `--cpus-per-task` from `ncpu`, `--partition`, and `--account` only if given). Add a command and you can submit. |
+| `default_template(command, args)` | The usual starting point: main's header shape (`--job-name`, `--nodes=1`, `--ntasks=1`, `--cpus-per-task` from `ncpu`, `--partition`, and `--account` only if given) plus the command. `default_template("Rscript", "{{file}}")` is ready to submit. |
 | `Template()` | An empty template, for building from scratch. An S7 object holding the `#SBATCH` flags, the command, hook lines and the values filled so far. It prints as the script it would become. |
-| `with_<flag>()` | Adds one `#SBATCH` line. There are ten named verbs (`with_job_name`, `with_partition`, `with_account`, `with_cpus_per_task`, `with_nodes`, `with_ntasks`, `with_ntasks_per_node`, `with_gres`, `with_output`, `with_error`), plus the **blanket** `with_sbatch(t, "<any flag>")` for everything else (`time`, `mem`, …). Each verb takes a placeholder name and `optional = TRUE` to drop the line when it is left unfilled. |
-| `with_command()` | What to run. The program is resolved to an absolute path. `launcher =` puts e.g. `mpirun` in front. |
-| `with_pre_run()` / `with_post_run()` | Plain bash lines before and after the command. |
+| `with_<flag>()` | Adds one `#SBATCH` line. The **blanket** verb is `with_sbatch_flag(t, "<any flag>")`; the ten named verbs (`with_job_name`, `with_partition`, `with_account`, `with_cpus_per_task`, `with_nodes`, `with_ntasks`, `with_ntasks_per_node`, `with_gres`, `with_output`, `with_error`) are one-line wrappers over it. Each takes a placeholder name and `optional = TRUE` to drop the line when it is left unfilled. |
+| `with_command(program, args)` | What to run: a program (resolved to an absolute path) and a character vector of arguments, never one string. `conditional = "parallel", if_true = c(...)` writes two versions of the line and slurm gets the one that applies. `launcher =` puts e.g. `mpirun` in front. |
+| `with_pre_run(program, args)` / `with_post_run(program, args)` | Lines before and after the command, same shape as the command. Shell builtins such as `module` are written as given. |
 | `fill()` | Supplies placeholder values early. Misspelling a placeholder is an **error** that lists the real ones. |
-| `submit_slurm_job(template, …)` | The final fills, then checks, then `sbatch`. It refuses if a required placeholder is still empty and names it. |
-| `Job` | The S7 handle `submit_slurm_job()` returns: id, name, partition, script path, log paths. |
-| `slurm_job_status()`, `wait_for_slurm_job()`, `slurm_job_log()`, `cancel_slurm_job()` | Follow the job through its handle, using `sacct`, so finished jobs are still visible. |
+| `submit_slurm_job(template, …, slurm_template_opts = list(…))` | main's function with main's signature; the template goes where the model went and the fills go in `slurm_template_opts`, as they always did. `partition`, `ncpu` and `bbi_config_path` fill placeholders of those names. Then checks, then `sbatch`. It refuses if a required placeholder is still empty and names it. |
+| `slurm_template_opts(template)` | A table of the options a template accepts: which flag uses each, whether it is required, its current value and its default. |
+| the result | What main returned (the `sbatch` result) plus `job_id`, `job_name`, `partition`, `script`, `output`, `error`. A plain list, not a class. |
+| `slurm_job_status()`, `wait_for_slurm_job()`, `slurm_job_log()`, `cancel_slurm_job()` | Follow the job from that result or a bare id, using `sacct`, so finished jobs are still visible. |
 | `write_slurm_template()` | Saves a Template as a whisker file, for people who want a file in the repo. |
 
 ### A complete example
@@ -146,16 +147,16 @@ one line. The template is ordinary bash, so anything bash can do is possible.
 ```r
 library(slurmtools)
 
-rscript <- default_template() |>
-  with_command("Rscript", "{{file}}") |>
-  with_sbatch("time") |>                  # any flag the default lacks
-  with_post_run('echo "done: exit $?"')
+rscript <- default_template("Rscript", "{{file}}") |>
+  with_sbatch_flag("time") |>             # any flag the default lacks
+  with_post_run("echo", "done: exit $?")  # a program and its arguments, like the command
 
 rscript                                   # prints the script with {{placeholders}}
+slurm_template_opts(rscript)              # the blanks it takes, required or not, defaults
 
-job <- submit_slurm_job(rscript, file = "sim.R", time = "01:00:00",
-                        partition = "cpu2mem4gb", ncpu = 2)   # job name: "sim", from the file
-job                                       # <Job> 2051 · sim · cpu2mem4gb …
+job <- submit_slurm_job(rscript, partition = "cpu2mem4gb", ncpu = 2,
+                        slurm_template_opts = list(file = "sim.R", time = "01:00:00"))
+job$job_id                                # "2389"; job name "sim", from the file
 wait_for_slurm_job(job)                   # polls sacct until the job finishes
 slurm_job_log(job)                        # what R printed
 ```
@@ -181,23 +182,27 @@ which is the build-once, reuse-everywhere idea.
 | Choice | Reason |
 |---|---|
 | Builder pattern instead of a hand-edited bash file | The flags become data the package can validate, drop when optional, and check against the partition. |
-| S7 classes (`Template`, `Job`) | Validation lives on the object, so an invalid template can't exist, whichever verb built it. |
-| Template and Job are separate classes | A template is reusable and has no id. A job is one submission with an id. |
-| Named verbs for ten flags, `with_sbatch()` for the rest | The ten are the ones the client corpus uses. Everything else stays possible without waiting for a new verb. |
+| One S7 class, `Template` | Validation lives on the object, so an invalid template can't exist, whichever verb built it. |
+| No `Job` class; a submit returns main's `sbatch` result plus `job_id` and paths | Review feedback (2026-09-23): keep template and job apart and drop `job.R`. The template is the reusable thing; a submission is just a result. |
+| `submit_slurm_job()` keeps main's signature to the letter | Review feedback: match the old signature. A `Template` in `.mod` and fills in `slurm_template_opts` mean nothing new to learn for the call itself. |
+| A program plus a vector of arguments, never `"Rscript sim.R"` | Review feedback: standardize inputs. The package can resolve the program, quote an argument with a space, and swap conditional arguments without parsing bash. |
+| Named verbs for ten flags, `with_sbatch_flag()` for the rest | The ten are the ones the client corpus uses, as thin wrappers. Everything else stays possible without waiting for a new verb. |
 | whisker kept | Existing templates and users know it. The derived builtins remove the one case (dirname/stem) that seemed to demand a richer engine. |
 | Hooks are plain lines; ntfy is a recipe, not a feature | Slurm's own mail does not deliver on this cluster. Posting to ntfy.sh with `curl` in a post-run line works, and it isn't special-cased. |
 | One default template, main's header shape | People start from what they already know. Anything more is one `with_*()` call. |
-| Old calls keep working through a shim | `R/legacy.R` is main's function verbatim. A main-style call is recognised, re-matched against main's own signature, and warned about once per session. Projects upgrade without edits. |
+| Old calls keep working through a shim | `R/legacy.R` is main's function verbatim. A call with a `bbr` model, or a template naming `{{model_path}}`, runs it and warns once per session. Projects upgrade without edits. |
 | Program paths resolved on the login node; no `exec` | The compute node runs exactly what you tested with. |
 
 ## 6. Where it stands (2026-09-23)
 
 **Built and suite-tested,** each slice also run once for real on the cluster:
 the builder, the named and blanket verbs, fills, optional flags, the command
-and launcher, the `Job` handle, status, wait, log and cancel, hooks v1, the
-derived builtins, and the topology checks.
-`default_template()` and the legacy shim are suite-tested and dry-run only;
-no real job has been submitted through them yet.
+and launcher, status, wait, log and cancel, hooks v1, the derived builtins,
+and the topology checks. After the 2026-09-23 review, an R script (job 2389)
+and a NONMEM model through bbi (job 2390) ran for real through
+`default_template()` and main's signature. The legacy shim is suite-tested
+and dry-run only. The review changes sit on `poc/template-first-submit`,
+uncommitted.
 
 **Not done or open:**
 
@@ -219,4 +224,4 @@ no real job has been submitted through them yet.
 | See the decisions and their dates | `DESIGN-SBATCH-OPTIONS.md`, § "Open after the meeting" (`✅ LANDED` notes) |
 | See the full roadmap (handle, lifecycle, hooks, batch, guardrails) | `PLAN-LAYERS-ON-SBATCH.md` |
 | See the client job scripts that drove the design | `TEMPLATE-CORPUS.md` |
-| Read the function reference | `?Template`, `?with_sbatch`, `?submit_slurm_job`, `?Job`, `?template_builtins` |
+| Read the function reference | `?Template`, `?default_template`, `?with_sbatch_flag`, `?with_command`, `?submit_slurm_job`, `?slurm_template_opts`, `?template_builtins` |

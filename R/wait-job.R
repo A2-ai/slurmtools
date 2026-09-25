@@ -17,7 +17,7 @@ terminal_job_states <- c(
 #' A job `sacct` does not know yet shows as "not in sacct yet" and is polled
 #' like any other, so a fresh submission is never mistaken for a missing job.
 #'
-#' @param job the [Job] returned by [submit_slurm_job()], or one job id
+#' @param job the result of [submit_slurm_job()], or one job id
 #' @param poll seconds between two looks at `sacct`
 #' @param timeout seconds to wait in total before giving up with an error;
 #'   `Inf` (the default) waits as long as it takes
@@ -26,7 +26,7 @@ terminal_job_states <- c(
 #'
 #' @examples
 #' \dontrun{
-#' job <- submit_slurm_job(rscript, file = "sim.R", partition = "cpu2mem4gb")
+#' job <- submit_slurm_job(rscript, slurm_template_opts = list(file = "sim.R"))
 #' status <- wait_for_slurm_job(job)
 #' status$state # "COMPLETED"
 #' slurm_job_log(job)

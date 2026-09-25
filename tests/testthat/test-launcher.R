@@ -46,6 +46,7 @@ test_that("a second with_command() call is unaffected by the first one's launche
 })
 
 test_that("with_command() checks the launcher arguments", {
+  # each launcher argument is one element, never several in one string
   expect_error(with_command(Template(), rscript, launcher = 1), "`launcher` must be")
   expect_error(with_command(Template(), rscript, launcher = NA_character_), "`launcher` must be")
   expect_error(with_command(Template(), rscript, launcher = character()), "`launcher` must be")
@@ -57,12 +58,15 @@ test_that("the corpus ex. 2 shape submits with the launcher line resolved and fa
   tmpl <- Template() |>
     with_job_name() |>
     with_nodes() |>
-    with_cpus_per_task("ncpu") |>
+    with_cpus_per_task("{{ncpu}}") |>
     with_command(
       "/opt/monolix/MonolixSuite2024R1/lib/distMonolix", c("-p", "{{file}}", "--thread", "{{ncpu}}"),
-      launcher = "env", launcher_args = "--map-by slot:PE={{ncpu}}"
+      launcher = "env", launcher_args = c("--map-by", "slot:PE={{ncpu}}")
     )
-  dry <- submit_slurm_job(tmpl, file = "theophylline_project.mlxtran", job_name = "monolixRun", nodes = 2, ncpu = 2, dry_run = TRUE)
+  dry <- submit_slurm_job(
+    tmpl, ncpu = 2, dry_run = TRUE,
+    slurm_template_opts = list(file = "theophylline_project.mlxtran", job_name = "monolixRun", nodes = 2)
+  )
   script <- strsplit(dry$template_script, "\n")[[1]]
   expect_equal(
     utils::tail(script, 1),

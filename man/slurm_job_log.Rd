@@ -7,7 +7,7 @@
 slurm_job_log(job, which = c("output", "error"), n = Inf)
 }
 \arguments{
-\item{job}{the \link{Job} returned by \code{\link[=submit_slurm_job]{submit_slurm_job()}}}
+\item{job}{the result of \code{\link[=submit_slurm_job]{submit_slurm_job()}} for a \code{\link[=Template]{Template()}}}
 
 \item{which}{\code{"output"} (the default) or \code{"error"}}
 
@@ -18,14 +18,14 @@ a character vector, one element per line
 }
 \description{
 The lines of the job's standard output — or, with \code{which = "error"}, its
-standard error — read from the path the \link{Job} handle recorded at submit
-time, \verb{\%j} already resolved. Before the job has started there is no file,
-and that is an error rather than an empty result, so "printed nothing" and
-"has not run" cannot be confused.
+standard error — read from the path \code{\link[=submit_slurm_job]{submit_slurm_job()}} recorded in its
+result, \verb{\%j} already resolved. Before the job has started there is no
+file, and that is an error rather than an empty result, so "printed
+nothing" and "has not run" cannot be confused.
 }
 \examples{
 \dontrun{
-job <- submit_slurm_job(rscript, file = "sim.R", partition = "cpu2mem4gb")
+job <- submit_slurm_job(rscript, slurm_template_opts = list(file = "sim.R"))
 wait_for_slurm_job(job)
 slurm_job_log(job)
 slurm_job_log(job, "error", n = 20)
