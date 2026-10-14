@@ -9,7 +9,16 @@ fill(template, ...)
 \arguments{
 \item{template}{a \code{\link[=Template]{Template()}}}
 
-\item{...}{\code{placeholder = value} pairs; each value a single string or number}
+\item{...}{\code{placeholder = value} pairs. The names are the template's
+placeholders: one per \verb{#SBATCH} flag (for \code{\link[=default_template]{default_template()}} those are
+\code{job_name}, \code{ncpu}, \code{partition} and \code{account}, plus \code{nodes} and \code{ntasks}
+to change the \code{1} they hold) and every \code{{{tag}}} written in a command or
+hook line, \code{file} first among them. \code{\link[=slurm_template_opts]{slurm_template_opts()}} lists them
+for the template you have. Each value is a single string or number, or
+\code{NULL} to remove the flag; the common flags check theirs as \link{with_flag}
+describes. \code{file_dir}, \code{file_stem}, \code{file_ext} and \code{parallel} are
+derived for you when the template writes them, and may be given here to
+override the derived value (see \link{template_builtins}).}
 }
 \value{
 the template with those placeholders filled
@@ -20,11 +29,18 @@ Gives placeholders their values: \code{fill(template, ncpu = 4)} renders every
 template until every placeholder has a value. Filling a placeholder again
 replaces the earlier value. A name that is not a placeholder of this
 template is an error, so a typo cannot silently leave a flag empty.
-\code{\link[=slurm_template_opts]{slurm_template_opts()}} lists what there is to fill.
+\code{NULL} removes the \verb{#SBATCH} line a placeholder fills:
+\code{fill(template, account = NULL)} drops \code{--account}. The values are kept,
+not substituted, until the template is built, and a list of them can be
+spliced in: \code{fill(template, !!!opts)}. \code{\link[=slurm_template_opts]{slurm_template_opts()}} lists what
+there is to fill.
 }
 \examples{
 Template() |>
   with_sbatch_flag("cpus-per-task", "{{ncpu}}") |>
   with_sbatch_flag("partition") |>
   fill(ncpu = 4, partition = "cpu4mem32gb")
+
+default_template() |>
+  fill(ntasks = NULL) # no --ntasks line
 }

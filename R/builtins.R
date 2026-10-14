@@ -24,12 +24,13 @@ file_builtins <- c("file_dir", "file_stem", "file_ext")
 #' follows whichever placeholder [with_cpus_per_task()] (or
 #' `with_sbatch_flag("cpus-per-task", ...)`) was given, so it is a whisker
 #' *section* rather than a plain tag: give [with_command()] or a hook
-#' `conditional = "parallel", if_true = c("--parallel", "--threads={{ncpu}}")`
-#' and the parallel form of the line is used only for `ncpu > 1`. Sections
-#' resolve at submit time, not in `print()` — a template with a conditional
-#' still shows both forms and their mustache tags when you print it, the same
-#' as an unfilled optional `#SBATCH` line does. Filling a builtin yourself overrides the derived
-#' value. Templates used through the file form get the same names.
+#' `conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}"))`
+#' and the parallel form of the line is used only for `ncpu > 1`. While
+#' `ncpu` is unknown the template shows both forms and their mustache tags,
+#' the same as an unfilled optional `#SBATCH` line does; once it is filled,
+#' `print()` shows the form that applies. Filling a builtin yourself
+#' overrides the derived value. Templates used through the file form get the
+#' same names.
 #'
 #' The corpus's NONMEM recipe — a flat symlink to the `.lst` a run writes into
 #' its own directory — is one post-run line:
@@ -53,11 +54,9 @@ derived_fills <- function(fills, submission_root = NULL, template = NULL) {
   if (!is.null(submission_root)) {
     derived$log_dir <- submission_root
   }
-  if (!is.null(template) && "cpus-per-task" %in% names(template@sbatch)) {
-    cpu_placeholder <- unname(template@sbatch[["cpus-per-task"]])
-    if (cpu_placeholder %in% names(fills)) {
-      derived$parallel <- isTRUE(suppressWarnings(as.numeric(fills[[cpu_placeholder]])) > 1)
-    }
+  cpu <- if (!is.null(template)) sbatch_entry(template, "cpus-per-task")
+  if (!is.null(cpu) && cpu@fill %in% names(fills)) {
+    derived$parallel <- isTRUE(suppressWarnings(as.numeric(fills[[cpu@fill]])) > 1)
   }
   derived[setdiff(names(derived), names(fills))]
 }
@@ -65,9 +64,6 @@ derived_fills <- function(fills, submission_root = NULL, template = NULL) {
 # the placeholder that feeds --cpus-per-task, or NA if the template has no such flag;
 # for the "how do I unblock {{parallel}}" hint in submit_template()
 cpus_per_task_placeholder <- function(template) {
-  if ("cpus-per-task" %in% names(template@sbatch)) {
-    unname(template@sbatch[["cpus-per-task"]])
-  } else {
-    NA_character_
-  }
+  cpu <- sbatch_entry(template, "cpus-per-task")
+  if (is.null(cpu)) NA_character_ else cpu@fill
 }

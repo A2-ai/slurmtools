@@ -137,14 +137,16 @@ test_that("a differently-named cpus-per-task fill still drives parallel", {
   expect_equal(derived_fills(list(threads = 8), template = tmpl)$parallel, TRUE)
 })
 
-test_that("{{#parallel}} resolves in the rendered script but stays literal at print time", {
+test_that("{{#parallel}} stays a section until ncpu is known, then resolves at print time as in the script", {
   tmpl <- Template() |>
     with_job_name() |>
     with_cpus_per_task("{{ncpu}}") |>
     with_command("/opt/monolix/.../distMonolix", "{{file}}") |>
-    with_post_run("echo", conditional = "parallel", if_true = "distributed", if_false = "single-node")
+    with_post_run("echo", character(), conditional("parallel", if_true = "distributed", if_false = "single-node"))
 
-  expect_match(utils::tail(format(fill(tmpl, ncpu = 4)), 1), "\\{\\{/parallel\\}\\}", fixed = FALSE)
+  expect_match(utils::tail(format(tmpl), 1), "\\{\\{/parallel\\}\\}", fixed = FALSE)
+  expect_equal(utils::tail(format(fill(tmpl, ncpu = 4)), 1), paste(echo, "distributed"))
+  expect_equal(utils::tail(format(fill(tmpl, ncpu = 1)), 1), paste(echo, "single-node"))
 
   one <- submit_slurm_job(tmpl, ncpu = 1, dry_run = TRUE, slurm_template_opts = list(file = "x.mlxtran", job_name = "m"))
   four <- submit_slurm_job(tmpl, ncpu = 4, dry_run = TRUE, slurm_template_opts = list(file = "x.mlxtran", job_name = "m"))
@@ -157,13 +159,13 @@ test_that("an explicit fill of parallel overrides the derived value", {
     with_job_name() |>
     with_cpus_per_task("{{ncpu}}") |>
     with_command("echo", "hi") |>
-    with_post_run("echo", conditional = "parallel", if_true = "yes")
+    with_post_run("echo", character(), conditional("parallel", if_true = "yes"))
   dry <- submit_slurm_job(tmpl, ncpu = 1, dry_run = TRUE, slurm_template_opts = list(job_name = "m", parallel = TRUE))
   expect_equal(utils::tail(strsplit(dry$template_script, "\n")[[1]], 1), paste(echo, "yes"))
 })
 
 test_that("{{parallel}} with no cpus-per-task flag is an ordinary unresolved placeholder", {
-  tmpl <- Template() |> with_job_name() |> with_command("echo", "hi") |> with_post_run("echo", conditional = "parallel", if_true = "x")
+  tmpl <- Template() |> with_job_name() |> with_command("echo", "hi") |> with_post_run("echo", character(), conditional("parallel", if_true = "x"))
   expect_error(submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(job_name = "m")), "unfilled placeholders: `\\{\\{parallel\\}\\}`")
 })
 
@@ -173,7 +175,7 @@ test_that("{{parallel}} used but cpus-per-task never filled hints at the real pl
     with_job_name() |>
     with_cpus_per_task("{{threads}}") |>
     with_command("echo", "hi") |>
-    with_post_run("echo", conditional = "parallel", if_true = "x")
+    with_post_run("echo", character(), conditional("parallel", if_true = "x"))
   expect_error(
     submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(job_name = "m")),
     "slurm_template_opts = list(threads = ...)",

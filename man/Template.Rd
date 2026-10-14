@@ -5,25 +5,22 @@
 \title{A slurm job template, built one piece at a time}
 \usage{
 Template(
-  sbatch = character(0),
+  sbatch = list(),
   fills = list(),
-  optional = character(0),
   body = list(),
   pre_run = list(),
   post_run = list()
 )
 }
 \arguments{
-\item{sbatch}{named character vector of \verb{#SBATCH} flags in header order,
-e.g. \code{c(partition = "partition", "cpus-per-task" = "ncpu")}. Usually built
-with \code{\link[=with_sbatch_flag]{with_sbatch_flag()}} rather than passed directly.}
+\item{sbatch}{list of the \verb{#SBATCH} lines in header order, each the flag,
+the placeholder it is filled from, its value if given, and whether it is
+optional. Built with \code{\link[=with_sbatch_flag]{with_sbatch_flag()}} and the \verb{with_<flag>()} verbs,
+never passed directly.}
 
-\item{fills}{named list of placeholder values already filled in, e.g.
-\code{list(ncpu = 4)}. Usually built with \code{\link[=fill]{fill()}} rather than passed directly.}
-
-\item{optional}{character vector of the flags in \code{sbatch} that are emitted
-only when filled, e.g. \code{"account"}. Usually set through the verbs'
-\code{optional = TRUE} rather than passed directly.}
+\item{fills}{named list of values for the placeholders written in the
+script lines, e.g. \code{list(file = "sim.R")}; a header placeholder's value
+lives on its flag. Built with \code{\link[=fill]{fill()}} rather than passed directly.}
 
 \item{body}{list of the commands that follow the header, one entry per
 line, each the program and its arguments. Built with \code{\link[=with_command]{with_command()}},
@@ -60,12 +57,17 @@ placeholders are filled for you — \code{{{file_dir}}}, \code{{{file_stem}}},
 \link{template_builtins}. \code{\link[=slurm_template_opts]{slurm_template_opts()}} lists a template's
 placeholders, what each feeds, and what it falls back to.
 
-Flags are held as a named character vector: names are the sbatch long
-options (\code{partition}, \code{cpus-per-task}), values are the placeholder each is
-filled from. The object validates itself whenever it changes: a flag with
-leading dashes, a duplicated flag, a placeholder that could not be an R
-argument name, a fill for a placeholder the template does not have, or a
-value a common flag cannot take (see \link{with_flag}) is refused on the spot.
+Each header line is remembered as what it is made of — the flag, the
+placeholder it is filled from, its value once given, and whether it is
+optional — and nothing is substituted until the template is built:
+\code{format()}, \code{print()}, \code{\link[=write_slurm_template]{write_slurm_template()}} and \code{\link[=submit_slurm_job]{submit_slurm_job()}}
+all render from that record, so a value given to a verb and one given
+later with \code{\link[=fill]{fill()}} produce the same line. \code{NULL}, to a verb or to
+\code{\link[=fill]{fill()}}, removes the line. The object validates itself whenever it
+changes: a flag with leading dashes, a duplicated flag, a placeholder that
+could not be an R argument name, a fill for a placeholder the template
+does not have, or a value a common flag cannot take (see \link{with_flag}) is
+refused on the spot.
 }
 \examples{
 Template() |>

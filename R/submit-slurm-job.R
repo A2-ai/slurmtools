@@ -39,12 +39,19 @@
 #' directory. With a template it is refused rather than guessed at: give bbi
 #' `--overwrite` in its arguments, or clear the directory yourself.
 #'
-#' @param .mod what to submit: a [Template()]; the path of the file to run
-#'   through `slurm_job_template_path`; or a NONMEM model (a
-#'   `bbi_nonmem_model`, or a model path) for the pre-template interface
-#' @param partition name of the partition to submit to. The default passes the
-#'   full set of partitions; the first is selected.
-#' @param ncpu number of cpus to request
+#' @param .mod what to submit, in one of three forms: a [Template()] (the
+#'   argument keeps its old name; pass the template first, as in the
+#'   examples); the path of the file to run through `slurm_job_template_path`;
+#'   or a NONMEM model (a `bbi_nonmem_model`, or a model path) for the
+#'   pre-template interface
+#' @param partition name of the partition to submit to, one of those
+#'   [get_slurm_partitions()] lists. With a [Template()] it fills the
+#'   `{{partition}}` placeholder, taking precedence over a `partition` entry
+#'   in `slurm_template_opts`; left out, the first partition is used whenever
+#'   the template still needs one.
+#' @param ncpu number of cpus to request, a positive whole number. With a
+#'   [Template()] it fills the `{{ncpu}}` placeholder, taking precedence over
+#'   an `ncpu` entry in `slurm_template_opts`; left out, `1`.
 #' @param overwrite pre-template NONMEM form only: whether to delete the
 #'   model's existing output directory first
 #' @param dry_run return the command that would have been invoked, without
@@ -57,10 +64,25 @@
 #'   output; defaults to `options("slurmtools.submission_root")`, falling back
 #'   to `"submission-log"` under the calling directory
 #' @param bbi_config_path path to a bbi.yaml, filled into
-#'   `{{bbi_config_path}}`; defaults to `options("slurmtools.bbi_config_path")`
+#'   `{{bbi_config_path}}` when the template writes it; defaults to
+#'   `options("slurmtools.bbi_config_path")`
 #' @param slurm_template_opts named list of `placeholder = value` fills for
-#'   the template — `file`, and anything else it asks for; see
-#'   [slurm_template_opts()]
+#'   the template, applied on top of anything already filled with [fill()].
+#'   For a [default_template()] the names are:
+#'
+#'   | name | fills | if left out |
+#'   |---|---|---|
+#'   | `file` | `{{file}}` in the command, and the builtins below | required whenever the command writes it |
+#'   | `job_name` | `--job-name`, the script name `<job_name>.sh` and the default log names | the stem of `file` (`sim.R` -> `sim`) |
+#'   | `partition` | `--partition` | the `partition` argument, else the first partition |
+#'   | `ncpu` | `--cpus-per-task` | the `ncpu` argument, else `1` |
+#'   | `account` | `--account` | the line is dropped |
+#'   | `nodes`, `ntasks` | `--nodes`, `--ntasks` | `1`, filled already |
+#'   | `bbi_config_path` | `{{bbi_config_path}}`, when written | the `bbi_config_path` argument |
+#'   | `file_dir`, `file_stem`, `file_ext`, `parallel` | see [template_builtins] | derived from `file` and `ncpu` |
+#'
+#'   plus any other `{{tag}}` the template's flags, command or hooks write.
+#'   [slurm_template_opts()] prints this table for the template you have.
 #'
 #' @return for a dry run, a list with the sbatch command, its args, the
 #'   rendered script, and the partition. Otherwise the result of
@@ -83,7 +105,7 @@
 #' # NONMEM through bbi, parallel when ncpu > 1
 #' bbi <- default_template(
 #'   "bbi", c("nonmem", "run", "local", "{{file}}", "--config", "{{bbi_config_path}}"),
-#'   conditional = "parallel", if_true = c("--parallel", "--threads={{ncpu}}")
+#'   conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}"))
 #' )
 #' submit_slurm_job(bbi, ncpu = 2, slurm_template_opts = list(
 #'   file = "model/nonmem/1001.mod", bbi_config_path = "model/nonmem/bbi.yaml"
@@ -121,7 +143,7 @@ submit_slurm_job <- function(
     # `partition` and `ncpu` fill placeholders of those names; left out, they
     # keep their defaults (the first available partition, one cpu) whenever the
     # template still needs them, as they always did in the file form
-    needed <- setdiff(required_placeholders(.mod), c(names(.mod@fills), names(fills)))
+    needed <- setdiff(required_placeholders(.mod), c(names(template_fills(.mod)), names(fills)))
     if (!missing(partition)) {
       fills$partition <- partition
     } else if ("partition" %in% needed) {
@@ -233,14 +255,14 @@ check_template_opts <- function(opts) {
 #' @keywords internal
 #' @noRd
 submit_template <- function(template, fills, submission_root, dry_run, ...) {
-  template <- do.call(fill, c(list(template), fills))
+  template <- fill(template, !!!fills)
 
   # an unfilled --job-name takes the file's stem: file = "sim.R" -> sim
-  job_placeholder <- unname(template@sbatch["job-name"])
-  if (!is.na(job_placeholder) && !job_placeholder %in% names(template@fills) &&
-      !is.null(template@fills[["file"]])) {
-    stem <- c(template@fills, derived_fills(template@fills))[["file_stem"]]
-    template <- do.call(fill, c(list(template), rlang::set_names(list(stem), job_placeholder)))
+  job <- sbatch_entry(template, "job-name")
+  filled <- template_fills(template)
+  if (!is.null(job) && is.null(filled[[job@fill]]) && !is.null(filled[["file"]])) {
+    stem <- c(filled, derived_fills(filled))[["file_stem"]]
+    template <- fill(template, !!!rlang::set_names(list(stem), job@fill))
   }
   # a program given as `{{placeholder}}` is looked up now that its fill is known
   template <- resolve_program_fills(template)
@@ -251,8 +273,11 @@ submit_template <- function(template, fills, submission_root, dry_run, ...) {
       i = "add one with with_command(template, \"Rscript\", \"{{file}}\")"
     ))
   }
-  derivable <- names(derived_fills(template@fills, submission_root, template = template))
-  unresolved <- setdiff(required_placeholders(template), c(names(template@fills), derivable))
+  filled <- template_fills(template)
+  derived <- derived_fills(filled, submission_root, template = template)
+  # a known switch leaves only the form of its line that applies, so a
+  # placeholder written only in the other form is not asked for
+  unresolved <- setdiff(required_placeholders(template, c(filled, derived)), c(names(filled), names(derived)))
   if (length(unresolved) > 0) {
     # a missing derived builtin is fixed by filling what it derives from, not itself
     cpu_placeholder <- cpus_per_task_placeholder(template)
@@ -303,18 +328,19 @@ submit_template <- function(template, fills, submission_root, dry_run, ...) {
 
   # logs default to <submission_root>/<job_name>-%j.{out,err}
   log_stem <- file.path(submission_root, job_name)
-  if (is.na(template@sbatch["output"])) {
+  if (is.null(sbatch_entry(template, "output"))) {
     template <- with_output(template, paste0(log_stem, "-%j.out"))
   }
-  if (is.na(template@sbatch["error"])) {
+  if (is.null(sbatch_entry(template, "error"))) {
     template <- with_error(template, paste0(log_stem, "-%j.err"))
   }
 
   # plain `{{tags}}` are already substituted by format(); whisker resolves the
   # sections that remain, dropping any optional flag that was left unfilled
+  filled <- template_fills(template)
   rendered <- whisker::whisker.render(
     paste(c(format(template), ""), collapse = "\n"),
-    c(template@fills, derived_fills(template@fills, submission_root, template = template))
+    c(filled, derived_fills(filled, submission_root, template = template))
   )
   res <- sbatch_script(
     rendered,
@@ -357,9 +383,9 @@ log_path <- function(template, flag, job_id) {
 
 # the filled value behind a flag, or NULL when the flag is absent or unfilled
 filled_flag <- function(template, flag) {
-  placeholder <- unname(template@sbatch[flag])
-  if (is.na(placeholder) || !placeholder %in% names(template@fills)) {
+  entry <- sbatch_entry(template, flag)
+  if (is.null(entry)) {
     return(NULL)
   }
-  template@fills[[placeholder]]
+  template_fills(template)[[entry@fill]]
 }

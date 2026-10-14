@@ -42,13 +42,12 @@ create_slurm_template <- function(
   parallel_args = NULL,
   overwrite = FALSE
 ) {
-  template <- default_template(
-    command,
-    args,
-    conditional = if (!is.null(parallel_args)) "parallel",
-    if_true = if (is.null(parallel_args)) character() else parallel_args
-  ) |>
-    with_output("{{log_path}}")
+  template <- if (is.null(parallel_args)) {
+    default_template(command, args)
+  } else {
+    default_template(command, args, conditional("parallel", if_true = parallel_args))
+  }
+  template <- with_output(template, "{{log_path}}")
   write_slurm_template(template, path, overwrite = overwrite)
 }
 

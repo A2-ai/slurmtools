@@ -24,12 +24,13 @@ stays a \code{{{log_dir}}} tag in a written template file. \code{{{parallel}}}
 follows whichever placeholder \code{\link[=with_cpus_per_task]{with_cpus_per_task()}} (or
 \code{with_sbatch_flag("cpus-per-task", ...)}) was given, so it is a whisker
 \emph{section} rather than a plain tag: give \code{\link[=with_command]{with_command()}} or a hook
-\verb{conditional = "parallel", if_true = c("--parallel", "--threads=\{\{ncpu\}\}")}
-and the parallel form of the line is used only for \code{ncpu > 1}. Sections
-resolve at submit time, not in \code{print()} — a template with a conditional
-still shows both forms and their mustache tags when you print it, the same
-as an unfilled optional \verb{#SBATCH} line does. Filling a builtin yourself overrides the derived
-value. Templates used through the file form get the same names.
+\code{conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}"))}
+and the parallel form of the line is used only for \code{ncpu > 1}. While
+\code{ncpu} is unknown the template shows both forms and their mustache tags,
+the same as an unfilled optional \verb{#SBATCH} line does; once it is filled,
+\code{print()} shows the form that applies. Filling a builtin yourself
+overrides the derived value. Templates used through the file form get the
+same names.
 
 The corpus's NONMEM recipe — a flat symlink to the \code{.lst} a run writes into
 its own directory — is one post-run line:

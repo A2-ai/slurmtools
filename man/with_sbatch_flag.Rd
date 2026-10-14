@@ -4,7 +4,7 @@
 \alias{with_sbatch_flag}
 \title{Add an \verb{#SBATCH} flag to a template}
 \usage{
-with_sbatch_flag(template, flag, value = NULL, optional = FALSE)
+with_sbatch_flag(template, flag, value, optional = FALSE)
 }
 \arguments{
 \item{template}{a \code{\link[=Template]{Template()}}}
@@ -12,10 +12,11 @@ with_sbatch_flag(template, flag, value = NULL, optional = FALSE)
 \item{flag}{an sbatch long option without the leading dashes, e.g.
 \code{"partition"}, \code{"cpus-per-task"}, \code{"gres"}}
 
-\item{value}{the flag's value, a single string or number; or a
-\code{"{{placeholder}}"} naming the blank the flag is filled from later;
-\code{NULL} (the default) leaves a blank named after the flag, with \code{-}
-replaced by \verb{_}, so \code{"cpus-per-task"} fills from \code{{{cpus_per_task}}}}
+\item{value}{the flag's value, a single string or number; a
+\code{"{{placeholder}}"} naming the blank the flag is filled from later; left
+out, a blank named after the flag with \code{-} replaced by \verb{_}, so
+\code{"cpus-per-task"} fills from \code{{{cpus_per_task}}}; or \code{NULL} to remove the
+flag from the template}
 
 \item{optional}{if \code{TRUE}, the line is emitted only when its placeholder is
 filled; an unfilled optional flag is dropped at submit rather than
@@ -26,13 +27,17 @@ the template with the flag added
 }
 \description{
 The blanket verb: any sbatch long option becomes a header line. Give it a
-value and the line is filled on the spot, \code{with_sbatch_flag("time", "01:00:00")} is \verb{#SBATCH --time=01:00:00}; give it nothing and the line is a
-blank to fill later, \code{with_sbatch_flag("time")} is \verb{#SBATCH --time=\{\{time\}\}}; give it a \code{"{{placeholder}}"} to name that blank
-yourself, so one value can feed several places. Adding a flag the template
-already has replaces its line, and its \code{optional} setting. The common
-flags also have named verbs, \code{with_partition()} and friends (see
-\link{with_flag}); their values are checked whichever verb added the flag, and
-whether they arrive here or through \code{\link[=fill]{fill()}}.
+value and the line has it, \code{with_sbatch_flag("time", "01:00:00")} is
+\verb{#SBATCH --time=01:00:00}; give it nothing and the line is a blank to fill
+later, \code{with_sbatch_flag("time")} is \verb{#SBATCH --time=\{\{time\}\}}; give it a
+\code{"{{placeholder}}"} to name that blank yourself, so one value can feed
+several places; give it \code{NULL} and the flag is removed, so
+\code{with_sbatch_flag(default_template(), "nodes", NULL)} has no \code{--nodes}
+line. Adding a flag the template already has replaces its line, its value
+and its \code{optional} setting. The common flags also have named verbs,
+\code{with_partition()} and friends (see \link{with_flag}); their values are checked
+whichever verb added the flag, and whether they arrive here or through
+\code{\link[=fill]{fill()}}.
 }
 \examples{
 Template() |>

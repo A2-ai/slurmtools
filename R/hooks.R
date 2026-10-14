@@ -11,8 +11,9 @@
 #' any other with [fill()] or at submit time, and `$SLURM_JOB_ID` and the
 #' other Slurm variables are there at run time as usual: an argument with
 #' whitespace is wrapped in double quotes, so they still expand. Calling a
-#' verb again appends another line. `conditional`, `if_true` and `if_false`
-#' work as in [with_command()].
+#' verb again appends another line. Conditionals given after `args` work as
+#' in [with_command()]; a payload of `NULL` leaves the line out in that state,
+#' so a cleanup or a notification can exist only when a switch says so.
 #'
 #' Post-run lines run however the command ended: this first version has no
 #' exit-status logic. Success-only and failure-only hooks are a later, opt-in
@@ -45,20 +46,18 @@ NULL
 
 #' @rdname with_hooks
 #' @export
-with_pre_run <- function(template, command, args = character(), conditional = NULL,
-                         if_true = character(), if_false = character()) {
+with_pre_run <- function(template, command, args = character(), ...) {
   check_template(template)
-  entry <- command_entry(command, args, conditional, if_true, if_false, strict = FALSE)
+  entry <- command_entry(command, args, rlang::list2(...), strict = FALSE)
   template@pre_run <- c(template@pre_run, list(entry))
   template
 }
 
 #' @rdname with_hooks
 #' @export
-with_post_run <- function(template, command, args = character(), conditional = NULL,
-                          if_true = character(), if_false = character()) {
+with_post_run <- function(template, command, args = character(), ...) {
   check_template(template)
-  entry <- command_entry(command, args, conditional, if_true, if_false, strict = FALSE)
+  entry <- command_entry(command, args, rlang::list2(...), strict = FALSE)
   template@post_run <- c(template@post_run, list(entry))
   template
 }

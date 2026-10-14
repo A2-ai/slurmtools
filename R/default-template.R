@@ -39,8 +39,7 @@
 #'                  slurm_template_opts = list(file = "sim.R", time = "01:00:00"))
 #' }
 #' @export
-default_template <- function(command = NULL, args = character(), conditional = NULL,
-                             if_true = character(), if_false = character()) {
+default_template <- function(command = NULL, args = character(), ...) {
   template <- Template() |>
     with_job_name() |>
     with_nodes(1) |>
@@ -49,7 +48,13 @@ default_template <- function(command = NULL, args = character(), conditional = N
     with_partition() |>
     with_account(optional = TRUE)
   if (is.null(command)) {
+    if (...length() > 0) {
+      rlang::abort(c(
+        "conditionals need a `command` to switch",
+        i = "default_template(\"bbi\", c(\"nonmem\", \"run\", \"local\", \"{{file}}\"), conditional(\"parallel\", if_true = ...))"
+      ))
+    }
     return(template)
   }
-  with_command(template, command, args, conditional = conditional, if_true = if_true, if_false = if_false)
+  with_command(template, command, args, ...)
 }

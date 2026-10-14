@@ -1,34 +1,3 @@
-validate_sbatch_flags <- function(value) {
-  flags <- names(value)
-  if (length(value) > 0 && (is.null(flags) || anyNA(flags) || !all(nzchar(flags)))) {
-    return(
-      "must be a named character vector: names are sbatch flags, values are placeholder names"
-    )
-  }
-  bad_flag <- flags[!grepl("^[a-z][a-z0-9-]*$", flags)]
-  if (length(bad_flag) > 0) {
-    return(sprintf(
-      "flags are sbatch long options without the leading dashes, like `cpus-per-task`; not %s",
-      paste0("`", bad_flag, "`", collapse = ", ")
-    ))
-  }
-  dup <- unique(flags[duplicated(flags)])
-  if (length(dup) > 0) {
-    return(sprintf(
-      "each flag may appear once; duplicated: %s",
-      paste0("`", dup, "`", collapse = ", ")
-    ))
-  }
-  bad_fill <- value[!grepl("^[A-Za-z][A-Za-z0-9_]*$", value)]
-  if (length(bad_fill) > 0) {
-    return(sprintf(
-      "placeholder names must start with a letter and contain only letters, digits and `_`, like `ncpu`; not %s",
-      paste0("`", bad_fill, "`", collapse = ", ")
-    ))
-  }
-  NULL
-}
-
 validate_fills <- function(value) {
   if (length(value) == 0) {
     return(NULL)
@@ -58,20 +27,6 @@ validate_fills <- function(value) {
   NULL
 }
 
-validate_optional <- function(value) {
-  if (anyNA(value) || !all(nzchar(value))) {
-    return("must name flags, like `account`")
-  }
-  dup <- unique(value[duplicated(value)])
-  if (length(dup) > 0) {
-    return(sprintf(
-      "each flag may be listed once; duplicated: %s",
-      paste0("`", dup, "`", collapse = ", ")
-    ))
-  }
-  NULL
-}
-
 # body, pre_run and post_run hold one entry per line to run: the program and
 # its arguments, kept apart until the script is rendered (see command_lines())
 validate_commands <- function(value) {
@@ -96,30 +51,14 @@ validate_template <- function(self) {
       paste0("`", orphan, "`", collapse = ", ")
     ))
   }
-  stray <- setdiff(self@optional, names(self@sbatch))
-  if (length(stray) > 0) {
+  # a header placeholder's value lives on its flag, never in `fills`
+  header <- vapply(self@sbatch, function(f) f@fill, character(1))
+  doubled <- intersect(names(self@fills), header)
+  if (length(doubled) > 0) {
     return(sprintf(
-      "optional names flags the template does not have: %s",
-      paste0("`", stray, "`", collapse = ", ")
+      "fills name header placeholders, whose values belong to their flags: %s",
+      paste0("`", doubled, "`", collapse = ", ")
     ))
-  }
-  for (flag in names(self@sbatch)) {
-    placeholder <- self@sbatch[[flag]]
-    check <- sbatch_flags[[flag]]
-    if (is.null(check) || !placeholder %in% names(self@fills)) {
-      next
-    }
-    value <- self@fills[[placeholder]]
-    problem <- check(value)
-    if (!is.null(problem)) {
-      return(sprintf(
-        "`{{%s}}` fills `--%s`, which %s; got %s",
-        placeholder,
-        flag,
-        problem,
-        deparse(value)
-      ))
-    }
   }
   NULL
 }
@@ -153,21 +92,25 @@ validate_template <- function(self) {
 #' [template_builtins]. [slurm_template_opts()] lists a template's
 #' placeholders, what each feeds, and what it falls back to.
 #'
-#' Flags are held as a named character vector: names are the sbatch long
-#' options (`partition`, `cpus-per-task`), values are the placeholder each is
-#' filled from. The object validates itself whenever it changes: a flag with
-#' leading dashes, a duplicated flag, a placeholder that could not be an R
-#' argument name, a fill for a placeholder the template does not have, or a
-#' value a common flag cannot take (see [with_flag]) is refused on the spot.
+#' Each header line is remembered as what it is made of — the flag, the
+#' placeholder it is filled from, its value once given, and whether it is
+#' optional — and nothing is substituted until the template is built:
+#' `format()`, `print()`, [write_slurm_template()] and [submit_slurm_job()]
+#' all render from that record, so a value given to a verb and one given
+#' later with [fill()] produce the same line. `NULL`, to a verb or to
+#' [fill()], removes the line. The object validates itself whenever it
+#' changes: a flag with leading dashes, a duplicated flag, a placeholder that
+#' could not be an R argument name, a fill for a placeholder the template
+#' does not have, or a value a common flag cannot take (see [with_flag]) is
+#' refused on the spot.
 #'
-#' @param sbatch named character vector of `#SBATCH` flags in header order,
-#'   e.g. `c(partition = "partition", "cpus-per-task" = "ncpu")`. Usually built
-#'   with [with_sbatch_flag()] rather than passed directly.
-#' @param fills named list of placeholder values already filled in, e.g.
-#'   `list(ncpu = 4)`. Usually built with [fill()] rather than passed directly.
-#' @param optional character vector of the flags in `sbatch` that are emitted
-#'   only when filled, e.g. `"account"`. Usually set through the verbs'
-#'   `optional = TRUE` rather than passed directly.
+#' @param sbatch list of the `#SBATCH` lines in header order, each the flag,
+#'   the placeholder it is filled from, its value if given, and whether it is
+#'   optional. Built with [with_sbatch_flag()] and the `with_<flag>()` verbs,
+#'   never passed directly.
+#' @param fills named list of values for the placeholders written in the
+#'   script lines, e.g. `list(file = "sim.R")`; a header placeholder's value
+#'   lives on its flag. Built with [fill()] rather than passed directly.
 #' @param body list of the commands that follow the header, one entry per
 #'   line, each the program and its arguments. Built with [with_command()],
 #'   never passed directly.
@@ -186,19 +129,14 @@ Template <- S7::new_class(
   package = "slurmtools",
   properties = list(
     sbatch = S7::new_property(
-      S7::class_character,
-      default = character(),
+      S7::class_list,
+      default = list(),
       validator = validate_sbatch_flags
     ),
     fills = S7::new_property(
       S7::class_list,
       default = list(),
       validator = validate_fills
-    ),
-    optional = S7::new_property(
-      S7::class_character,
-      default = character(),
-      validator = validate_optional
     ),
     body = S7::new_property(
       S7::class_list,
@@ -273,23 +211,17 @@ program_text <- function(program, strict = TRUE) {
 }
 
 # one entry of body / pre_run / post_run, checked
-command_entry <- function(command, args, conditional, if_true, if_false,
+command_entry <- function(command, args, conditionals = list(),
                           launcher = NULL, launcher_args = character(), strict = TRUE) {
   check_program(command, "command", "\"Rscript\"")
-  check_args(args, "args", "c(\"render\", \"{{file}}\")")
-  if (!is.null(conditional) &&
-    (!is.character(conditional) || length(conditional) != 1 || is.na(conditional) ||
-      !grepl("^[A-Za-z][A-Za-z0-9_]*$", conditional))) {
-    rlang::abort("`conditional` must be a single placeholder name, like \"parallel\"")
-  }
-  check_args(if_true, "if_true", "c(\"--parallel\", \"--threads={{ncpu}}\")")
-  check_args(if_false, "if_false", "character()")
-  if (is.null(conditional) && (length(if_true) > 0 || length(if_false) > 0)) {
+  if (S7::S7_inherits(args, Conditional)) {
     rlang::abort(c(
-      "`if_true` / `if_false` need a `conditional`",
-      i = "with_command(template, command, args, conditional = \"parallel\", if_true = ...)"
+      "`args` is the character vector of arguments; conditionals come after it",
+      i = "with_post_run(template, \"rm\", character(), conditional(\"parallel\", if_true = ...))"
     ))
   }
+  check_args(args, "args", "c(\"render\", \"{{file}}\")")
+  conditionals <- check_conditionals(conditionals)
   if (!is.null(launcher)) {
     check_program(launcher, "launcher", "\"mpirun\"")
   }
@@ -303,9 +235,7 @@ command_entry <- function(command, args, conditional, if_true, if_false,
   list(
     exe = program_text(command, strict),
     args = args,
-    conditional = conditional,
-    if_true = if_true,
-    if_false = if_false,
+    conditionals = conditionals,
     launcher = if (!is.null(launcher)) program_text(launcher, strict),
     launcher_args = launcher_args
   )
@@ -320,37 +250,103 @@ shell_arg <- function(x) {
   x
 }
 
-# the script line(s) one entry renders to, placeholders left as tags: one
-# line, or — with a conditional — the line with `if_true` inside
-# `{{#conditional}}` and the line with `if_false` inside `{{^conditional}}`
-command_lines <- function(entry) {
-  head <- c(entry$launcher, shell_arg(entry$launcher_args), entry$exe)
-  if (is.null(entry$conditional)) {
-    return(paste(c(head, shell_arg(entry$args)), collapse = " "))
+# the script line(s) one entry renders to, placeholders left as tags. Each
+# conditional whose switch is known in `fills` puts the payload of the state
+# that applies on the line, in the order given — or takes the line away when
+# that payload is NULL. Switches still unknown are left for whisker to pick at
+# submit: one open conditional with both payloads writes the two full lines,
+# `if_true`'s in `{{#name}}` and `if_false`'s in `{{^name}}`; several write
+# one line with each payload in its own inline section; one that can take the
+# line away wraps the whole line in the section of the state the line exists in
+command_lines <- function(entry, fills = list()) {
+  conds <- entry$conditionals
+  is_known <- function(cond) cond@name %in% names(fills)
+  open <- Filter(Negate(is_known), conds)
+
+  # the words of the line: each known switch's payload in place, `open_as(cond)`
+  # standing in for an unknown one; NULL when a known switch takes the line away
+  words <- function(open_as) {
+    out <- c(entry$launcher, shell_arg(entry$launcher_args), entry$exe, shell_arg(entry$args))
+    for (cond in conds) {
+      if (is_known(cond)) {
+        extra <- payload(cond, is_truthy(fills[[cond@name]]))
+        if (is.null(extra)) {
+          return(NULL)
+        }
+        out <- c(out, shell_arg(extra))
+      } else {
+        out <- c(out, open_as(cond))
+      }
+    }
+    out
   }
-  c(
-    sprintf("{{#%s}}", entry$conditional),
-    paste(c(head, shell_arg(c(entry$args, entry$if_true))), collapse = " "),
-    sprintf("{{/%s}}", entry$conditional),
-    sprintf("{{^%s}}", entry$conditional),
-    paste(c(head, shell_arg(c(entry$args, entry$if_false))), collapse = " "),
-    sprintf("{{/%s}}", entry$conditional)
-  )
+  # an inline section carries its own leading space, so an unrendered one
+  # leaves no gap behind
+  line <- function(ws) {
+    text <- paste(ws, collapse = " ")
+    text <- gsub(" {{#", "{{#", text, fixed = TRUE)
+    gsub(" {{^", "{{^", text, fixed = TRUE)
+  }
+
+  if (length(open) == 0) {
+    ws <- words(identity)
+    return(if (is.null(ws)) character() else line(ws))
+  }
+  one <- open[[1]]
+  if (length(open) == 1 && !is.null(one@if_true) && !is.null(one@if_false)) {
+    on <- words(function(cond) shell_arg(cond@if_true))
+    off <- words(function(cond) shell_arg(cond@if_false))
+    if (is.null(on)) {
+      return(character())
+    }
+    return(c(
+      sprintf("{{#%s}}", one@name), line(on), sprintf("{{/%s}}", one@name),
+      sprintf("{{^%s}}", one@name), line(off), sprintf("{{/%s}}", one@name)
+    ))
+  }
+  wrap <- character()
+  ws <- words(function(cond) {
+    if (is.null(cond@if_false)) {
+      wrap <<- c(wrap, sprintf("{{#%s}}", cond@name))
+      return(shell_arg(cond@if_true))
+    }
+    if (is.null(cond@if_true)) {
+      wrap <<- c(wrap, sprintf("{{^%s}}", cond@name))
+      return(shell_arg(cond@if_false))
+    }
+    inline_section(cond)
+  })
+  if (is.null(ws)) {
+    return(character())
+  }
+  c(wrap, line(ws), rev(sub("^\\{\\{[#^]", "{{/", wrap)))
+}
+
+# `{{#name}} a b{{/name}}{{^name}} c{{/name}}`, each part only when it has arguments
+inline_section <- function(cond) {
+  part <- function(tag, extra) {
+    if (length(extra) == 0) {
+      return("")
+    }
+    sprintf("{{%s%s}} %s{{/%s}}", tag, cond@name, paste(shell_arg(extra), collapse = " "), cond@name)
+  }
+  paste0(part("#", cond@if_true), part("^", cond@if_false))
 }
 
 # the lines of a group of entries
-group_lines <- function(entries) {
-  as.character(unlist(lapply(entries, command_lines), use.names = FALSE))
+group_lines <- function(entries, fills = list()) {
+  as.character(unlist(lapply(entries, command_lines, fills = fills), use.names = FALSE))
 }
 
-# the lines after the header, in the order they run
-script_lines <- function(x) {
-  group_lines(c(x@pre_run, x@body, x@post_run))
+# the lines after the header, in the order they run; with `fills`, a known
+# switch leaves only the form that applies
+script_lines <- function(x, fills = list()) {
+  group_lines(c(x@pre_run, x@body, x@post_run), fills)
 }
 
 # `{{name}}`, `{{#name}}`, `{{^name}}`, `{{/name}}` tags written in the script lines
-script_placeholders <- function(x) {
-  lines <- script_lines(x)
+script_placeholders <- function(x, fills = list()) {
+  lines <- script_lines(x, fills)
   tags <- regmatches(
     lines,
     gregexpr("\\{\\{[#^/]?\\s*[A-Za-z][A-Za-z0-9_]*\\s*\\}\\}", lines)
@@ -362,14 +358,17 @@ script_placeholders <- function(x) {
 template_placeholders <- function(x) {
   written <- script_placeholders(x)
   anchor <- if (any(file_builtins %in% written)) "file" else character()
-  unique(c(unname(x@sbatch), written, anchor))
+  header <- vapply(x@sbatch, function(f) f@fill, character(1))
+  unique(c(header, written, anchor))
 }
 
 # every placeholder that must have a value before the job can be submitted:
-# those of required flags, and every one written in the script lines
-required_placeholders <- function(x) {
-  header <- unname(x@sbatch[!names(x@sbatch) %in% x@optional])
-  unique(c(header, script_placeholders(x)))
+# those of required flags, and every one written in the script lines. With
+# `fills`, a placeholder written only in the branch a known switch does not
+# take is not among them
+required_placeholders <- function(x, fills = list()) {
+  header <- vapply(x@sbatch, function(f) if (f@optional) NA_character_ else f@fill, character(1))
+  unique(c(header[!is.na(header)], script_placeholders(x, fills)))
 }
 
 # plain `{{name}}` tags replaced by their filled values
@@ -406,23 +405,26 @@ resolve_program_fills <- function(template) {
 #'
 #' @description
 #' The blanket verb: any sbatch long option becomes a header line. Give it a
-#' value and the line is filled on the spot, `with_sbatch_flag("time",
-#' "01:00:00")` is `#SBATCH --time=01:00:00`; give it nothing and the line is a
-#' blank to fill later, `with_sbatch_flag("time")` is `#SBATCH
-#' --time={{time}}`; give it a `"{{placeholder}}"` to name that blank
-#' yourself, so one value can feed several places. Adding a flag the template
-#' already has replaces its line, and its `optional` setting. The common
-#' flags also have named verbs, `with_partition()` and friends (see
-#' [with_flag]); their values are checked whichever verb added the flag, and
-#' whether they arrive here or through [fill()].
+#' value and the line has it, `with_sbatch_flag("time", "01:00:00")` is
+#' `#SBATCH --time=01:00:00`; give it nothing and the line is a blank to fill
+#' later, `with_sbatch_flag("time")` is `#SBATCH --time={{time}}`; give it a
+#' `"{{placeholder}}"` to name that blank yourself, so one value can feed
+#' several places; give it `NULL` and the flag is removed, so
+#' `with_sbatch_flag(default_template(), "nodes", NULL)` has no `--nodes`
+#' line. Adding a flag the template already has replaces its line, its value
+#' and its `optional` setting. The common flags also have named verbs,
+#' `with_partition()` and friends (see [with_flag]); their values are checked
+#' whichever verb added the flag, and whether they arrive here or through
+#' [fill()].
 #'
 #' @param template a [Template()]
 #' @param flag an sbatch long option without the leading dashes, e.g.
 #'   `"partition"`, `"cpus-per-task"`, `"gres"`
-#' @param value the flag's value, a single string or number; or a
-#'   `"{{placeholder}}"` naming the blank the flag is filled from later;
-#'   `NULL` (the default) leaves a blank named after the flag, with `-`
-#'   replaced by `_`, so `"cpus-per-task"` fills from `{{cpus_per_task}}`
+#' @param value the flag's value, a single string or number; a
+#'   `"{{placeholder}}"` naming the blank the flag is filled from later; left
+#'   out, a blank named after the flag with `-` replaced by `_`, so
+#'   `"cpus-per-task"` fills from `{{cpus_per_task}}`; or `NULL` to remove the
+#'   flag from the template
 #' @param optional if `TRUE`, the line is emitted only when its placeholder is
 #'   filled; an unfilled optional flag is dropped at submit rather than
 #'   reported as missing
@@ -435,12 +437,18 @@ resolve_program_fills <- function(template) {
 #'   with_sbatch_flag("cpus-per-task", "{{ncpu}}") |>  # #SBATCH --cpus-per-task={{ncpu}}
 #'   with_sbatch_flag("time", "01:00:00")           # #SBATCH --time=01:00:00
 #' @export
-with_sbatch_flag <- function(template, flag, value = NULL, optional = FALSE) {
+with_sbatch_flag <- function(template, flag, value, optional = FALSE) {
   check_template(template)
   if (!is.character(flag) || length(flag) != 1 || is.na(flag)) {
     rlang::abort("`flag` must be a single sbatch option name, like \"partition\"")
   }
-  if (!is.null(value) && (!is.atomic(value) || length(value) != 1 || is.na(value))) {
+  if (missing(value)) {
+    value <- sprintf("{{%s}}", gsub("-", "_", flag, fixed = TRUE))
+  }
+  if (is.null(value)) {
+    return(without_flag(template, flag))
+  }
+  if (!is.atomic(value) || length(value) != 1 || is.na(value)) {
     rlang::abort(
       "`value` must be a single value, like 4, or a \"{{placeholder}}\" to fill later"
     )
@@ -449,28 +457,30 @@ with_sbatch_flag <- function(template, flag, value = NULL, optional = FALSE) {
     rlang::abort("`optional` must be TRUE or FALSE")
   }
 
-  # "{{name}}" names the blank; anything else fills it
-  placeholder <- gsub("-", "_", flag, fixed = TRUE)
-  fill_value <- NULL
-  if (!is.null(value)) {
-    if (is.character(value) && grepl("^\\{\\{.*\\}\\}$", value)) {
-      placeholder <- trimws(sub("^\\{\\{(.*)\\}\\}$", "\\1", value))
-    } else {
-      fill_value <- value
-    }
+  # "{{name}}" names the blank; anything else is the value, kept on the flag
+  # until the template is built
+  if (is.character(value) && grepl("^\\{\\{.*\\}\\}$", value)) {
+    entry <- SbatchFlag(
+      flag = flag,
+      fill = trimws(sub("^\\{\\{(.*)\\}\\}$", "\\1", value)),
+      optional = optional
+    )
+  } else {
+    entry <- SbatchFlag(
+      flag = flag,
+      fill = gsub("-", "_", flag, fixed = TRUE),
+      value = value,
+      optional = optional
+    )
   }
-
   sbatch <- template@sbatch
-  sbatch[[flag]] <- placeholder
+  i <- match(flag, sbatch_flag_names(template))
+  if (is.na(i)) {
+    sbatch <- c(sbatch, list(entry))
+  } else {
+    sbatch[[i]] <- entry
+  }
   template@sbatch <- sbatch
-  opt <- setdiff(template@optional, flag)
-  if (optional) {
-    opt <- c(opt, flag)
-  }
-  template@optional <- opt
-  if (!is.null(fill_value)) {
-    template <- do.call(fill, c(list(template), rlang::set_names(list(fill_value), placeholder)))
-  }
   template
 }
 
@@ -482,10 +492,23 @@ with_sbatch_flag <- function(template, flag, value = NULL, optional = FALSE) {
 #' template until every placeholder has a value. Filling a placeholder again
 #' replaces the earlier value. A name that is not a placeholder of this
 #' template is an error, so a typo cannot silently leave a flag empty.
-#' [slurm_template_opts()] lists what there is to fill.
+#' `NULL` removes the `#SBATCH` line a placeholder fills:
+#' `fill(template, account = NULL)` drops `--account`. The values are kept,
+#' not substituted, until the template is built, and a list of them can be
+#' spliced in: `fill(template, !!!opts)`. [slurm_template_opts()] lists what
+#' there is to fill.
 #'
 #' @param template a [Template()]
-#' @param ... `placeholder = value` pairs; each value a single string or number
+#' @param ... `placeholder = value` pairs. The names are the template's
+#'   placeholders: one per `#SBATCH` flag (for [default_template()] those are
+#'   `job_name`, `ncpu`, `partition` and `account`, plus `nodes` and `ntasks`
+#'   to change the `1` they hold) and every `{{tag}}` written in a command or
+#'   hook line, `file` first among them. [slurm_template_opts()] lists them
+#'   for the template you have. Each value is a single string or number, or
+#'   `NULL` to remove the flag; the common flags check theirs as [with_flag]
+#'   describes. `file_dir`, `file_stem`, `file_ext` and `parallel` are
+#'   derived for you when the template writes them, and may be given here to
+#'   override the derived value (see [template_builtins]).
 #'
 #' @return the template with those placeholders filled
 #'
@@ -494,10 +517,13 @@ with_sbatch_flag <- function(template, flag, value = NULL, optional = FALSE) {
 #'   with_sbatch_flag("cpus-per-task", "{{ncpu}}") |>
 #'   with_sbatch_flag("partition") |>
 #'   fill(ncpu = 4, partition = "cpu4mem32gb")
+#'
+#' default_template() |>
+#'   fill(ntasks = NULL) # no --ntasks line
 #' @export
 fill <- function(template, ...) {
   check_template(template)
-  values <- list(...)
+  values <- rlang::list2(...)
   if (length(values) == 0) {
     return(template)
   }
@@ -527,9 +553,33 @@ fill <- function(template, ...) {
     ))
   }
 
-  fills <- template@fills
-  fills[nms] <- values
-  template@fills <- fills
+  switches <- switch_names(template)
+  for (name in nms) {
+    value <- values[[name]]
+    flags <- flags_filled_from(template, name)
+    if (is.null(value)) {
+      if (length(flags) == 0) {
+        rlang::abort(c(
+          sprintf("`NULL` removes an #SBATCH flag, and `{{%s}}` is written in the script, not a flag", name),
+          i = "to leave it blank, do not fill it"
+        ))
+      }
+      for (flag in flags) {
+        template <- without_flag(template, flag)
+      }
+    } else {
+      if (name %in% switches) {
+        check_switch_value(name, value)
+      }
+      if (length(flags) > 0) {
+        template <- set_flag_value(template, name, value)
+      } else {
+        fills <- template@fills
+        fills[[name]] <- value
+        template@fills <- fills
+      }
+    }
+  }
   template
 }
 
@@ -548,12 +598,18 @@ fill <- function(template, ...) {
 #' `{{placeholders}}` — `{{file}}` is the one you almost always want. Call
 #' `with_command()` again to run a second command after the first.
 #'
-#' A `conditional` names a placeholder that switches between two forms of
-#' the line: with `if_true` appended when the placeholder is true, with
-#' `if_false` appended otherwise. The script carries both, in
-#' `{{#conditional}}` and `{{^conditional}}` sections, and the submitted job
-#' gets the one that applies. The usual switch is the `{{parallel}}` builtin,
-#' true when `--cpus-per-task` is filled above one (see [template_builtins]).
+#' Conditionals, made with [conditional()] and given after `args`, switch the
+#' line on placeholders: `conditional("parallel", if_true = c("--parallel",
+#' "--threads={{ncpu}}"))` appends those two arguments when `{{parallel}}` is
+#' true and nothing otherwise. Until a switch is known the template carries
+#' both forms, in `{{#parallel}}` and `{{^parallel}}` sections, and the
+#' submitted job gets the one that applies; once it is filled or derived, the
+#' template shows the one line. Several conditionals put their payloads on
+#' the line in the order given, each in its own section while unknown. A
+#' payload of `NULL` means the line is not written in that state. The usual
+#' switch is the `{{parallel}}` builtin, true when `--cpus-per-task` is filled
+#' above one (see [template_builtins]); any other switch is filled with `TRUE`
+#' or `FALSE`.
 #'
 #' A distributed tool is usually launcher-plus-binary — `mpirun <flags>
 #' distMonolix <flags>` — rather than one program. `launcher` and
@@ -569,12 +625,8 @@ fill <- function(template, ...) {
 #' @param args character vector of arguments appended to the command, one
 #'   word each, e.g. `c("nonmem", "run", "local", "{{file}}")`. An argument
 #'   containing a space is quoted for the shell
-#' @param conditional a placeholder that decides between `if_true` and
-#'   `if_false`, e.g. `"parallel"`; `NULL` (the default) for a plain line
-#' @param if_true,if_false character vectors of arguments appended when
-#'   `conditional` is true, respectively false, e.g.
-#'   `if_true = c("--parallel", "--threads={{ncpu}}")` and
-#'   `if_false = character()`
+#' @param ... zero or more [conditional()]s that switch the line between two
+#'   forms, by position; none for a plain line
 #' @param launcher a launcher program that runs `command` for you, e.g.
 #'   `"mpirun"`; `NULL` (the default) runs `command` directly
 #' @param launcher_args character vector of arguments appended to the
@@ -590,12 +642,12 @@ fill <- function(template, ...) {
 #'   with_partition() |>
 #'   with_command("Rscript", "{{file}}")
 #'
-#' # NONMEM through bbi, parallel only when ncpu > 1
+#' # NONMEM through bbi, parallel only when ncpu > 1, --overwrite when asked
 #' default_template() |>
 #'   with_command(
 #'     "bbi", c("nonmem", "run", "local", "{{file}}", "--config", "{{bbi_config_path}}"),
-#'     conditional = "parallel",
-#'     if_true = c("--parallel", "--threads={{ncpu}}")
+#'     conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}")),
+#'     conditional("overwrite", if_true = "--overwrite")
 #'   )
 #'
 #' # launcher + binary (corpus ex. 2): one line, both resolved and shown
@@ -609,11 +661,10 @@ fill <- function(template, ...) {
 #'   )
 #' }
 #' @export
-with_command <- function(template, command, args = character(), conditional = NULL,
-                         if_true = character(), if_false = character(),
+with_command <- function(template, command, args = character(), ...,
                          launcher = NULL, launcher_args = character()) {
   check_template(template)
-  entry <- command_entry(command, args, conditional, if_true, if_false, launcher, launcher_args)
+  entry <- command_entry(command, args, rlang::list2(...), launcher, launcher_args)
   template@body <- c(template@body, list(entry))
   template
 }
@@ -641,15 +692,16 @@ slurm_template_opts <- function(template) {
   check_template(template)
   option <- template_placeholders(template)
   derived <- c(file_builtins, "log_dir", "parallel")
+  fills <- template_fills(template)
   used_by <- vapply(option, function(name) {
-    flags <- names(template@sbatch)[template@sbatch == name]
+    flags <- flags_filled_from(template, name)
     if (length(flags) > 0) paste0("--", flags, collapse = ", ") else "script"
   }, character(1))
   value <- vapply(option, function(name) {
-    if (name %in% names(template@fills)) fill_text(template@fills[[name]]) else NA_character_
+    if (name %in% names(fills)) fill_text(fills[[name]]) else NA_character_
   }, character(1))
   default <- vapply(option, function(name) {
-    flags <- names(template@sbatch)[template@sbatch == name]
+    flags <- flags_filled_from(template, name)
     if (name %in% file_builtins) {
       "derived from `file`"
     } else if (identical(name, "log_dir")) {
@@ -662,16 +714,17 @@ slurm_template_opts <- function(template) {
       "1"
     } else if (identical(name, "partition") && "partition" %in% flags) {
       "the first partition"
-    } else if (length(flags) > 0 && all(flags %in% template@optional)) {
+    } else if (length(flags) > 0 && all(flags %in% optional_flags(template))) {
       "left out"
     } else {
       NA_character_
     }
   }, character(1))
+  known <- c(fills, derived_fills(fills, template = template))
   tibble::tibble(
     option = option,
     used_by = unname(used_by),
-    required = option %in% required_placeholders(template) & !option %in% derived,
+    required = option %in% required_placeholders(template, known) & !option %in% derived,
     value = unname(value),
     default = unname(default)
   )
@@ -717,26 +770,41 @@ write_slurm_template <- function(template, path, overwrite = FALSE) {
 
 #' @export
 S7::method(format, Template) <- function(x, ...) {
-  lines <- "#!/bin/bash"
-  for (flag in names(x@sbatch)) {
-    placeholder <- x@sbatch[[flag]]
-    if (placeholder %in% names(x@fills)) {
-      line <- sprintf("#SBATCH --%s=%s", flag, fill_text(x@fills[[placeholder]]))
-    } else {
-      line <- sprintf("#SBATCH --%s={{%s}}", flag, placeholder)
-      if (flag %in% x@optional) {
-        line <- c(sprintf("{{#%s}}", placeholder), line, sprintf("{{/%s}}", placeholder))
-      }
-    }
-    lines <- c(lines, line)
+  fills <- template_fills(x)
+  lines <- shebang()
+  for (entry in x@sbatch) {
+    lines <- c(lines, sbatch_line(entry, fills))
   }
-  fills <- c(x@fills, derived_fills(x@fills, template = x))
+  fills <- c(fills, derived_fills(fills, template = x))
   for (group in list(x@pre_run, x@body, x@post_run)) {
-    if (length(group) > 0) {
-      lines <- c(lines, "", substitute_fills(group_lines(group), fills))
+    rendered <- group_lines(group, fills)
+    if (length(rendered) > 0) {
+      lines <- c(lines, "", substitute_fills(rendered, fills))
     }
   }
   lines
+}
+
+# the bash the script asks for: the one on this host's PATH, resolved as every
+# program is; `env` finds one at run time when none is found here
+shebang <- function() {
+  bash <- unname(Sys.which("bash"))
+  if (nzchar(bash)) paste0("#!", bash) else "#!/usr/bin/env bash"
+}
+
+# one flag's header line(s): filled, a plain line; unfilled, a `{{tag}}` to
+# fill, inside a section when the flag is optional
+sbatch_line <- function(entry, fills) {
+  value <- fills[[entry@fill]]
+  if (!is.null(value)) {
+    return(sprintf("#SBATCH --%s=%s", entry@flag, fill_text(value)))
+  }
+  line <- sprintf("#SBATCH --%s={{%s}}", entry@flag, entry@fill)
+  if (entry@optional) {
+    c(sprintf("{{#%s}}", entry@fill), line, sprintf("{{/%s}}", entry@fill))
+  } else {
+    line
+  }
 }
 
 #' @export

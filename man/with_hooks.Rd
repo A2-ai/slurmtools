@@ -6,23 +6,9 @@
 \alias{with_post_run}
 \title{Run commands before or after the job's command}
 \usage{
-with_pre_run(
-  template,
-  command,
-  args = character(),
-  conditional = NULL,
-  if_true = character(),
-  if_false = character()
-)
+with_pre_run(template, command, args = character(), ...)
 
-with_post_run(
-  template,
-  command,
-  args = character(),
-  conditional = NULL,
-  if_true = character(),
-  if_false = character()
-)
+with_post_run(template, command, args = character(), ...)
 }
 \arguments{
 \item{template}{a \code{\link[=Template]{Template()}}}
@@ -34,13 +20,8 @@ shell builtin such as \code{"module"}, or a placeholder. The program alone:
 \item{args}{character vector of arguments, one word each, e.g.
 \code{c("load", "R/4.5")}}
 
-\item{conditional}{a placeholder that decides between \code{if_true} and
-\code{if_false}, e.g. \code{"parallel"}; \code{NULL} (the default) for a plain line}
-
-\item{if_true, if_false}{character vectors of arguments appended when
-\code{conditional} is true, respectively false, e.g.
-\code{if_true = c("--parallel", "--threads={{ncpu}}")} and
-\code{if_false = character()}}
+\item{...}{zero or more \code{\link[=conditional]{conditional()}}s that switch the line between two
+forms, by position; none for a plain line}
 }
 \value{
 the template with the line added
@@ -56,8 +37,9 @@ resolve on the node. Arguments may hold \code{{{placeholders}}}, filled like
 any other with \code{\link[=fill]{fill()}} or at submit time, and \verb{$SLURM_JOB_ID} and the
 other Slurm variables are there at run time as usual: an argument with
 whitespace is wrapped in double quotes, so they still expand. Calling a
-verb again appends another line. \code{conditional}, \code{if_true} and \code{if_false}
-work as in \code{\link[=with_command]{with_command()}}.
+verb again appends another line. Conditionals given after \code{args} work as
+in \code{\link[=with_command]{with_command()}}; a payload of \code{NULL} leaves the line out in that state,
+so a cleanup or a notification can exist only when a switch says so.
 
 Post-run lines run however the command ended: this first version has no
 exit-status logic. Success-only and failure-only hooks are a later, opt-in

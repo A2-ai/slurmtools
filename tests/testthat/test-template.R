@@ -1,7 +1,9 @@
 # --- Template() + with_sbatch_flag() -------------------------------------------
 
-test_that("an empty Template renders to a bare bash shebang", {
-  expect_equal(format(Template()), "#!/bin/bash")
+test_that("an empty Template renders to a bare bash shebang, the bash Sys.which() finds", {
+  expect_equal(format(Template()), shebang_line)
+  expect_equal(shebang_line, paste0("#!", Sys.which("bash")))
+  expect_match(shebang_line, "^#!/.+bash$")
 })
 
 test_that("with_sbatch_flag adds one #SBATCH line per flag, in call order", {
@@ -13,7 +15,7 @@ test_that("with_sbatch_flag adds one #SBATCH line per flag, in call order", {
   expect_equal(
     format(tmpl),
     c(
-      "#!/bin/bash",
+      shebang_line,
       "#SBATCH --job-name={{job_name}}",
       "#SBATCH --cpus-per-task={{ncpu}}",
       "#SBATCH --partition={{partition}}"
@@ -23,7 +25,7 @@ test_that("with_sbatch_flag adds one #SBATCH line per flag, in call order", {
 
 test_that("the default placeholder is the flag with dashes as underscores", {
   tmpl <- Template() |> with_sbatch_flag("ntasks-per-node")
-  expect_equal(tmpl@sbatch, c("ntasks-per-node" = "ntasks_per_node"))
+  expect_equal(header_fills(tmpl), c("ntasks-per-node" = "ntasks_per_node"))
 })
 
 test_that("adding a flag twice replaces its placeholder in place", {
@@ -31,7 +33,7 @@ test_that("adding a flag twice replaces its placeholder in place", {
     with_sbatch_flag("nodes") |>
     with_sbatch_flag("partition") |>
     with_sbatch_flag("nodes", "{{n_nodes}}")
-  expect_equal(tmpl@sbatch, c(nodes = "n_nodes", partition = "partition"))
+  expect_equal(header_fills(tmpl), c(nodes = "n_nodes", partition = "partition"))
 })
 
 test_that("flags are sbatch long options without dashes", {
@@ -67,21 +69,24 @@ test_that("a verb's argument is the flag's value", {
   expect_equal(
     format(tmpl),
     c(
-      "#!/bin/bash",
+      shebang_line,
       "#SBATCH --job-name=nm1",
       "#SBATCH --cpus-per-task=4",
       "#SBATCH --account=proj-x",
       "#SBATCH --time=01:00:00"
     )
   )
-  expect_equal(tmpl@fills, list(job_name = "nm1", cpus_per_task = 4, account = "proj-x", time = "01:00:00"))
+  # the values live on their flags, not in `fills`
+  expect_equal(template_fills(tmpl), list(job_name = "nm1", cpus_per_task = 4, account = "proj-x", time = "01:00:00"))
+  expect_equal(tmpl@fills, list())
+  expect_equal(sbatch_entry(tmpl, "cpus-per-task")@value, 4)
   expect_equal(unname(slurm_template_opts(tmpl)$value), c("nm1", "4", "proj-x", "01:00:00"))
 })
 
 test_that("a \"{{placeholder}}\" argument leaves a blank with that name", {
   tmpl <- Template() |> with_cpus_per_task("{{ncpu}}") |> with_sbatch_flag("mem", "{{ memory }}")
-  expect_equal(tmpl@sbatch, c("cpus-per-task" = "ncpu", mem = "memory"))
-  expect_equal(tmpl@fills, list())
+  expect_equal(header_fills(tmpl), c("cpus-per-task" = "ncpu", mem = "memory"))
+  expect_equal(template_fills(tmpl), list())
   expect_equal(format(tmpl)[2:3], c("#SBATCH --cpus-per-task={{ncpu}}", "#SBATCH --mem={{memory}}"))
 })
 
@@ -95,10 +100,10 @@ test_that("a value given to a verb is checked like a fill", {
 
 test_that("a value given again, or filled later, replaces the earlier one", {
   tmpl <- Template() |> with_nodes(1) |> with_nodes(2)
-  expect_equal(tmpl@fills, list(nodes = 2))
-  expect_equal(fill(tmpl, nodes = 4)@fills, list(nodes = 4))
-  # renaming a filled flag's blank orphans the value, and says so
-  expect_error(with_nodes(tmpl, "{{n}}"), "does not have")
+  expect_equal(template_fills(tmpl), list(nodes = 2))
+  expect_equal(template_fills(fill(tmpl, nodes = 4)), list(nodes = 4))
+  # re-adding the flag with a new blank replaces the line, value and all
+  expect_equal(format(with_nodes(tmpl, "{{n}}"))[2], "#SBATCH --nodes={{n}}")
 })
 
 test_that("with_sbatch_flag needs a Template", {
@@ -106,8 +111,14 @@ test_that("with_sbatch_flag needs a Template", {
 })
 
 test_that("Template() validates flags passed directly", {
-  expect_error(Template(sbatch = c("a", "b")), "named character vector")
-  expect_error(Template(sbatch = c(nodes = "n", nodes = "m")), "once")
+  expect_error(Template(sbatch = list("a")), "built with")
+  expect_error(
+    Template(sbatch = list(SbatchFlag(flag = "nodes", fill = "n"), SbatchFlag(flag = "nodes", fill = "m"))),
+    "once"
+  )
+  expect_error(SbatchFlag(flag = "--nodes", fill = "nodes"), "leading dashes")
+  expect_error(SbatchFlag(flag = "nodes", fill = "2n"), "start with a letter")
+  expect_error(SbatchFlag(flag = "nodes", fill = "nodes", value = c(1, 2)), "single non-missing value")
 })
 
 test_that("print shows the rendered header", {
@@ -158,7 +169,7 @@ test_that("filling a placeholder again replaces the earlier value", {
     with_sbatch_flag("partition") |>
     fill(partition = "a") |>
     fill(partition = "b")
-  expect_equal(tmpl@fills, list(partition = "b"))
+  expect_equal(template_fills(tmpl), list(partition = "b"))
   expect_equal(format(tmpl)[2], "#SBATCH --partition=b")
 })
 
@@ -175,7 +186,6 @@ test_that("fill needs named, single values", {
   tmpl <- Template() |> with_sbatch_flag("partition")
   expect_error(fill(tmpl, "cpu2mem4gb"), "must be named")
   expect_error(fill(tmpl, partition = c("a", "b")), "single non-missing value")
-  expect_error(fill(tmpl, partition = NULL), "single non-missing value")
   expect_error(fill(tmpl, partition = NA), "single non-missing value")
   expect_error(fill("rscript.tmpl", partition = "x"), "must be a Template")
 })
@@ -187,11 +197,17 @@ test_that("fill with nothing to fill returns the template unchanged", {
 
 test_that("a fill for a placeholder the template lacks is caught, however it gets there", {
   expect_error(
-    Template(sbatch = c(nodes = "nodes"), fills = list(ncpu = 2)),
+    Template(sbatch = list(SbatchFlag(flag = "nodes", fill = "nodes")), fills = list(ncpu = 2)),
     "does not have"
   )
+  # a header placeholder's value belongs on its flag, not in `fills`
+  expect_error(
+    Template(sbatch = list(SbatchFlag(flag = "nodes", fill = "nodes")), fills = list(nodes = 2)),
+    "belong to their flags"
+  )
+  # re-adding a flag under a new blank drops the old value with the old line
   tmpl <- Template() |> with_sbatch_flag("nodes") |> fill(nodes = 2)
-  expect_error(with_sbatch_flag(tmpl, "nodes", "{{n_nodes}}"), "does not have")
+  expect_equal(format(with_sbatch_flag(tmpl, "nodes", "{{n_nodes}}"))[2], "#SBATCH --nodes={{n_nodes}}")
 })
 
 # --- write_slurm_template() ---------------------------------------------------
@@ -208,7 +224,7 @@ test_that("write_slurm_template writes the rendered lines, newline-terminated", 
   expect_identical(out, path)
   expect_equal(
     brio::read_file(path),
-    "#!/bin/bash\n#SBATCH --job-name={{job_name}}\n#SBATCH --partition=cpu2mem4gb\n"
+    paste0(shebang_line, "\n#SBATCH --job-name={{job_name}}\n#SBATCH --partition=cpu2mem4gb\n")
   )
 })
 
@@ -220,7 +236,7 @@ test_that("write_slurm_template refuses to overwrite unless asked", {
   expect_equal(readLines(path), "keep me")
 
   suppressMessages(write_slurm_template(tmpl, path, overwrite = TRUE))
-  expect_equal(readLines(path)[1], "#!/bin/bash")
+  expect_equal(readLines(path)[1], shebang_line)
 })
 
 test_that("write_slurm_template needs a Template", {
@@ -265,11 +281,12 @@ test_that("the named verbs and the flag table stay in step, both directions", {
   for (flag in names(sbatch_flags)) {
     verb <- get(paste0("with_", gsub("-", "_", flag)))
     expect_equal(
-      verb(Template())@sbatch,
+      header_fills(verb(Template())),
       stats::setNames(gsub("-", "_", flag), flag),
       info = flag
     )
-    expect_equal(verb(Template(), "{{x}}")@sbatch, stats::setNames("x", flag), info = flag)
+    expect_equal(header_fills(verb(Template(), "{{x}}")), stats::setNames("x", flag), info = flag)
+    expect_equal(verb(Template(), NULL)@sbatch, list(), info = flag)
   }
 })
 
@@ -319,10 +336,7 @@ test_that("a placeholder feeding two flags must satisfy both", {
 
 test_that("the check follows the flag, not the verb that added it", {
   expect_error(fill(with_sbatch_flag(Template(), "nodes"), nodes = 0), "positive whole number")
-  expect_error(
-    Template(sbatch = c(nodes = "nodes"), fills = list(nodes = 0)),
-    "positive whole number"
-  )
+  expect_error(SbatchFlag(flag = "nodes", fill = "nodes", value = 0), "positive whole number")
   # a flag outside the table is not checked
   expect_equal(
     format(fill(with_sbatch_flag(Template(), "time"), time = "not-a-time"))[2],
@@ -347,7 +361,7 @@ test_that("an unfilled optional flag renders inside a section, in its place", {
       "#SBATCH --cpus-per-task={{ncpu}}"
     )
   )
-  expect_equal(tmpl@optional, "account")
+  expect_equal(optional_flags(tmpl), "account")
 })
 
 test_that("a filled optional flag renders as a plain line", {
@@ -365,23 +379,15 @@ test_that("required flags never get a section, and optional works on the blanket
 
 test_that("re-adding a flag resets its optional setting", {
   tmpl <- Template() |> with_account(optional = TRUE) |> with_account()
-  expect_equal(tmpl@optional, character())
+  expect_equal(optional_flags(tmpl), character())
   tmpl <- Template() |> with_nodes() |> with_nodes(optional = TRUE)
-  expect_equal(tmpl@optional, "nodes")
+  expect_equal(optional_flags(tmpl), "nodes")
 })
 
-test_that("optional must be TRUE or FALSE, and must name a flag the template has", {
+test_that("optional must be TRUE or FALSE", {
   expect_error(with_account(Template(), optional = NA), "TRUE or FALSE")
   expect_error(with_account(Template(), optional = "yes"), "TRUE or FALSE")
-  expect_error(
-    Template(sbatch = c(nodes = "nodes"), optional = "account"),
-    "optional names flags the template does not have: `account`",
-    fixed = TRUE
-  )
-  expect_error(
-    Template(sbatch = c(nodes = "nodes"), optional = c("nodes", "nodes")),
-    "once"
-  )
+  expect_error(SbatchFlag(flag = "nodes", fill = "nodes", optional = NA), "TRUE or FALSE")
 })
 
 test_that("a written optional flag is dropped or kept by the file form as today", {
@@ -410,6 +416,55 @@ test_that("a written optional flag is dropped or kept by the file form as today"
     slurm_template_opts = list(account = "proj-x")
   )
   expect_match(with$template_script, "#SBATCH --account=proj-x", fixed = TRUE)
+})
+
+# --- NULL removes a flag; values live on the flag --------------------------------
+
+test_that("NULL to a verb removes the flag; a flag never there is nothing to remove", {
+  tmpl <- default_template() |> with_nodes(NULL)
+  expect_equal(sbatch_flag_names(tmpl), c("job-name", "ntasks", "cpus-per-task", "partition", "account"))
+  expect_false(any(grepl("--nodes", format(tmpl), fixed = TRUE)))
+  expect_equal(format(with_nodes(Template(), NULL)), shebang_line)
+  expect_equal(
+    format(with_sbatch_flag(default_template(), "ntasks", NULL)),
+    format(default_template() |> with_ntasks(NULL))
+  )
+  # the no-argument call still leaves the blank named after the flag
+  expect_equal(format(with_nodes(Template()))[2], "#SBATCH --nodes={{nodes}}")
+})
+
+test_that("NULL to fill() removes the flag its placeholder feeds, and only a flag", {
+  tmpl <- default_template("echo", "{{file}}") |> fill(ntasks = NULL)
+  expect_false("ntasks" %in% sbatch_flag_names(tmpl))
+  expect_false("ntasks" %in% template_placeholders(tmpl))
+  # two flags filled from one placeholder go together
+  both <- Template() |> with_output("{{log}}") |> with_error("{{log}}") |> fill(log = NULL)
+  expect_equal(both@sbatch, list())
+  expect_error(fill(tmpl, file = NULL), "written in the script, not a flag")
+  expect_error(fill(tmpl, nope = NULL), "no placeholder")
+  # at submit, through slurm_template_opts
+  cmd <- submit_slurm_job(default_template("echo", "{{file}}"), dry_run = TRUE, slurm_template_opts = list(file = "s.R", nodes = NULL))
+  expect_no_match(cmd$template_script, "--nodes", fixed = TRUE)
+  expect_match(cmd$template_script, "--ntasks=1", fixed = TRUE)
+})
+
+test_that("a flag keeps its value itself; fills holds only the script's placeholders", {
+  tmpl <- default_template("echo", "{{file}}") |> fill(ncpu = 4, file = "sim.R")
+  expect_equal(sbatch_entry(tmpl, "cpus-per-task")@value, 4)
+  expect_equal(tmpl@fills, list(file = "sim.R"))
+  expect_equal(template_fills(tmpl)[c("ncpu", "file")], list(ncpu = 4, file = "sim.R"))
+  # a value given to the verb and one given later render the same
+  expect_equal(format(Template() |> with_nodes(2)), format(Template() |> with_nodes() |> fill(nodes = 2)))
+  # a placeholder shared by two flags takes one fill, on both
+  both <- Template() |> with_output("{{log}}") |> with_error("{{log}}") |> fill(log = "run.log")
+  expect_equal(format(both)[-1], c("#SBATCH --output=run.log", "#SBATCH --error=run.log"))
+  expect_equal(sbatch_entry(both, "error")@value, "run.log")
+})
+
+test_that("fill() splices a list", {
+  tmpl <- Template() |> with_partition() |> with_cpus_per_task("{{ncpu}}") |> with_command("echo", "{{file}}")
+  opts <- list(partition = "cpu2mem4gb", ncpu = 2, file = "sim.R")
+  expect_equal(format(fill(tmpl, !!!opts)), format(fill(tmpl, partition = "cpu2mem4gb", ncpu = 2, file = "sim.R")))
 })
 
 # --- with_command() -----------------------------------------------------------
@@ -469,7 +524,7 @@ test_that("a conditional writes both forms of the line, each in its section", {
     with_cpus_per_task("{{ncpu}}") |>
     with_command(
       "echo", c("nonmem", "run", "{{file}}"),
-      conditional = "parallel", if_true = c("--parallel", "--threads={{ncpu}}"), if_false = "--serial"
+      conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}"), if_false = "--serial")
     )
   expect_equal(
     utils::tail(format(tmpl), 6),
@@ -491,13 +546,160 @@ test_that("a conditional writes both forms of the line, each in its section", {
   expect_no_match(parallel$template_script, "--serial", fixed = TRUE)
 })
 
-test_that("if_false defaults to the plain line, and the conditional arguments are checked", {
-  tmpl <- Template() |> with_command("echo", "x", conditional = "parallel", if_true = "--par")
+test_that("if_false defaults to the plain line, and a conditional is checked", {
+  tmpl <- Template() |> with_command("echo", "x", conditional("parallel", if_true = "--par"))
   expect_equal(format(tmpl)[7], paste(echo_path, "x"))
-  expect_error(with_command(Template(), "echo", "x", if_true = "--par"), "need a `conditional`")
-  expect_error(with_command(Template(), "echo", "x", conditional = c("a", "b")), "single placeholder name")
-  expect_error(with_command(Template(), "echo", "x", conditional = "2x"), "single placeholder name")
-  expect_error(with_command(Template(), "echo", "x", conditional = "p", if_true = 1), "`if_true` must be")
+  expect_error(with_command(Template(), "echo", "x", "parallel"), "takes conditionals made with conditional()", fixed = TRUE)
+  expect_error(conditional(c("a", "b")), "single placeholder name")
+  expect_error(conditional("2x"), "single placeholder name")
+  expect_error(conditional("p", if_true = 1), "`if_true` must be")
+  expect_error(conditional("p", if_false = NA_character_), "`if_false` must be")
+})
+
+test_that("a conditional renders as the one line that applies once its switch is known", {
+  tmpl <- Template() |>
+    with_cpus_per_task("{{ncpu}}") |>
+    with_command("echo", "x", conditional("parallel", if_true = "--par", if_false = "--one"))
+  expect_length(format(tmpl), 9) # both forms, in their sections
+  expect_equal(utils::tail(format(fill(tmpl, ncpu = 4)), 1), paste(echo_path, "x --par"))
+  expect_equal(utils::tail(format(fill(tmpl, ncpu = 1)), 1), paste(echo_path, "x --one"))
+  expect_length(format(fill(tmpl, ncpu = 1)), 4)
+  expect_output(print(fill(tmpl, ncpu = 4)), "x --par", fixed = TRUE)
+  # a switch filled by hand takes TRUE or FALSE
+  byhand <- Template() |> with_command("echo", "x", conditional("go", if_true = "yes", if_false = "no"))
+  expect_equal(utils::tail(format(fill(byhand, go = TRUE)), 1), paste(echo_path, "x yes"))
+  expect_equal(utils::tail(format(fill(byhand, go = FALSE)), 1), paste(echo_path, "x no"))
+  expect_error(fill(byhand, go = "yes"), "give it TRUE or FALSE")
+})
+
+# --- several conditionals, NULL payloads, the switch guard ---------------------
+
+test_that("several conditionals share a line, in the order given, each resolving on its own", {
+  tmpl <- Template() |>
+    with_cpus_per_task("{{ncpu}}") |>
+    with_command(
+      "echo", c("run", "{{file}}"),
+      conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}")),
+      conditional("overwrite", if_true = "--overwrite")
+    )
+  # both unknown: one line, each payload in its own inline section
+  expect_equal(
+    utils::tail(format(tmpl), 1),
+    paste0(echo_path, " run {{file}}{{#parallel}} --parallel --threads={{ncpu}}{{/parallel}}{{#overwrite}} --overwrite{{/overwrite}}")
+  )
+  expect_setequal(template_placeholders(tmpl), c("ncpu", "parallel", "file", "overwrite"))
+  # one known: the two full lines, for the one still open
+  expect_equal(
+    utils::tail(format(fill(tmpl, ncpu = 4)), 6),
+    c(
+      "{{#overwrite}}", paste(echo_path, "run {{file}} --parallel --threads=4 --overwrite"), "{{/overwrite}}",
+      "{{^overwrite}}", paste(echo_path, "run {{file}} --parallel --threads=4"), "{{/overwrite}}"
+    )
+  )
+  # both known: the four combinations
+  line <- function(...) utils::tail(format(fill(tmpl, file = "a.mod", ...)), 1)
+  expect_equal(line(ncpu = 4, overwrite = TRUE), paste(echo_path, "run a.mod --parallel --threads=4 --overwrite"))
+  expect_equal(line(ncpu = 4, overwrite = FALSE), paste(echo_path, "run a.mod --parallel --threads=4"))
+  expect_equal(line(ncpu = 1, overwrite = TRUE), paste(echo_path, "run a.mod --overwrite"))
+  expect_equal(line(ncpu = 1, overwrite = FALSE), paste(echo_path, "run a.mod"))
+  # the written file renders the same way through whisker
+  path <- withr::local_tempfile(fileext = ".tmpl")
+  suppressMessages(write_slurm_template(tmpl, path))
+  rendered <- whisker::whisker.render(
+    paste(readLines(path), collapse = "\n"),
+    list(file = "a.mod", ncpu = 1, parallel = FALSE, overwrite = TRUE)
+  )
+  expect_match(rendered, paste(echo_path, "run a.mod --overwrite"), fixed = TRUE)
+  expect_no_match(rendered, "--parallel", fixed = TRUE)
+})
+
+test_that("conditionals are given by position, each made with conditional(), each switch once", {
+  par <- conditional("parallel", if_true = "--par")
+  expect_error(with_command(Template(), "echo", "x", conditional = par), "given by position")
+  expect_error(with_command(Template(), "echo", "x", "parallel"), "takes conditionals made with conditional()", fixed = TRUE)
+  expect_error(
+    with_command(Template(), "echo", "x", par, conditional("parallel", if_true = "--again")),
+    "`parallel` is given twice",
+    fixed = TRUE
+  )
+  expect_error(with_command(Template(), "echo", par), "conditionals come after it")
+  # launcher is still reached by name
+  tmpl <- Template() |> with_command("/x/tool", "a", par, launcher = "/opt/mpirun")
+  expect_equal(utils::tail(format(fill(tmpl, parallel = TRUE)), 1), "/opt/mpirun /x/tool a --par")
+})
+
+test_that("a conditional with nothing in either payload is refused", {
+  expect_error(conditional("parallel"), "needs arguments in `if_true`, `if_false` or both", fixed = TRUE)
+  expect_error(conditional("parallel", if_true = NULL, if_false = NULL), "cannot both be NULL")
+  expect_no_error(conditional("notify", if_true = NULL)) # the plain line, only when off
+})
+
+test_that("a NULL payload takes the line away in that state", {
+  tmpl <- Template() |>
+    with_cpus_per_task("{{ncpu}}") |>
+    with_command("echo", "run") |>
+    with_post_run("echo", character(), conditional("parallel", if_true = c("clean", "{{scratch}}"), if_false = NULL))
+  # unknown: the line sits inside the section of the state it belongs to
+  expect_equal(utils::tail(format(tmpl), 3), c("{{#parallel}}", paste(echo_path, "clean {{scratch}}"), "{{/parallel}}"))
+  # off: no line, and no blank left where the group was
+  off <- format(fill(tmpl, ncpu = 1))
+  expect_equal(utils::tail(off, 1), paste(echo_path, "run"))
+  expect_false(any(grepl("clean", off, fixed = TRUE)))
+  # on: the line, with its payload
+  expect_equal(utils::tail(format(fill(tmpl, ncpu = 4, scratch = "/tmp/x")), 1), paste(echo_path, "clean /tmp/x"))
+  # the other way round: a line only when the switch is off
+  only_off <- Template() |> with_command("echo", "run", conditional("parallel", if_true = NULL, if_false = "--serial"))
+  expect_equal(utils::tail(format(only_off), 3), c("{{^parallel}}", paste(echo_path, "run --serial"), "{{/parallel}}"))
+  expect_equal(format(fill(only_off, parallel = TRUE)), shebang_line)
+  # a second, open switch on the same line: the NULL one wraps, the other goes inline
+  both <- Template() |> with_command("echo", "run", conditional("notify", if_true = NULL), conditional("verbose", if_true = "-v"))
+  expect_equal(
+    utils::tail(format(both), 3),
+    c("{{^notify}}", paste0(echo_path, " run{{#verbose}} -v{{/verbose}}"), "{{/notify}}")
+  )
+})
+
+test_that("a placeholder written only in the branch not taken is not required", {
+  tmpl <- Template() |>
+    with_job_name() |>
+    with_cpus_per_task("{{ncpu}}") |>
+    with_command("echo", "{{file}}", conditional("parallel", if_true = c("--hosts", "{{mpi_hosts}}")))
+  expect_setequal(required_placeholders(tmpl), c("job_name", "ncpu", "parallel", "file", "mpi_hosts"))
+  # once the switch is known, neither it nor the untaken branch is asked for
+  expect_setequal(required_placeholders(tmpl, list(parallel = FALSE)), c("job_name", "ncpu", "file"))
+  # still a placeholder of the template: listed, and fillable ahead of time
+  expect_true("mpi_hosts" %in% template_placeholders(tmpl))
+  expect_no_error(fill(tmpl, mpi_hosts = "a,b"))
+  one <- submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(file = "x", job_name = "m", ncpu = 1))
+  expect_no_match(one$template_script, "--hosts", fixed = TRUE)
+  expect_error(
+    submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(file = "x", job_name = "m", ncpu = 4)),
+    "unfilled placeholders: `{{mpi_hosts}}`",
+    fixed = TRUE
+  )
+  required_for <- function(t) {
+    opts <- slurm_template_opts(t)
+    opts$required[opts$option == "mpi_hosts"]
+  }
+  expect_true(required_for(tmpl))
+  expect_false(required_for(fill(tmpl, ncpu = 1)))
+})
+
+test_that("a switch takes TRUE or FALSE, nothing else", {
+  tmpl <- Template() |> with_job_name() |> with_command("echo", "x", conditional("gpu", if_true = "--gpu", if_false = "--cpu"))
+  for (bad in list("no", "FALSE", 0, "", NA, c(TRUE, FALSE))) {
+    expect_error(fill(tmpl, gpu = bad), "give it TRUE or FALSE")
+  }
+  expect_equal(utils::tail(format(fill(tmpl, gpu = FALSE)), 1), paste(echo_path, "x --cpu"))
+  expect_error(
+    submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(job_name = "j", gpu = "yes")),
+    "`gpu` switches a line",
+    fixed = TRUE
+  )
+  # the derived parallel is a logical already; an explicit override must be one too
+  par <- Template() |> with_job_name() |> with_cpus_per_task("{{ncpu}}") |> with_command("echo", "x", conditional("parallel", if_true = "--par"))
+  expect_no_error(submit_slurm_job(par, dry_run = TRUE, slurm_template_opts = list(job_name = "j", ncpu = 2)))
+  expect_error(fill(par, parallel = "yes"), "give it TRUE or FALSE")
 })
 
 test_that("a program given as a placeholder is filled like any other and resolved at submit", {
@@ -540,7 +742,7 @@ test_that("a Template submits with slurm_template_opts as the final fill (dry ru
   expect_equal(
     strsplit(cmd$template_script, "\n")[[1]],
     c(
-      "#!/bin/bash",
+      shebang_line,
       "#SBATCH --job-name=sim",
       "#SBATCH --partition=cpu2mem4gb",
       "#SBATCH --cpus-per-task=2",
@@ -743,7 +945,7 @@ test_that("without a job-name flag the script is slurm-job.sh", {
 # --- slurm_template_opts() ------------------------------------------------------
 
 test_that("slurm_template_opts() lists every placeholder with what it feeds and what it falls back to", {
-  tmpl <- default_template("echo", c("{{file}}", "--config", "{{config}}"), conditional = "parallel", if_true = "--par") |>
+  tmpl <- default_template("echo", c("{{file}}", "--config", "{{config}}"), conditional("parallel", if_true = "--par")) |>
     with_post_run("echo", "{{file_stem}}")
   opts <- slurm_template_opts(tmpl)
   expect_s3_class(opts, "tbl_df")

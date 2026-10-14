@@ -2,6 +2,7 @@
 
 export(Template)
 export(cancel_slurm_job)
+export(conditional)
 export(create_slurm_template)
 export(default_template)
 export(fill)

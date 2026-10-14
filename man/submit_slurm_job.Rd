@@ -18,14 +18,21 @@ submit_slurm_job(
 )
 }
 \arguments{
-\item{.mod}{what to submit: a \code{\link[=Template]{Template()}}; the path of the file to run
-through \code{slurm_job_template_path}; or a NONMEM model (a
-\code{bbi_nonmem_model}, or a model path) for the pre-template interface}
+\item{.mod}{what to submit, in one of three forms: a \code{\link[=Template]{Template()}} (the
+argument keeps its old name; pass the template first, as in the
+examples); the path of the file to run through \code{slurm_job_template_path};
+or a NONMEM model (a \code{bbi_nonmem_model}, or a model path) for the
+pre-template interface}
 
-\item{partition}{name of the partition to submit to. The default passes the
-full set of partitions; the first is selected.}
+\item{partition}{name of the partition to submit to, one of those
+\code{\link[=get_slurm_partitions]{get_slurm_partitions()}} lists. With a \code{\link[=Template]{Template()}} it fills the
+\code{{{partition}}} placeholder, taking precedence over a \code{partition} entry
+in \code{slurm_template_opts}; left out, the first partition is used whenever
+the template still needs one.}
 
-\item{ncpu}{number of cpus to request}
+\item{ncpu}{number of cpus to request, a positive whole number. With a
+\code{\link[=Template]{Template()}} it fills the \code{{{ncpu}}} placeholder, taking precedence over
+an \code{ncpu} entry in \code{slurm_template_opts}; left out, \code{1}.}
 
 \item{overwrite}{pre-template NONMEM form only: whether to delete the
 model's existing output directory first}
@@ -44,11 +51,26 @@ output; defaults to \code{options("slurmtools.submission_root")}, falling back
 to \code{"submission-log"} under the calling directory}
 
 \item{bbi_config_path}{path to a bbi.yaml, filled into
-\code{{{bbi_config_path}}}; defaults to \code{options("slurmtools.bbi_config_path")}}
+\code{{{bbi_config_path}}} when the template writes it; defaults to
+\code{options("slurmtools.bbi_config_path")}}
 
 \item{slurm_template_opts}{named list of \code{placeholder = value} fills for
-the template — \code{file}, and anything else it asks for; see
-\code{\link[=slurm_template_opts]{slurm_template_opts()}}}
+the template, applied on top of anything already filled with \code{\link[=fill]{fill()}}.
+For a \code{\link[=default_template]{default_template()}} the names are:\tabular{lll}{
+   name \tab fills \tab if left out \cr
+   \code{file} \tab \code{{{file}}} in the command, and the builtins below \tab required whenever the command writes it \cr
+   \code{job_name} \tab \code{--job-name}, the script name \verb{<job_name>.sh} and the default log names \tab the stem of \code{file} (\code{sim.R} -> \code{sim}) \cr
+   \code{partition} \tab \code{--partition} \tab the \code{partition} argument, else the first partition \cr
+   \code{ncpu} \tab \code{--cpus-per-task} \tab the \code{ncpu} argument, else \code{1} \cr
+   \code{account} \tab \code{--account} \tab the line is dropped \cr
+   \code{nodes}, \code{ntasks} \tab \code{--nodes}, \code{--ntasks} \tab \code{1}, filled already \cr
+   \code{bbi_config_path} \tab \code{{{bbi_config_path}}}, when written \tab the \code{bbi_config_path} argument \cr
+   \code{file_dir}, \code{file_stem}, \code{file_ext}, \code{parallel} \tab see \link{template_builtins} \tab derived from \code{file} and \code{ncpu} \cr
+}
+
+
+plus any other \code{{{tag}}} the template's flags, command or hooks write.
+\code{\link[=slurm_template_opts]{slurm_template_opts()}} prints this table for the template you have.}
 }
 \value{
 for a dry run, a list with the sbatch command, its args, the
@@ -111,7 +133,7 @@ slurm_job_log(job)
 # NONMEM through bbi, parallel when ncpu > 1
 bbi <- default_template(
   "bbi", c("nonmem", "run", "local", "{{file}}", "--config", "{{bbi_config_path}}"),
-  conditional = "parallel", if_true = c("--parallel", "--threads={{ncpu}}")
+  conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}"))
 )
 submit_slurm_job(bbi, ncpu = 2, slurm_template_opts = list(
   file = "model/nonmem/1001.mod", bbi_config_path = "model/nonmem/bbi.yaml"

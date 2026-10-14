@@ -8,9 +8,7 @@ with_command(
   template,
   command,
   args = character(),
-  conditional = NULL,
-  if_true = character(),
-  if_false = character(),
+  ...,
   launcher = NULL,
   launcher_args = character()
 )
@@ -26,13 +24,8 @@ a path, or a placeholder such as \code{"{{bbi}}"}. The program alone:
 word each, e.g. \code{c("nonmem", "run", "local", "{{file}}")}. An argument
 containing a space is quoted for the shell}
 
-\item{conditional}{a placeholder that decides between \code{if_true} and
-\code{if_false}, e.g. \code{"parallel"}; \code{NULL} (the default) for a plain line}
-
-\item{if_true, if_false}{character vectors of arguments appended when
-\code{conditional} is true, respectively false, e.g.
-\code{if_true = c("--parallel", "--threads={{ncpu}}")} and
-\code{if_false = character()}}
+\item{...}{zero or more \code{\link[=conditional]{conditional()}}s that switch the line between two
+forms, by position; none for a plain line}
 
 \item{launcher}{a launcher program that runs \code{command} for you, e.g.
 \code{"mpirun"}; \code{NULL} (the default) runs \code{command} directly}
@@ -56,12 +49,17 @@ with a name or a path, and resolved the same way at submit. \code{args} may hold
 \code{{{placeholders}}} — \code{{{file}}} is the one you almost always want. Call
 \code{with_command()} again to run a second command after the first.
 
-A \code{conditional} names a placeholder that switches between two forms of
-the line: with \code{if_true} appended when the placeholder is true, with
-\code{if_false} appended otherwise. The script carries both, in
-\verb{\{\{#conditional\}\}} and \verb{\{\{^conditional\}\}} sections, and the submitted job
-gets the one that applies. The usual switch is the \code{{{parallel}}} builtin,
-true when \code{--cpus-per-task} is filled above one (see \link{template_builtins}).
+Conditionals, made with \code{\link[=conditional]{conditional()}} and given after \code{args}, switch the
+line on placeholders: \code{conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}"))} appends those two arguments when \code{{{parallel}}} is
+true and nothing otherwise. Until a switch is known the template carries
+both forms, in \verb{\{\{#parallel\}\}} and \verb{\{\{^parallel\}\}} sections, and the
+submitted job gets the one that applies; once it is filled or derived, the
+template shows the one line. Several conditionals put their payloads on
+the line in the order given, each in its own section while unknown. A
+payload of \code{NULL} means the line is not written in that state. The usual
+switch is the \code{{{parallel}}} builtin, true when \code{--cpus-per-task} is filled
+above one (see \link{template_builtins}); any other switch is filled with \code{TRUE}
+or \code{FALSE}.
 
 A distributed tool is usually launcher-plus-binary — \verb{mpirun <flags> distMonolix <flags>} — rather than one program. \code{launcher} and
 \code{launcher_args} prepend that launcher to this command's line, resolved the
@@ -76,12 +74,12 @@ Template() |>
   with_partition() |>
   with_command("Rscript", "{{file}}")
 
-# NONMEM through bbi, parallel only when ncpu > 1
+# NONMEM through bbi, parallel only when ncpu > 1, --overwrite when asked
 default_template() |>
   with_command(
     "bbi", c("nonmem", "run", "local", "{{file}}", "--config", "{{bbi_config_path}}"),
-    conditional = "parallel",
-    if_true = c("--parallel", "--threads={{ncpu}}")
+    conditional("parallel", if_true = c("--parallel", "--threads={{ncpu}}")),
+    conditional("overwrite", if_true = "--overwrite")
   )
 
 # launcher + binary (corpus ex. 2): one line, both resolved and shown

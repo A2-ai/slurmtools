@@ -2,7 +2,7 @@ test_that("default_template() is main's header shape, account optional", {
   expect_equal(
     format(default_template()),
     c(
-      "#!/bin/bash",
+      shebang_line,
       "#SBATCH --job-name={{job_name}}",
       "#SBATCH --nodes=1",
       "#SBATCH --ntasks=1",
@@ -20,11 +20,13 @@ test_that("default_template(command, args) is the header plus with_command()", {
     format(default_template("echo", c("run", "{{file}}"))),
     format(default_template() |> with_command("echo", c("run", "{{file}}")))
   )
+  par <- conditional("parallel", if_true = "--par")
   expect_equal(
-    format(default_template("echo", "{{file}}", conditional = "parallel", if_true = "--par")),
-    format(default_template() |> with_command("echo", "{{file}}", conditional = "parallel", if_true = "--par"))
+    format(default_template("echo", "{{file}}", par)),
+    format(default_template() |> with_command("echo", "{{file}}", par))
   )
-  expect_error(default_template("echo", "{{file}}", if_true = "--par"), "need a `conditional`")
+  expect_error(default_template("echo", "{{file}}", "parallel"), "takes conditionals made with conditional()", fixed = TRUE)
+  expect_error(default_template(NULL, character(), par), "need a `command`")
   expect_error(default_template("no-such-tool-xyz"), "could not find")
 })
 

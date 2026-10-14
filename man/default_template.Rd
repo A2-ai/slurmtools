@@ -4,13 +4,7 @@
 \alias{default_template}
 \title{A ready-made template to start from}
 \usage{
-default_template(
-  command = NULL,
-  args = character(),
-  conditional = NULL,
-  if_true = character(),
-  if_false = character()
-)
+default_template(command = NULL, args = character(), ...)
 }
 \arguments{
 \item{command}{the program to run, e.g. \code{"Rscript"}, \code{"python3"} or
@@ -21,13 +15,8 @@ later with \code{\link[=with_command]{with_command()}}}
 word each, e.g. \code{c("nonmem", "run", "local", "{{file}}")}. An argument
 containing a space is quoted for the shell}
 
-\item{conditional}{a placeholder that decides between \code{if_true} and
-\code{if_false}, e.g. \code{"parallel"}; \code{NULL} (the default) for a plain line}
-
-\item{if_true, if_false}{character vectors of arguments appended when
-\code{conditional} is true, respectively false, e.g.
-\code{if_true = c("--parallel", "--threads={{ncpu}}")} and
-\code{if_false = character()}}
+\item{...}{zero or more \code{\link[=conditional]{conditional()}}s that switch the line between two
+forms, by position; none for a plain line}
 }
 \value{
 a \code{\link[=Template]{Template()}}

@@ -21,7 +21,7 @@ test_that("hook lines land before and after the command whatever the call order"
   expect_equal(
     format(tmpl),
     c(
-      "#!/bin/bash",
+      shebang_line,
       "#SBATCH --job-name={{job_name}}",
       "",
       "module load R/4.5", paste(hook_exe("cd"), "{{work_dir}}"), paste(hook_exe("echo"), "start"),
@@ -55,7 +55,7 @@ test_that("a hook is a program plus arguments, in the same form as the command",
 
 test_that("a template without hooks renders exactly as before", {
   tmpl <- named() |> with_command(rscript, "{{file}}")
-  expect_equal(format(tmpl), c("#!/bin/bash", "#SBATCH --job-name={{job_name}}", "", paste(rscript, "{{file}}")))
+  expect_equal(format(tmpl), c(shebang_line, "#SBATCH --job-name={{job_name}}", "", paste(rscript, "{{file}}")))
   expect_equal(tmpl@pre_run, list())
   expect_equal(tmpl@post_run, list())
 })
@@ -64,7 +64,7 @@ test_that("hooks without a command still print, and pre lines come before post l
   tmpl <- named() |> with_post_run("echo", "done") |> with_pre_run("echo", "start")
   expect_equal(
     format(tmpl),
-    c("#!/bin/bash", "#SBATCH --job-name={{job_name}}", "", paste(hook_exe("echo"), "start"), "", paste(hook_exe("echo"), "done"))
+    c(shebang_line, "#SBATCH --job-name={{job_name}}", "", paste(hook_exe("echo"), "start"), "", paste(hook_exe("echo"), "done"))
   )
 })
 
@@ -111,7 +111,7 @@ test_that("a hook takes a conditional like the command does", {
   tmpl <- named() |>
     with_cpus_per_task("{{ncpu}}") |>
     with_command(rscript, "{{file}}") |>
-    with_post_run("echo", conditional = "parallel", if_true = "distributed", if_false = "single-node")
+    with_post_run("echo", character(), conditional("parallel", if_true = "distributed", if_false = "single-node"))
   one <- submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(file = "s", job_name = "s", ncpu = 1))
   four <- submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(file = "s", job_name = "s", ncpu = 4))
   expect_equal(utils::tail(strsplit(one$template_script, "\n")[[1]], 1), paste(hook_exe("echo"), "single-node"))
@@ -144,6 +144,21 @@ test_that("with_pre_run() / with_post_run() check their input", {
   expect_error(with_pre_run(named(), NA_character_), "`command` must be a single program")
   expect_error(with_post_run(named(), 1), "`command` must be a single program")
   expect_error(with_post_run(named(), "echo", list("x")), "`args` must be a character vector")
-  expect_error(with_post_run(named(), "echo", if_true = "x"), "need a `conditional`")
+  expect_error(with_post_run(named(), "echo", character(), "parallel"), "takes conditionals made with conditional()", fixed = TRUE)
+  expect_error(with_post_run(named(), "rm", conditional("parallel", if_true = "-rf")), "conditionals come after it")
   expect_error(with_post_run("not a template", "x"), "must be a Template()", fixed = TRUE)
+})
+
+test_that("a hook line can exist in one state only", {
+  tmpl <- named() |>
+    with_cpus_per_task("{{ncpu}}") |>
+    with_command(rscript, "{{file}}") |>
+    with_post_run("rm", character(), conditional("parallel", if_true = c("-rf", "{{file_stem}}/worker*"), if_false = NULL))
+  # unknown: the line sits inside the section of the state it belongs to
+  expect_equal(utils::tail(format(tmpl), 3), c("{{#parallel}}", paste(hook_exe("rm"), "-rf {{file_stem}}/worker*"), "{{/parallel}}"))
+  one <- submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(file = "m/1001.mod", job_name = "s", ncpu = 1))
+  four <- submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(file = "m/1001.mod", job_name = "s", ncpu = 4))
+  expect_equal(utils::tail(strsplit(one$template_script, "\n")[[1]], 1), paste(rscript, "m/1001.mod"))
+  expect_no_match(one$template_script, "-rf", fixed = TRUE)
+  expect_equal(utils::tail(strsplit(four$template_script, "\n")[[1]], 1), paste(hook_exe("rm"), "-rf 1001/worker*"))
 })
