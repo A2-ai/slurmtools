@@ -11,9 +11,12 @@ slurm_template_opts(template)
 }
 \value{
 a tibble with columns \code{option} (the placeholder), \code{used_by} (the
-\code{--flag} it fills, or \code{script} for a command or hook line), \code{required},
-\code{value} (the fill so far, \code{NA} if none) and \code{default} (what an unfilled
-option becomes at submit, \code{NA} if it must be given)
+\code{--flag} it fills, or \code{script} for a command or hook line), \code{required}
+(\code{TRUE} when \code{\link[=submit_slurm_job]{submit_slurm_job()}} would stop without it: it has no value
+yet and submit does not fill it for you), \code{value} (the fill so far, \code{NA}
+if none) and \code{default} (what an unfilled option becomes at submit, \code{NA}
+if it must be given). \code{required} and \code{default} come from the same list
+submit follows, so the table says exactly what submit enforces
 }
 \description{
 One row per placeholder of the template — everything

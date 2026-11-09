@@ -40,6 +40,50 @@ file_builtins <- c("file_dir", "file_stem", "file_ext")
 #' @seealso [with_hooks], [with_command()], [fill()]
 NULL
 
+# what submit_slurm_job() supplies for each placeholder a template writes but
+# nobody fills, as a named vector of descriptions; a placeholder with no entry
+# must be given or the submit stops. This is the ONE list of automatic values:
+# slurm_template_opts() reads it for its `required` and `default` columns, and
+# the test "slurm_template_opts() agrees with submit" holds submit_template()
+# to it, so the two cannot drift apart (deep-review finding 5). The dispatcher
+# fills `partition` and `ncpu` only under those names and only for those flags,
+# whatever flag or line they feed; `parallel` is derived from --cpus-per-task,
+# so a template without that flag has to be given it; an optional flag's
+# placeholder is "left out" only while nothing in the script writes it too
+automatic_defaults <- function(template) {
+  option <- template_placeholders(template)
+  optional <- optional_flags(template)
+  in_script <- script_placeholders(template)
+  has_cpu_flag <- !is.null(sbatch_entry(template, "cpus-per-task"))
+  out <- character()
+  for (name in option) {
+    flags <- flags_filled_from(template, name)
+    default <- if (name %in% file_builtins) {
+      "derived from `file`"
+    } else if (identical(name, "log_dir")) {
+      "the submission root"
+    } else if (identical(name, "parallel") && has_cpu_flag) {
+      "TRUE when --cpus-per-task > 1"
+    } else if ("job-name" %in% flags && "file" %in% option) {
+      "the stem of `file`"
+    } else if (identical(name, "ncpu")) {
+      "1"
+    } else if (identical(name, "partition")) {
+      "the first partition"
+    } else if (identical(name, "bbi_config_path") && !is.null(getOption("slurmtools.bbi_config_path"))) {
+      "the slurmtools.bbi_config_path option"
+    } else if (length(flags) > 0 && all(flags %in% optional) && !name %in% in_script) {
+      "left out"
+    } else {
+      NA_character_
+    }
+    if (!is.na(default)) {
+      out[[name]] <- default
+    }
+  }
+  out
+}
+
 # the builtin values derivable right now; an explicit fill of the same name wins.
 # `template` is optional (the file form has no Template) and only needed for `parallel`.
 derived_fills <- function(fills, submission_root = NULL, template = NULL) {
@@ -59,6 +103,12 @@ derived_fills <- function(fills, submission_root = NULL, template = NULL) {
     derived$parallel <- isTRUE(suppressWarnings(as.numeric(fills[[cpu@fill]])) > 1)
   }
   derived[setdiff(names(derived), names(fills))]
+}
+
+# the placeholder that feeds --job-name, or NA if the template has no such flag
+job_name_placeholder <- function(template) {
+  job <- sbatch_entry(template, "job-name")
+  if (is.null(job)) NA_character_ else job@fill
 }
 
 # the placeholder that feeds --cpus-per-task, or NA if the template has no such flag;

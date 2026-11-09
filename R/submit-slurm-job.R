@@ -18,10 +18,11 @@
 #' placeholder must have a value by then — pre-filled with [fill()] or given
 #' here — or the call stops and names the missing ones; a flag added with
 #' `optional = TRUE` is simply left out. An unfilled `--job-name` takes the
-#' stem of `file` (`sim.R` -> `sim`). The job script is written as
-#' `<job_name>.sh` (`slurm-job.sh` without a job name), and a template without
-#' `--output` or `--error` gets `<submission_root>/<job_name>-%j.out` and
-#' `.err`, so two submits of the same job never share a log.
+#' stem of `file` (`sim.R` -> `sim`). Once sbatch has accepted the job, its
+#' script is kept as `<submission_root>/<job_name>-<job_id>.sh` (`slurm-job`
+#' without a job name), and a template without `--output` or `--error` gets
+#' `<submission_root>/<job_name>-%j.out` and `.err`, so every job has its own
+#' script and logs, named alike, and a refused submit leaves nothing behind.
 #'
 #' **A file path**, the file form. The path is rendered into a whisker bash
 #' template's `{{file}}` along with `job_name` (the file's name), `partition`,
@@ -73,7 +74,7 @@
 #'   | name | fills | if left out |
 #'   |---|---|---|
 #'   | `file` | `{{file}}` in the command, and the builtins below | required whenever the command writes it |
-#'   | `job_name` | `--job-name`, the script name `<job_name>.sh` and the default log names | the stem of `file` (`sim.R` -> `sim`) |
+#'   | `job_name` | `--job-name`, the script name `<job_name>-<job_id>.sh` and the default log names | the stem of `file` (`sim.R` -> `sim`) |
 #'   | `partition` | `--partition` | the `partition` argument, else the first partition |
 #'   | `ncpu` | `--cpus-per-task` | the `ncpu` argument, else `1` |
 #'   | `account` | `--account` | the line is dropped |
@@ -85,11 +86,15 @@
 #'   [slurm_template_opts()] prints this table for the template you have.
 #'
 #' @return for a dry run, a list with the sbatch command, its args, the
-#'   rendered script, and the partition. Otherwise the result of
-#'   [processx::run()] on sbatch (`status`, `stdout`, `stderr`, `timeout`),
-#'   which for a [Template()] also carries `job_id`, `job_name`, `partition`,
-#'   `script`, and the `output` and `error` log paths with `%j` resolved. Hand
-#'   it to [slurm_job_status()], [wait_for_slurm_job()], [slurm_job_log()] or
+#'   rendered script, and the partition. Otherwise, whichever form was used,
+#'   the result of [processx::run()] on sbatch (`status`, `stdout`, `stderr`,
+#'   `timeout`) plus `job_id`, `job_name`, `partition`, `script` (the job's
+#'   own copy of its script, `<submission_root>/<job_name>-<job_id>.sh`; the
+#'   NONMEM form keeps main's `<model>.sh`), and the `output` and `error`
+#'   log paths with `%j` resolved; `NA` where a form cannot know (the file
+#'   form knows `output` only when its template wrote `{{log_path}}`, and the
+#'   NONMEM form leaves the logs to its template). Hand it to
+#'   [slurm_job_status()], [wait_for_slurm_job()], [slurm_job_log()] or
 #'   [cancel_slurm_job()].
 #'
 #' @examples
@@ -160,7 +165,11 @@ submit_slurm_job <- function(
 
   if (is_legacy_submit(.mod, slurm_job_template_path)) {
     warn_legacy_submit()
-    return(submit_slurm_job_legacy(
+    # the old code runs sbatch from inside submission_root and hands it
+    # <submission_root>/<model>.sh, so a relative root (the default) points
+    # at a file that does not exist; make it absolute first (finding 2)
+    root <- as.character(fs::path_abs(submission_root))
+    res <- submit_slurm_job_legacy(
       .mod,
       partition = partition,
       ncpu = ncpu,
@@ -168,9 +177,35 @@ submit_slurm_job <- function(
       dry_run = dry_run,
       ...,
       slurm_job_template_path = slurm_job_template_path,
-      submission_root = submission_root,
+      submission_root = root,
       bbi_config_path = bbi_config_path,
       slurm_template_opts = slurm_template_opts
+    )
+    if (dry_run) {
+      return(res)
+    }
+    # the old code calls sbatch without --parsable and hands back its raw
+    # reply, "Submitted batch job 2049"; read the id off it here so this
+    # result works with the follow-up functions like any other (finding 7).
+    # R/legacy.R itself stays as it was
+    job_id <- regmatches(res$stdout, regexpr("(?<=Submitted batch job )[0-9]+(_[0-9]+)?", res$stdout, perl = TRUE))
+    if (length(job_id) != 1) {
+      rlang::abort(c(
+        "sbatch did not return a job id",
+        i = sprintf("sbatch said: %s", trimws(res$stdout))
+      ))
+    }
+    stem <- if (inherits(.mod, "bbi_nonmem_model")) {
+      basename(.mod$absolute_model_path)
+    } else {
+      basename(tools::file_path_sans_ext(.mod))
+    }
+    return(job_record(
+      c(res, list(job_id = job_id, script = file.path(root, sprintf("%s.sh", stem)))),
+      job_name = NA_character_, # the template decides it; main's own was <model>-nonmem-run
+      partition = partition[[1]],
+      output = NA_character_, # the template decides; slurm's default is slurm-<id>.out in the root
+      error = NA_character_
     ))
   }
 
@@ -201,7 +236,7 @@ submit_slurm_job <- function(
     ncpu = ncpu,
     parallel = ncpu > 1,
     num_mpi_cpus = ncpu,
-    log_path = file.path(submission_root, sprintf("%s.out", job_name))
+    log_path = file.path(submission_root, sprintf("%s-%%j.out", job_name)) # %j: the job id, so runs never share a log
   )
   if (!is.null(bbi_config_path)) {
     builtin$bbi_config_path <- bbi_config_path
@@ -279,13 +314,21 @@ submit_template <- function(template, fills, submission_root, dry_run, ...) {
   # placeholder written only in the other form is not asked for
   unresolved <- setdiff(required_placeholders(template, c(filled, derived)), c(names(filled), names(derived)))
   if (length(unresolved) > 0) {
-    # a missing derived builtin is fixed by filling what it derives from, not itself
+    # the first line names what is unfilled as written; the hint names what to
+    # give: a missing derived builtin is fixed by filling what it derives from,
+    # not itself, and a missing job name follows from `file`. That hint is the
+    # list slurm_template_opts() marks required, and a test holds the two
+    # together (finding 5)
     cpu_placeholder <- cpus_per_task_placeholder(template)
+    job_placeholder <- job_name_placeholder(template)
+    takes_stem <- !is.na(job_placeholder) && "file" %in% template_placeholders(template)
     to_fill <- unique(vapply(unresolved, function(name) {
       if (name %in% file_builtins) {
         "file"
       } else if (identical(name, "parallel") && !is.na(cpu_placeholder)) {
         cpu_placeholder
+      } else if (identical(name, job_placeholder) && takes_stem) {
+        "file"
       } else {
         name
       }
@@ -302,6 +345,9 @@ submit_template <- function(template, fills, submission_root, dry_run, ...) {
     )
     if (any(unresolved %in% file_builtins)) {
       msg <- c(msg, i = "`{{file_dir}}`, `{{file_stem}}` and `{{file_ext}}` derive from `file`")
+    }
+    if (takes_stem && job_placeholder %in% unresolved) {
+      msg <- c(msg, i = sprintf("`{{%s}}` takes the stem of `file` unless given", job_placeholder))
     }
     if ("parallel" %in% unresolved && !is.na(cpu_placeholder)) {
       msg <- c(msg, i = sprintf("`{{parallel}}` derives from `{{%s}}` (cpus-per-task)", cpu_placeholder))
@@ -335,41 +381,42 @@ submit_template <- function(template, fills, submission_root, dry_run, ...) {
     template <- with_error(template, paste0(log_stem, "-%j.err"))
   }
 
-  # plain `{{tags}}` are already substituted by format(); whisker resolves the
-  # sections that remain, dropping any optional flag that was left unfilled
+  # say what the job is made of, as the file form always has: every value,
+  # whether given, defaulted or derived (deep-review finding 9)
   filled <- template_fills(template)
-  rendered <- whisker::whisker.render(
-    paste(c(format(template), ""), collapse = "\n"),
-    c(filled, derived_fills(filled, submission_root, template = template))
+  values <- c(filled, derived[setdiff(names(derived), names(filled))])
+  log4r::info(
+    .le$logger,
+    paste0(
+      "filling template with: \n\t",
+      paste(sprintf("%s: %s", names(values), vapply(values, fill_text, character(1))), collapse = "\n\t")
+    )
   )
+  log4r::debug(.le$logger, paste0("job name: ", job_name, "; script: ", script_name, "; logs under: ", submission_root))
+
+  # the same renderer as print(): every placeholder is filled by now (checked
+  # above), `{{log_dir}}` takes the submission root, and an optional flag left
+  # unfilled is dropped. No second pass through whisker, which read `{{ file }}`
+  # differently from format() and HTML-escaped values
+  rendered <- paste(c(render_template(template, submission_root, final = TRUE), ""), collapse = "\n")
   res <- sbatch_script(
     rendered,
     script_name = script_name,
     submission_root = submission_root,
     partition = partition,
     dry_run = dry_run,
-    sbatch_args = "--parsable",
     ...
   )
   if (dry_run) {
     return(res)
   }
-
-  job_id <- sub(";.*$", "", trimws(res$stdout)) # "2049" or "2049;cluster"
-  if (!grepl("^[0-9]+(_[0-9]+)?$", job_id)) {
-    rlang::abort(c(
-      "sbatch did not return a job id",
-      i = sprintf("sbatch said: %s", trimws(res$stdout))
-    ))
-  }
-  c(res, list(
-    job_id = job_id,
+  job_record(
+    res,
     job_name = job_name,
     partition = partition,
-    script = file.path(submission_root, script_name),
-    output = log_path(template, "output", job_id),
-    error = log_path(template, "error", job_id)
-  ))
+    output = log_path(template, "output", res$job_id),
+    error = log_path(template, "error", res$job_id)
+  )
 }
 
 # the log a flag points at once %j is known; NA if the flag was left unfilled

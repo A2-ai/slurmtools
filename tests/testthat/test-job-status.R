@@ -78,6 +78,11 @@ test_that("a missing sacct is reported", {
 # --- cancel_slurm_job(<submit result>) ------------------------------------------
 
 test_that("cancel_slurm_job resolves a submit result to its id before looking it up", {
+  # a stub squeue with an empty queue, so no real queue is read or touched
+  stub_dir <- withr::local_tempdir()
+  brio::write_file("#!/bin/bash\necho '{\"jobs\": []}'\n", file.path(stub_dir, "squeue"))
+  fs::file_chmod(file.path(stub_dir, "squeue"), "0755")
+  withr::local_path(stub_dir, action = "prefix")
   # an id no queue holds: the lookup fails the same way it does for a bare id,
   # which is the point — the result was accepted where an id was
   expect_error(

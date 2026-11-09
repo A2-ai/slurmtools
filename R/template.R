@@ -192,6 +192,14 @@ check_args <- function(x, arg, example) {
   if (!is.character(x) || anyNA(x)) {
     rlang::abort(sprintf("`%s` must be a character vector, like %s", arg, example))
   }
+  # a hand-written whisker section is not a placeholder: nothing renders it
+  # now that submit no longer runs whisker over a Template (finding 3)
+  if (any(grepl("\\{\\{\\s*[#^/]", x))) {
+    rlang::abort(c(
+      sprintf("`%s` holds a `{{#section}}` tag, which is not a placeholder", arg),
+      i = "a line that changes with a switch is written with conditional(\"name\", if_true = ..., if_false = ...)"
+    ))
+  }
   invisible(x)
 }
 
@@ -241,13 +249,73 @@ command_entry <- function(command, args, conditionals = list(),
   )
 }
 
-# an argument with whitespace is one word to the program, so it is quoted for
-# bash — unless it already is
+# a literal argument with whitespace is one word to the program, so it is
+# double-quoted for bash — unless it already is. Double quotes on purpose:
+# text written into the template is code, and `$SLURM_JOB_ID` in it expands
 shell_arg <- function(x) {
   quoted <- grepl("^([\"']).*\\1$", x)
   needs <- grepl("\\s", x) & !quoted
   x[needs] <- paste0("\"", x[needs], "\"")
   x
+}
+
+# the words of a command line with their fills in place, each quoted for bash.
+# Quoting happens AFTER substitution, so a filled path with a space arrives as
+# one word (deep-review finding 6). An argument that is nothing but a
+# `{{placeholder}}` is data: once filled it is single-quoted with shQuote(), so
+# no `$`, backtick or `;` in the value is read by bash, and quote characters in
+# the value are part of the value. A placeholder inside longer text
+# (`--out={{out}}`, `"{{file_stem}} done $SLURM_JOB_ID"`, `{{file_stem}}/worker*`,
+# or an author's own `"{{file}}"`) is part of the author's text, which keeps
+# shell_arg()'s rule, so the `$VAR` and the glob written there still work. A
+# word with a placeholder still unfilled also keeps that rule, so an unfilled
+# template prints and writes as before. What counts as a tag is decided from
+# the template's word, never from a filled value
+fill_words <- function(words, fills) {
+  vapply(words, fill_word, character(1), fills = fills, USE.NAMES = FALSE)
+}
+
+fill_word <- function(word, fills) {
+  names <- tag_names(word)
+  if (length(names) == 0) {
+    return(shell_arg(word))
+  }
+  filled <- substitute_tags(word, fills)
+  alone <- grepl(paste0("^", tag_re, "$"), word)
+  if (!alone || !all(names %in% names(fills))) {
+    return(shell_arg(filled))
+  }
+  quote_fill(filled)
+}
+
+# a plain `{{name}}` or `{{ name }}` tag; section tags (`{{#name}}` ...) do not match
+tag_re <- "\\{\\{\\s*([A-Za-z][A-Za-z0-9_]*)\\s*\\}\\}"
+
+tag_names <- function(x) {
+  gsub("[{}[:space:]]", "", regmatches(x, gregexpr(tag_re, x))[[1]])
+}
+
+# every plain tag in `x` replaced by its filled value, in one pass over the
+# original text: a value is pasted in as it is and never read as a tag itself
+substitute_tags <- function(x, fills) {
+  found <- gregexpr(tag_re, x)
+  regmatches(x, found) <- lapply(regmatches(x, found), function(tags) {
+    names <- gsub("[{}[:space:]]", "", tags)
+    vapply(seq_along(tags), function(i) {
+      if (names[[i]] %in% names(fills)) fill_text(fills[[names[[i]]]]) else tags[[i]]
+    }, character(1))
+  })
+  x
+}
+
+# a value that filled a lone placeholder: left alone when it is plain (letters,
+# digits, `_ . / = : , + @ % -`), otherwise single-quoted so bash reads none of
+# it, an empty value included; shQuote() handles an embedded `'`
+quote_fill <- function(x) {
+  if (nzchar(x) && !grepl("[^A-Za-z0-9_./=:,+@%-]", x)) {
+    return(x)
+  }
+  shQuote(x, type = "sh")
 }
 
 # the script line(s) one entry renders to, placeholders left as tags. Each
@@ -266,26 +334,32 @@ command_lines <- function(entry, fills = list()) {
   # the words of the line: each known switch's payload in place, `open_as(cond)`
   # standing in for an unknown one; NULL when a known switch takes the line away
   words <- function(open_as) {
-    out <- c(entry$launcher, shell_arg(entry$launcher_args), entry$exe, shell_arg(entry$args))
+    launcher <- if (!is.null(entry$launcher)) fill_word(entry$launcher, fills)
+    out <- c(launcher, fill_words(entry$launcher_args, fills), fill_word(entry$exe, fills), fill_words(entry$args, fills))
     for (cond in conds) {
       if (is_known(cond)) {
         extra <- payload(cond, is_truthy(fills[[cond@name]]))
         if (is.null(extra)) {
           return(NULL)
         }
-        out <- c(out, shell_arg(extra))
+        out <- c(out, fill_words(extra, fills))
       } else {
         out <- c(out, open_as(cond))
       }
     }
     out
   }
-  # an inline section carries its own leading space, so an unrendered one
-  # leaves no gap behind
+  # an inline section (a word inline_section() marked) carries its own leading
+  # space, so no joining space goes before it and an unrendered section leaves
+  # no gap behind. Only a word that IS a section is touched: the text of every
+  # other word, a filled value with `{{#` or a control character included, is
+  # left exactly as given
   line <- function(ws) {
-    text <- paste(ws, collapse = " ")
-    text <- gsub(" {{#", "{{#", text, fixed = TRUE)
-    gsub(" {{^", "{{^", text, fixed = TRUE)
+    is_section <- startsWith(ws, section_marker)
+    ws[is_section] <- substring(ws[is_section], 2)
+    sep <- ifelse(is_section, "", " ")
+    sep[[1]] <- ""
+    paste0(sep, ws, collapse = "")
   }
 
   if (length(open) == 0) {
@@ -294,8 +368,8 @@ command_lines <- function(entry, fills = list()) {
   }
   one <- open[[1]]
   if (length(open) == 1 && !is.null(one@if_true) && !is.null(one@if_false)) {
-    on <- words(function(cond) shell_arg(cond@if_true))
-    off <- words(function(cond) shell_arg(cond@if_false))
+    on <- words(function(cond) fill_words(cond@if_true, fills))
+    off <- words(function(cond) fill_words(cond@if_false, fills))
     if (is.null(on)) {
       return(character())
     }
@@ -308,13 +382,13 @@ command_lines <- function(entry, fills = list()) {
   ws <- words(function(cond) {
     if (is.null(cond@if_false)) {
       wrap <<- c(wrap, sprintf("{{#%s}}", cond@name))
-      return(shell_arg(cond@if_true))
+      return(fill_words(cond@if_true, fills))
     }
     if (is.null(cond@if_true)) {
       wrap <<- c(wrap, sprintf("{{^%s}}", cond@name))
-      return(shell_arg(cond@if_false))
+      return(fill_words(cond@if_false, fills))
     }
-    inline_section(cond)
+    inline_section(cond, fills)
   })
   if (is.null(ws)) {
     return(character())
@@ -323,15 +397,19 @@ command_lines <- function(entry, fills = list()) {
 }
 
 # `{{#name}} a b{{/name}}{{^name}} c{{/name}}`, each part only when it has arguments
-inline_section <- function(cond) {
+inline_section <- function(cond, fills) {
   part <- function(tag, extra) {
     if (length(extra) == 0) {
       return("")
     }
-    sprintf("{{%s%s}} %s{{/%s}}", tag, cond@name, paste(shell_arg(extra), collapse = " "), cond@name)
+    sprintf("{{%s%s}} %s{{/%s}}", tag, cond@name, paste(fill_words(extra, fills), collapse = " "), cond@name)
   }
-  paste0(part("#", cond@if_true), part("^", cond@if_false))
+  paste0(section_marker, part("#", cond@if_true), part("^", cond@if_false))
 }
+
+# prefixed to a generated inline section so line() can tell it from a word; a
+# control character no argument contains
+section_marker <- "\u0001"
 
 # the lines of a group of entries
 group_lines <- function(entries, fills = list()) {
@@ -344,9 +422,15 @@ script_lines <- function(x, fills = list()) {
   group_lines(c(x@pre_run, x@body, x@post_run), fills)
 }
 
-# `{{name}}`, `{{#name}}`, `{{^name}}`, `{{/name}}` tags written in the script lines
+# `{{name}}`, `{{#name}}`, `{{^name}}`, `{{/name}}` tags written in the script
+# lines. Only the switches among `fills` are applied, so a known switch leaves
+# the branch that applies while every other tag stays in place: a filled
+# value's own text is never read as a tag
 script_placeholders <- function(x, fills = list()) {
-  lines <- script_lines(x, fills)
+  switches <- unlist(lapply(c(x@pre_run, x@body, x@post_run), function(entry) {
+    vapply(entry$conditionals, function(cond) cond@name, character(1))
+  }))
+  lines <- script_lines(x, fills[intersect(names(fills), switches)])
   tags <- regmatches(
     lines,
     gregexpr("\\{\\{[#^/]?\\s*[A-Za-z][A-Za-z0-9_]*\\s*\\}\\}", lines)
@@ -368,15 +452,10 @@ template_placeholders <- function(x) {
 # take is not among them
 required_placeholders <- function(x, fills = list()) {
   header <- vapply(x@sbatch, function(f) if (f@optional) NA_character_ else f@fill, character(1))
-  unique(c(header[!is.na(header)], script_placeholders(x, fills)))
-}
-
-# plain `{{name}}` tags replaced by their filled values
-substitute_fills <- function(lines, fills) {
-  for (name in names(fills)) {
-    lines <- gsub(sprintf("{{%s}}", name), fill_text(fills[[name]]), lines, fixed = TRUE)
-  }
-  lines
+  written <- script_placeholders(x, fills)
+  # a derived builtin nobody filled directly takes `file`, so `file` is required too
+  anchor <- if (any(file_builtins %in% setdiff(written, names(fills)))) "file" else character()
+  unique(c(header[!is.na(header)], written, anchor))
 }
 
 fill_text <- function(value) {
@@ -587,9 +666,14 @@ fill <- function(template, ...) {
 #'
 #' @description
 #' Appends the line that runs on the compute node, after the `#SBATCH`
-#' header: `command` followed by `args`, one argument per element. An
-#' argument containing whitespace is quoted for bash, so it reaches the
-#' program as one word. `command` is a program name, a path, or a
+#' header: `command` followed by `args`, one argument per element. Each
+#' argument reaches the program as one word. An argument that is just a
+#' `"{{placeholder}}"` is single-quoted with [base::shQuote()] once its value is in
+#' place, so a path with a space, a `;` or a `$` in the value arrives exactly
+#' as given. An argument with text of your own around a placeholder
+#' (`"--out={{out}}"`, `"{{file_stem}} done $SLURM_JOB_ID"`) is yours: it is
+#' double-quoted only when it has whitespace, so `$SLURM_JOB_ID` and a `*`
+#' written there still work on the node. `command` is a program name, a path, or a
 #' `{{placeholder}}`. A bare name is resolved to an absolute path with
 #' `Sys.which()` when the template is built, so the script names the exact
 #' binary that will run and a missing tool fails here rather than on the
@@ -623,8 +707,9 @@ fill <- function(template, ...) {
 #'   a path, or a placeholder such as `"{{bbi}}"`. The program alone:
 #'   `"Rscript sim.R"` is an error, its arguments go in `args`
 #' @param args character vector of arguments appended to the command, one
-#'   word each, e.g. `c("nonmem", "run", "local", "{{file}}")`. An argument
-#'   containing a space is quoted for the shell
+#'   word each, e.g. `c("nonmem", "run", "local", "{{file}}")`. Do not add
+#'   quotes around a lone placeholder: its value is quoted for the shell when
+#'   it is filled
 #' @param ... zero or more [conditional()]s that switch the line between two
 #'   forms, by position; none for a plain line
 #' @param launcher a launcher program that runs `command` for you, e.g.
@@ -680,9 +765,12 @@ with_command <- function(template, command, args = character(), ...,
 #' @param template a [Template()]
 #'
 #' @return a tibble with columns `option` (the placeholder), `used_by` (the
-#'   `--flag` it fills, or `script` for a command or hook line), `required`,
-#'   `value` (the fill so far, `NA` if none) and `default` (what an unfilled
-#'   option becomes at submit, `NA` if it must be given)
+#'   `--flag` it fills, or `script` for a command or hook line), `required`
+#'   (`TRUE` when [submit_slurm_job()] would stop without it: it has no value
+#'   yet and submit does not fill it for you), `value` (the fill so far, `NA`
+#'   if none) and `default` (what an unfilled option becomes at submit, `NA`
+#'   if it must be given). `required` and `default` come from the same list
+#'   submit follows, so the table says exactly what submit enforces
 #'
 #' @examples
 #' default_template("Rscript", "{{file}}") |>
@@ -691,7 +779,6 @@ with_command <- function(template, command, args = character(), ...,
 slurm_template_opts <- function(template) {
   check_template(template)
   option <- template_placeholders(template)
-  derived <- c(file_builtins, "log_dir", "parallel")
   fills <- template_fills(template)
   used_by <- vapply(option, function(name) {
     flags <- flags_filled_from(template, name)
@@ -700,31 +787,26 @@ slurm_template_opts <- function(template) {
   value <- vapply(option, function(name) {
     if (name %in% names(fills)) fill_text(fills[[name]]) else NA_character_
   }, character(1))
+  # what submit supplies for an unfilled option, from the one list submit
+  # itself follows; an option with no entry there must be given
+  automatic <- automatic_defaults(template)
   default <- vapply(option, function(name) {
-    flags <- flags_filled_from(template, name)
-    if (name %in% file_builtins) {
-      "derived from `file`"
-    } else if (identical(name, "log_dir")) {
-      "the submission root"
-    } else if (identical(name, "parallel")) {
-      "TRUE when --cpus-per-task > 1"
-    } else if ("job-name" %in% flags && "file" %in% option) {
-      "the stem of `file`"
-    } else if (identical(name, "ncpu") && "cpus-per-task" %in% flags) {
-      "1"
-    } else if (identical(name, "partition") && "partition" %in% flags) {
-      "the first partition"
-    } else if (length(flags) > 0 && all(flags %in% optional_flags(template))) {
-      "left out"
-    } else {
-      NA_character_
-    }
+    if (name %in% names(automatic)) automatic[[name]] else NA_character_
   }, character(1))
-  known <- c(fills, derived_fills(fills, template = template))
+  # the defaults submit will apply are applied here too before asking what is
+  # required, so a switch they settle (`parallel` from the default ncpu = 1)
+  # settles the same placeholders in both places
+  resolved <- fills
+  if ("ncpu" %in% names(automatic) && is.null(resolved[["ncpu"]])) {
+    resolved$ncpu <- 1
+  }
+  known <- c(resolved, derived_fills(resolved, template = template))
   tibble::tibble(
     option = option,
     used_by = unname(used_by),
-    required = option %in% required_placeholders(template, known) & !option %in% derived,
+    # "required" means submit would stop if nothing more were given: an option
+    # already filled, or one submit fills for you, is not
+    required = option %in% required_placeholders(template, known) & is.na(value) & is.na(default),
     value = unname(value),
     default = unname(default)
   )
@@ -770,16 +852,25 @@ write_slurm_template <- function(template, path, overwrite = FALSE) {
 
 #' @export
 S7::method(format, Template) <- function(x, ...) {
+  render_template(x)
+}
+
+# the one place a Template becomes script lines: format()/print(),
+# write_slurm_template() and submit_template() all come here, so what you
+# preview is what is submitted (deep-review finding 3). `final = TRUE` is the
+# submit-time render: `submission_root` fills `{{log_dir}}`, and an optional
+# header flag still unfilled is dropped instead of left as a `{{#tag}}` section
+render_template <- function(x, submission_root = NULL, final = FALSE) {
   fills <- template_fills(x)
   lines <- shebang()
   for (entry in x@sbatch) {
-    lines <- c(lines, sbatch_line(entry, fills))
+    lines <- c(lines, sbatch_line(entry, fills, final))
   }
-  fills <- c(fills, derived_fills(fills, template = x))
+  fills <- c(fills, derived_fills(fills, submission_root, template = x))
   for (group in list(x@pre_run, x@body, x@post_run)) {
     rendered <- group_lines(group, fills)
     if (length(rendered) > 0) {
-      lines <- c(lines, "", substitute_fills(rendered, fills))
+      lines <- c(lines, "", rendered)
     }
   }
   lines
@@ -793,11 +884,15 @@ shebang <- function() {
 }
 
 # one flag's header line(s): filled, a plain line; unfilled, a `{{tag}}` to
-# fill, inside a section when the flag is optional
-sbatch_line <- function(entry, fills) {
+# fill, inside a section when the flag is optional (or, at the final render,
+# no line at all)
+sbatch_line <- function(entry, fills, final = FALSE) {
   value <- fills[[entry@fill]]
   if (!is.null(value)) {
-    return(sprintf("#SBATCH --%s=%s", entry@flag, fill_text(value)))
+    return(sprintf("#SBATCH --%s=%s", entry@flag, header_value(fill_text(value))))
+  }
+  if (entry@optional && final) {
+    return(character())
   }
   line <- sprintf("#SBATCH --%s={{%s}}", entry@flag, entry@fill)
   if (entry@optional) {
@@ -805,6 +900,18 @@ sbatch_line <- function(entry, fills) {
   } else {
     line
   }
+}
+
+# an `#SBATCH` value with whitespace is double-quoted, as main's template
+# wrote `--job-name="{{job_name}}"`: sbatch reads these lines itself and
+# otherwise takes the second word as a new directive (deep-review finding 6)
+header_value <- function(x) {
+  # a value with both whitespace and an inner quote was refused when it was
+  # set (validate_sbatch_flag()), so what arrives here can always be written
+  if (!grepl("\\s", x) || grepl("^([\"']).*\\1$", x)) {
+    return(x)
+  }
+  sprintf("\"%s\"", x)
 }
 
 #' @export

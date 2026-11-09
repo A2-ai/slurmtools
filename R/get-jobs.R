@@ -86,14 +86,7 @@ parse_jobs_json <- function(.json) {
 #' get_slurm_jobs()
 #' }
 get_slurm_jobs <- function(user = NULL) {
-  cmd <- list(cmd = Sys.which("squeue"), args = "--json")
-  res <- processx::run(cmd$cmd, args = cmd$args)
-  if (res$status != 0) {
-    # todo: better handle returning why
-    rlang::abort(
-      "unable to get slurm jobs, test what the output would be by running `squeue --json`"
-    )
-  }
+  res <- run_slurm("squeue", "--json") # a missing or failing squeue is reported in its own words
   res_df <- parse_jobs_json(jsonlite::fromJSON(
     res$stdout,
     simplifyVector = FALSE

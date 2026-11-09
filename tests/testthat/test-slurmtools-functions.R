@@ -1,3 +1,15 @@
+# an integration test by intent (docs/decisions.md 6): it reads the real partition
+# table, so it runs where a Slurm controller answers and is skipped elsewhere
+# (a machine with the client installed but no controller included)
+slurm_answers <- function() {
+  sinfo <- Sys.which("sinfo")
+  nzchar(sinfo) && tryCatch(
+    processx::run(sinfo, c("--format", "%P"), timeout = 10, error_on_status = FALSE)$status == 0,
+    error = function(e) FALSE
+  )
+}
+skip_if_not(slurm_answers(), "needs a reachable Slurm controller")
+
 test_that("get_slurm_partitions returns list of partitions", {
   vectorOfPartitions <- c(
     "cpu2mem4gb",

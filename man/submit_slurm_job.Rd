@@ -59,7 +59,7 @@ the template, applied on top of anything already filled with \code{\link[=fill]{
 For a \code{\link[=default_template]{default_template()}} the names are:\tabular{lll}{
    name \tab fills \tab if left out \cr
    \code{file} \tab \code{{{file}}} in the command, and the builtins below \tab required whenever the command writes it \cr
-   \code{job_name} \tab \code{--job-name}, the script name \verb{<job_name>.sh} and the default log names \tab the stem of \code{file} (\code{sim.R} -> \code{sim}) \cr
+   \code{job_name} \tab \code{--job-name}, the script name \verb{<job_name>-<job_id>.sh} and the default log names \tab the stem of \code{file} (\code{sim.R} -> \code{sim}) \cr
    \code{partition} \tab \code{--partition} \tab the \code{partition} argument, else the first partition \cr
    \code{ncpu} \tab \code{--cpus-per-task} \tab the \code{ncpu} argument, else \code{1} \cr
    \code{account} \tab \code{--account} \tab the line is dropped \cr
@@ -74,11 +74,15 @@ plus any other \code{{{tag}}} the template's flags, command or hooks write.
 }
 \value{
 for a dry run, a list with the sbatch command, its args, the
-rendered script, and the partition. Otherwise the result of
-\code{\link[processx:run]{processx::run()}} on sbatch (\code{status}, \code{stdout}, \code{stderr}, \code{timeout}),
-which for a \code{\link[=Template]{Template()}} also carries \code{job_id}, \code{job_name}, \code{partition},
-\code{script}, and the \code{output} and \code{error} log paths with \verb{\%j} resolved. Hand
-it to \code{\link[=slurm_job_status]{slurm_job_status()}}, \code{\link[=wait_for_slurm_job]{wait_for_slurm_job()}}, \code{\link[=slurm_job_log]{slurm_job_log()}} or
+rendered script, and the partition. Otherwise, whichever form was used,
+the result of \code{\link[processx:run]{processx::run()}} on sbatch (\code{status}, \code{stdout}, \code{stderr},
+\code{timeout}) plus \code{job_id}, \code{job_name}, \code{partition}, \code{script} (the job's
+own copy of its script, \verb{<submission_root>/<job_name>-<job_id>.sh}; the
+NONMEM form keeps main's \verb{<model>.sh}), and the \code{output} and \code{error}
+log paths with \verb{\%j} resolved; \code{NA} where a form cannot know (the file
+form knows \code{output} only when its template wrote \code{{{log_path}}}, and the
+NONMEM form leaves the logs to its template). Hand it to
+\code{\link[=slurm_job_status]{slurm_job_status()}}, \code{\link[=wait_for_slurm_job]{wait_for_slurm_job()}}, \code{\link[=slurm_job_log]{slurm_job_log()}} or
 \code{\link[=cancel_slurm_job]{cancel_slurm_job()}}.
 }
 \description{
@@ -99,10 +103,11 @@ a \code{{{bbi_config_path}}} placeholder the same way. Every required
 placeholder must have a value by then — pre-filled with \code{\link[=fill]{fill()}} or given
 here — or the call stops and names the missing ones; a flag added with
 \code{optional = TRUE} is simply left out. An unfilled \code{--job-name} takes the
-stem of \code{file} (\code{sim.R} -> \code{sim}). The job script is written as
-\verb{<job_name>.sh} (\code{slurm-job.sh} without a job name), and a template without
-\code{--output} or \code{--error} gets \verb{<submission_root>/<job_name>-\%j.out} and
-\code{.err}, so two submits of the same job never share a log.
+stem of \code{file} (\code{sim.R} -> \code{sim}). Once sbatch has accepted the job, its
+script is kept as \verb{<submission_root>/<job_name>-<job_id>.sh} (\code{slurm-job}
+without a job name), and a template without \code{--output} or \code{--error} gets
+\verb{<submission_root>/<job_name>-\%j.out} and \code{.err}, so every job has its own
+script and logs, named alike, and a refused submit leaves nothing behind.
 
 \strong{A file path}, the file form. The path is rendered into a whisker bash
 template's \code{{{file}}} along with \code{job_name} (the file's name), \code{partition},

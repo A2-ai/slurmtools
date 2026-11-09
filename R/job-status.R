@@ -37,15 +37,11 @@ slurm_job_id <- function(x) {
 #' @export
 slurm_job_status <- function(job) {
   ids <- slurm_job_id(job)
-  sacct <- Sys.which("sacct")
-  if (!nzchar(sacct)) {
-    rlang::abort("could not find sacct binary")
-  }
   cols <- c(
     "job_id", "job_name", "partition", "state", "exit_code", "elapsed", "node",
     "submit", "start", "end"
   )
-  res <- processx::run(sacct, c(
+  res <- run_slurm("sacct", c(
     "-j", paste(ids, collapse = ","),
     "--allocations", "--parsable2", "--noheader",
     "--format=JobID,JobName,Partition,State,ExitCode,Elapsed,NodeList,Submit,Start,End"

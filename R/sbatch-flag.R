@@ -20,6 +20,22 @@ validate_sbatch_flag <- function(self) {
   if (length(self@optional) != 1 || is.na(self@optional)) {
     return("@optional must be TRUE or FALSE")
   }
+  # a header value with whitespace is written in double quotes (sbatch reads
+  # the directive itself, and has no escape for a quote inside them), so a
+  # value that has both whitespace and a double quote cannot be written at
+  # all; refused here, when it arrives, so print() never has to (decision 4).
+  # A value the author already wrapped in one pair of quotes is fine
+  if (!is.null(self@value)) {
+    text <- as.character(self@value)
+    inner <- sub("^\"([^\"]*)\"$", "\\1", text)
+    if (grepl("\\s", text) && grepl("\"", inner, fixed = TRUE)) {
+      return(sprintf(
+        "`--%s` cannot take a value with both whitespace and a double quote, which sbatch has no way to write; got %s",
+        self@flag,
+        deparse(self@value)
+      ))
+    }
+  }
   check <- sbatch_flags[[self@flag]]
   if (!is.null(self@value) && !is.null(check)) {
     problem <- check(self@value)

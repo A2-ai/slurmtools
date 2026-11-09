@@ -11,7 +11,7 @@ local_stub_sbatch <- function(env = parent.frame()) {
   # a stub sbatch on the PATH keeps tests from submitting a real job
   stub_dir <- withr::local_tempdir(.local_envir = env)
   brio::write_file(
-    "#!/bin/bash\necho Submitted batch job 0\n",
+    "#!/bin/bash\necho 0\n", # what sbatch --parsable prints
     file.path(stub_dir, "sbatch")
   )
   fs::file_chmod(file.path(stub_dir, "sbatch"), "0755")
@@ -27,8 +27,13 @@ local_stub_bin <- function(name, env = parent.frame()) {
   brio::write_file("#!/bin/bash\n", path)
   fs::file_chmod(path, "0755")
   withr::local_path(stub_dir, action = "prefix", .local_envir = env)
-  path
+  # as the package will see it: Sys.which() follows macOS's /var -> /private/var
+  # symlink and tidies the `//` tempdir() can leave, so the literal path would not match
+  unname(Sys.which(name))
 }
+
+# the partition table, so no test here needs a real sinfo (deep-review finding 4)
+local_partition_table()
 
 # --- create_slurm_template() ------------------------------------------------
 
@@ -297,8 +302,8 @@ test_that("the worker writes and chmods the job script when not a dry run", {
     dry_run = FALSE
   )
 
-  expect_match(res$stdout, "Submitted batch job 0")
-  script_file <- file.path(root, sprintf("%s.sh", basename(script)))
+  expect_equal(res$job_id, "0")
+  script_file <- file.path(root, sprintf("%s-0.sh", basename(script)))
   expect_true(fs::file_exists(script_file))
   expect_true(fs::file_access(script_file, mode = "execute"))
 })
@@ -318,8 +323,8 @@ test_that("submission_root defaults to submission-log under the calling director
     dry_run = FALSE
   )
 
-  expect_match(res$stdout, "Submitted batch job 0")
-  expect_true(fs::file_exists(file.path("submission-log", "sim.R.sh")))
+  expect_equal(res$job_id, "0")
+  expect_true(fs::file_exists(file.path("submission-log", "sim.R-0.sh")))
 })
 
 test_that("errors on missing files", {
@@ -360,4 +365,160 @@ test_that("partition is validated", {
     submit_slurm_job(script, slurm_job_template_path = template, partition = NULL, dry_run = TRUE),
     "no partition selected"
   )
+})
+
+test_that("the file form returns the same record as a Template submit, and the follow-up functions take it", {
+  # deep-review finding 7: sbatch --parsable on every route, one return shape
+  local_stub_sbatch()
+  root <- local_submission_root()
+  template <- local_rscript_template() # writes --output={{log_path}}
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+
+  res <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb")
+  expect_equal(
+    names(res),
+    c("status", "stdout", "stderr", "timeout", "job_id", "job_name", "partition", "script", "output", "error")
+  )
+  expect_equal(res$job_id, "0")
+  expect_equal(res$job_name, basename(script))
+  expect_equal(res$partition, "cpu2mem4gb")
+  expect_equal(res$script, file.path(root, sprintf("%s-0.sh", basename(script))))
+  expect_equal(res$output, file.path(root, sprintf("%s-0.out", basename(script))))
+  expect_true(is.na(res$error))
+  expect_match(brio::read_file(res$script), sprintf("--output=%s/%s-%%j.out", root, basename(script)), fixed = TRUE)
+
+  calls <- stub_sacct_sequence(sacct_row("COMPLETED", id = "0"))
+  expect_equal(suppressMessages(wait_for_slurm_job(res, poll = 0.01))$state, "COMPLETED")
+  expect_equal(slurm_job_status(res)$job_id, "0")
+})
+
+test_that("a file-form template that leaves --output to slurm gives an NA log path, not a wrong one", {
+  local_stub_sbatch()
+  root <- local_submission_root()
+  template <- file.path(withr::local_tempdir(), "bare.tmpl")
+  writeLines(c("#!/bin/bash", "#SBATCH --partition={{partition}}", "echo {{file}}"), template)
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+
+  res <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb")
+  expect_equal(res$job_id, "0")
+  expect_true(is.na(res$output))
+  expect_error(slurm_job_log(res), "left to slurm")
+})
+
+# --- one script per job, nothing left by a refused submit (deep-review finding 9, decision 9) ---
+
+test_that("each submit keeps its own script, named like its logs, and the plain name is never left behind", {
+  stub_dir <- withr::local_tempdir()
+  counter <- file.path(stub_dir, "n")
+  writeLines("100", counter)
+  # an sbatch that hands out 101, 102, ... and records the script it was given
+  brio::write_file(
+    sprintf("#!/bin/bash\nn=$(( $(cat '%s') + 1 ))\necho $n > '%s'\ncp \"$2\" '%s/given-'$n\necho $n\n", counter, counter, stub_dir),
+    file.path(stub_dir, "sbatch")
+  )
+  fs::file_chmod(file.path(stub_dir, "sbatch"), "0755")
+  withr::local_path(stub_dir, action = "prefix")
+  root <- local_submission_root()
+  # a template whose rendered text differs per submit, so the kept scripts must too
+  template <- file.path(withr::local_tempdir(), "seeded.tmpl")
+  writeLines(c("#!/bin/bash", "#SBATCH --job-name={{job_name}}", "#SBATCH --partition={{partition}}", "echo {{file}} --seed={{seed}}"), template)
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+
+  first <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb",
+                            slurm_template_opts = list(seed = 1))
+  second <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb",
+                             slurm_template_opts = list(seed = 2))
+  name <- basename(script)
+  expect_equal(first$script, file.path(root, sprintf("%s-101.sh", name)))
+  expect_equal(second$script, file.path(root, sprintf("%s-102.sh", name)))
+  expect_true(fs::file_exists(first$script))
+  expect_true(fs::file_exists(second$script))
+  # each kept script is byte for byte what sbatch was handed for that job
+  expect_equal(brio::read_file(first$script), brio::read_file(file.path(stub_dir, "given-101")))
+  expect_equal(brio::read_file(second$script), brio::read_file(file.path(stub_dir, "given-102")))
+  expect_match(brio::read_file(first$script), "--seed=1\n", fixed = TRUE)
+  expect_match(brio::read_file(second$script), "--seed=2\n", fixed = TRUE)
+  expect_false(fs::file_exists(file.path(root, sprintf("%s.sh", name))))
+  expect_length(fs::dir_ls(root, glob = "*.tmp"), 0)
+})
+
+test_that("a submit sbatch refuses leaves no script behind", {
+  stub_dir <- withr::local_tempdir()
+  brio::write_file("#!/bin/bash\necho 'sbatch: error: Invalid directive found in batch script: model' >&2\nexit 1\n", file.path(stub_dir, "sbatch"))
+  fs::file_chmod(file.path(stub_dir, "sbatch"), "0755")
+  withr::local_path(stub_dir, action = "prefix")
+  root <- local_submission_root()
+  template <- local_rscript_template()
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+
+  expect_error(
+    submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb"),
+    "Invalid directive found in batch script: model"
+  )
+  expect_length(fs::dir_ls(root), 0)
+})
+
+test_that("a Template submit logs every value it fills, defaults and derived ones included", {
+  withr::local_envvar(SLURMTOOLS_VERBOSE = "INFO")
+  toggle_logger(quiet = TRUE)
+  withr::defer({
+    Sys.unsetenv("SLURMTOOLS_VERBOSE")
+    toggle_logger(quiet = TRUE)
+  })
+  local_submission_root()
+  tmpl <- Template() |> with_job_name() |> with_partition() |> with_cpus_per_task("{{ncpu}}") |> with_command("echo", "{{file}}")
+  out <- capture.output(submit_slurm_job(tmpl, dry_run = TRUE, slurm_template_opts = list(file = "sim.R")))
+  expect_match(paste(out, collapse = "\n"), "filling template with")
+  expect_match(paste(out, collapse = "\n"), "partition: cpu2mem4gb")
+  expect_match(paste(out, collapse = "\n"), "ncpu: 1")
+  expect_match(paste(out, collapse = "\n"), "job_name: sim")
+  # derived values too, not only what was given
+  expect_match(paste(out, collapse = "\n"), "file_stem: sim")
+  expect_match(paste(out, collapse = "\n"), "parallel: FALSE")
+})
+
+test_that("the file form's log paths come from the rendered #SBATCH lines, not from a mention of log_path", {
+  local_stub_sbatch()
+  root <- local_submission_root()
+  template <- file.path(withr::local_tempdir(), "mention.tmpl")
+  writeLines(c(
+    "#!/bin/bash",
+    "#SBATCH --partition={{partition}}",
+    "#SBATCH --error=\"{{log_path}}.err\"",
+    "# the output would go to {{log_path}}, but no --output line asks for it",
+    "echo {{file}}"
+  ), template)
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+
+  res <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb")
+  expect_true(is.na(res$output))
+  expect_equal(res$error, file.path(root, sprintf("%s-0.out.err", basename(script))))
+})
+
+test_that("an #SBATCH line after the first command is a comment to Slurm, and to the result", {
+  local_stub_sbatch()
+  root <- local_submission_root()
+  template <- file.path(withr::local_tempdir(), "late.tmpl")
+  writeLines(c(
+    "#!/bin/bash",
+    "#SBATCH --partition={{partition}}",
+    "echo {{file}}",
+    "#SBATCH --output=wrong.out"
+  ), template)
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+  res <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb")
+  expect_true(is.na(res$output))
+})
+
+test_that("a template that names its job with Slurm's short form -J is not overridden", {
+  local_submission_root()
+  template <- file.path(withr::local_tempdir(), "short.tmpl")
+  writeLines(c("#!/bin/bash", "#SBATCH -J chosen", "#SBATCH --partition={{partition}}", "echo {{file}}"), template)
+  script <- withr::local_tempfile(fileext = ".R", lines = "print('hi')")
+  cmd <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb", dry_run = TRUE)
+  expect_false(any(grepl("^--job-name", cmd$args)))
+  # and one with no name at all gets the script's stem
+  writeLines(c("#!/bin/bash", "#SBATCH --partition={{partition}}", "echo {{file}}"), template)
+  cmd <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb", dry_run = TRUE)
+  expect_true(sprintf("--job-name=%s", basename(script)) %in% cmd$args)
 })

@@ -28,7 +28,7 @@ local_stub_bbi <- function(env = parent.frame()) {
   brio::write_file("#!/bin/bash\n", path)
   fs::file_chmod(path, "0755")
   withr::local_path(stub_dir, action = "prefix", .local_envir = env)
-  path
+  unname(Sys.which("bbi")) # as the old code will write it (macOS: /private/var)
 }
 
 # a model file, a stub bbi, main's template, a fake partition table, and the
@@ -39,7 +39,8 @@ local_legacy <- function(env = parent.frame()) {
   dir <- withr::local_tempdir(.local_envir = env)
   mod <- file.path(dir, "1001.mod")
   writeLines("$PROBLEM", mod)
-  root <- file.path(dir, "submission-log")
+  # fs::path() tidies the `//` tempdir() can leave, as the dispatcher's path_abs() does
+  root <- as.character(fs::path(dir, "submission-log"))
   withr::local_options(slurmtools.submission_root = root, .local_envir = env)
   list(
     dir = dir,
@@ -179,4 +180,51 @@ test_that("a path with no template and no old option still asks for a template",
   l <- local_legacy()
   withr::local_options(slurmtools.slurm_job_template_path = NULL)
   expect_error(submit_slurm_job(l$mod, partition = "cpu2mem4gb", dry_run = TRUE), "`slurm_job_template_path` is required")
+})
+
+test_that("the dispatcher's relative default submission root works through the old code", {
+  # deep-review finding 2: the old code runs sbatch from inside submission_root
+  # and hands it <submission_root>/<model>.sh, so a relative root pointed at a
+  # file that does not exist from there
+  l <- local_legacy()
+  withr::local_options(slurmtools.submission_root = NULL) # the dispatcher's "submission-log"
+  withr::local_dir(l$dir)
+
+  expect_warning(
+    cmd <- submit_slurm_job(l$mod, partition = "cpu2mem4gb", dry_run = TRUE,
+                            slurm_job_template_path = l$template, slurm_template_opts = opts),
+    "pre-template way"
+  )
+  expect_true(fs::is_absolute_path(cmd$args))
+  expect_equal(basename(dirname(cmd$args)), "submission-log")
+
+  # a stub sbatch that records the directory it ran from and the script it was given
+  stub_dir <- withr::local_tempdir()
+  record <- file.path(stub_dir, "record")
+  brio::write_file(
+    # a chatty sbatch: the id must come off the "Submitted batch job" line, not the first number seen
+    sprintf("#!/bin/bash\npwd > %s\necho \"$1\" >> %s\necho wrapper version 2\necho Submitted batch job 0\n", record, record),
+    file.path(stub_dir, "sbatch")
+  )
+  fs::file_chmod(file.path(stub_dir, "sbatch"), "0755")
+  withr::local_path(stub_dir, action = "prefix")
+
+  expect_warning(
+    res <- submit_slurm_job(l$mod, partition = "cpu2mem4gb",
+                            slurm_job_template_path = l$template, slurm_template_opts = opts),
+    "pre-template way"
+  )
+  rec <- readLines(record)
+  # the script sbatch was handed must exist from the directory sbatch ran in
+  expect_true(withr::with_dir(rec[1], fs::file_exists(rec[2])))
+  expect_true(fs::file_exists(file.path(l$dir, "submission-log", "1001.sh")))
+
+  # and the result carries the id read off "Submitted batch job 0", plus the
+  # script's path, so the follow-up functions take it (finding 7)
+  expect_equal(res$job_id, "0")
+  # path_real(): the working directory is reported through macOS's /private/var symlink
+  expect_equal(fs::path_real(res$script), fs::path_real(file.path(l$dir, "submission-log", "1001.sh")))
+  expect_equal(res$partition, "cpu2mem4gb")
+  expect_true(is.na(res$output))
+  expect_equal(names(res), c("status", "stdout", "stderr", "timeout", "job_id", "job_name", "partition", "script", "output", "error"))
 })

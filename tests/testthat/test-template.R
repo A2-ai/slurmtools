@@ -1,5 +1,8 @@
 # --- Template() + with_sbatch_flag() -------------------------------------------
 
+# the partition table, so no test here needs a real sinfo (deep-review finding 4)
+local_partition_table()
+
 test_that("an empty Template renders to a bare bash shebang, the bash Sys.which() finds", {
   expect_equal(format(Template()), shebang_line)
   expect_equal(shebang_line, paste0("#!", Sys.which("bash")))
@@ -681,7 +684,10 @@ test_that("a placeholder written only in the branch not taken is not required", 
     opts <- slurm_template_opts(t)
     opts$required[opts$option == "mpi_hosts"]
   }
-  expect_true(required_for(tmpl))
+  # with nothing given, ncpu defaults to 1 at submit and parallel is FALSE, so
+  # the table says the same: not required until ncpu makes the branch live
+  expect_false(required_for(tmpl))
+  expect_true(required_for(fill(tmpl, ncpu = 4)))
   expect_false(required_for(fill(tmpl, ncpu = 1)))
 })
 
@@ -881,7 +887,7 @@ test_that("a real submit writes <job_name>.sh, calls sbatch --parsable and retur
   expect_equal(job$job_id, "12345")
   expect_equal(job$job_name, "sim")
   expect_equal(job$partition, "cpu2mem4gb")
-  expect_equal(job$script, file.path(root, "sim.sh"))
+  expect_equal(job$script, file.path(root, "sim-12345.sh")) # its own copy, named like its logs
   expect_equal(job$output, file.path(root, "sim-12345.out"))
   expect_equal(job$error, file.path(root, "sim-12345.err"))
 
@@ -914,7 +920,8 @@ test_that("`...` goes to processx::run(), as it always did", {
   # processx throws on a non-zero exit unless told otherwise; told otherwise, our own check speaks
   expect_error(
     submit_slurm_job(sketch(), partition = "cpu2mem4gb", ncpu = 1, submission_root = root, slurm_template_opts = list(file = "s", job_name = "s")),
-    "System command 'sbatch' failed"
+    "sbatch failed (exit status 1)",
+    fixed = TRUE
   )
   expect_error(
     submit_slurm_job(sketch(), partition = "cpu2mem4gb", ncpu = 1, submission_root = root, slurm_template_opts = list(file = "s", job_name = "s"), error_on_status = FALSE),
@@ -938,7 +945,9 @@ test_that("a template's own log path lands in the result with %j resolved", {
 test_that("without a job-name flag the script is slurm-job.sh", {
   tmpl <- Template() |> with_partition() |> with_command("echo", "hi")
   cmd <- submit_slurm_job(tmpl, partition = "cpu2mem4gb", dry_run = TRUE)
-  expect_equal(basename(cmd$args[[2]]), "slurm-job.sh")
+  expect_equal(basename(cmd$args[[length(cmd$args)]]), "slurm-job.sh")
+  # and sbatch is told the name, so Slurm does not name the job after the temporary file
+  expect_true("--job-name=slurm-job" %in% cmd$args)
   expect_match(cmd$template_script, "slurm-job-%j.out", fixed = TRUE)
 })
 

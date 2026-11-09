@@ -7,7 +7,6 @@
 {{#account}}
 #SBATCH --account={{account}}
 {{/account}}
-#SBATCH --output={{log_path}}
 
 unset SLURM_NODELIST
 unset SLURM_JOB_NODELIST
@@ -44,10 +43,10 @@ unset SLURM_JOB_NODELIST
 # submit_slurm_job uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
 {{#parallel}}
-bbi nonmem run local {{model_path}}.mod --parallel --threads={{ncpu}} --config {{config_path}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --parallel --threads={{ncpu}} --config {{bbi_config_path}}
 {{/parallel}}
 
 
 {{^parallel}}
-bbi nonmem run local {{model_path}}.mod --config {{config_path}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --config {{bbi_config_path}}
 {{/parallel}}

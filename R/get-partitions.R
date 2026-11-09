@@ -8,22 +8,7 @@ partition_cache <- new.env(parent = emptyenv())
 #' @keywords internal
 #' @noRd
 run_sinfo <- function() {
-  sinfobin <- Sys.which("sinfo")
-  if (!nzchar(sinfobin)) {
-    rlang::abort("could not find sinfo binary")
-  }
-
-  res <- processx::run(sinfobin, c("--format", "%P|%c|%m|%G"), )
-  if (res$status != 0) {
-    stderrout <- sprintf(
-      "failed to get partition info with info:
-                         \n\n stdout: %s\n\n stderr: %s",
-      res$stdout,
-      res$stderr
-    )
-    rlang::abort(stderrout)
-  }
-  return(res$stdout)
+  run_slurm("sinfo", c("--format", "%P|%c|%m|%G"))$stdout
 }
 
 
@@ -49,40 +34,82 @@ lookup_partitions_by_cpu <- function(cache = TRUE) {
     run_sinfo()
   }
 
-  # make data frame
+  # make data frame: every column read as text, then CPUS and MEMORY turned
+  # into numbers here, so a grouped value like `4+` (sinfo's "4 or more",
+  # printed when a partition's nodes differ) cannot turn the column into text
   avail_cpus_table <- read.table(
     text = avail_cpus,
     sep = "|",
-    header = T,
-    na.strings = c("NA", "(null)")
+    header = TRUE,
+    colClasses = "character",
+    na.strings = c("NA", "(null)"),
+    strip.white = TRUE
   )
+  avail_cpus_table$CPUS <- sinfo_count(avail_cpus_table$CPUS)
+  avail_cpus_table$MEMORY <- sinfo_count(avail_cpus_table$MEMORY)
 
   # process
   process_slurm_partitions(avail_cpus_table)
 } # lookup_partitions_by_cpu
+
+# an sinfo count such as `4` or `4+` as an integer; the `+` marks the smallest
+# value across nodes that differ, so what is kept is a lower bound
+sinfo_count <- function(x) {
+  as.integer(sub("\\+$", "", x))
+}
 
 
 #' manipulate partition table for usability
 #'
 #' @param table the table created by lookup_partitions_by_cpu
 #'
-#' @return the table such that the default partition will be first
-#'    and will have the asterisk removed
+#' @return the table with one row per partition, the default partition (the
+#'    one sinfo stars) first with its asterisk removed, and the rest in sinfo's
+#'    order. A table with no starred row is returned in sinfo's order; every
+#'    later check then treats the first partition as the default.
 #' @keywords internal
 #' @noRd
 process_slurm_partitions <- function(table) {
-  all_partitions <- table$PARTITION
-  is_default_partition <- grepl('\\*$', x = all_partitions, )
-  default_partition <- gsub(
-    x = all_partitions[is_default_partition],
-    pattern = "\\*$",
-    replacement = ""
-  )
-  # delete the default partition then lets put it at the beginning
-  # so it can be selected that way
-  all_partitions <- all_partitions[-is_default_partition]
-  table$PARTITION <- c(default_partition, all_partitions)
-  return(table)
+  # whole rows move with their names: the old code reordered the PARTITION
+  # column alone, so with the default anywhere but first every name sat beside
+  # another partition's CPUs and memory (deep-review finding 1)
+  is_default <- grepl("\\*$", table$PARTITION)
+  table$PARTITION <- sub("\\*$", "", table$PARTITION)
+  default_names <- unique(table$PARTITION[is_default])
+
+  # sinfo prints one row per group of identically configured nodes, so a
+  # partition mixing two node shapes (CPU and GPU nodes, say) has two rows;
+  # keep one per partition so every check reads a single number
+  table <- one_row_per_partition(table)
+
+  is_default <- table$PARTITION %in% default_names
+  table <- table[order(!is_default), , drop = FALSE] # stable: default first, rest as sinfo listed them
+  rownames(table) <- NULL
+  table
+}
+
+# one row per partition name, in first-appearance order, with the largest CPUs
+# and memory among its rows and the first gres any of its rows advertises
+one_row_per_partition <- function(table) {
+  if (!anyDuplicated(table$PARTITION)) {
+    return(table)
+  }
+  groups <- split(seq_len(nrow(table)), factor(table$PARTITION, levels = unique(table$PARTITION)))
+  rows <- lapply(groups, function(i) {
+    out <- table[i[[1]], , drop = FALSE]
+    out$CPUS <- largest(table$CPUS[i])
+    out$MEMORY <- largest(table$MEMORY[i])
+    if ("GRES" %in% names(table)) {
+      gres <- table$GRES[i]
+      out$GRES <- if (all(is.na(gres))) gres[[1]] else gres[!is.na(gres)][[1]]
+    }
+    out
+  })
+  do.call(rbind, unname(rows))
+}
+
+largest <- function(x) {
+  if (all(is.na(x))) x[[1]] else max(x, na.rm = TRUE)
 }
 
 #' Gets the available slurm partitions the user can use.

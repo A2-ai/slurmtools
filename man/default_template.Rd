@@ -12,8 +12,9 @@ default_template(command = NULL, args = character(), ...)
 later with \code{\link[=with_command]{with_command()}}}
 
 \item{args}{character vector of arguments appended to the command, one
-word each, e.g. \code{c("nonmem", "run", "local", "{{file}}")}. An argument
-containing a space is quoted for the shell}
+word each, e.g. \code{c("nonmem", "run", "local", "{{file}}")}. Do not add
+quotes around a lone placeholder: its value is quoted for the shell when
+it is filled}
 
 \item{...}{zero or more \code{\link[=conditional]{conditional()}}s that switch the line between two
 forms, by position; none for a plain line}

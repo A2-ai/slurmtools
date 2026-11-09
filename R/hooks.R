@@ -8,9 +8,11 @@
 #' as its full path when found; one that is not found — `module`, `cd`,
 #' `export` and the other shell builtins — is written as given, for bash to
 #' resolve on the node. Arguments may hold `{{placeholders}}`, filled like
-#' any other with [fill()] or at submit time, and `$SLURM_JOB_ID` and the
-#' other Slurm variables are there at run time as usual: an argument with
-#' whitespace is wrapped in double quotes, so they still expand. Calling a
+#' any other with [fill()] or at submit time, and quoted for bash as in
+#' [with_command()]: a lone `"{{placeholder}}"` argument is single-quoted so
+#' its value arrives as typed, while an argument with your own text around a
+#' placeholder, `"{{file_stem}} finished $SLURM_JOB_ID"`, is double-quoted
+#' when it has whitespace, so the Slurm variables in it still expand. Calling a
 #' verb again appends another line. Conditionals given after `args` work as
 #' in [with_command()]; a payload of `NULL` leaves the line out in that state,
 #' so a cleanup or a notification can exist only when a switch says so.

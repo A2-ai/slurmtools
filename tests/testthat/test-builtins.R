@@ -13,6 +13,9 @@ nonmem <- function() {
     with_post_run("ln", c("-sf", "{{file_dir}}/{{file_stem}}/{{file_stem}}.lst", "{{file_dir}}/{{file_stem}}.lst"))
 }
 
+# the partition table, so no test here needs a real sinfo (deep-review finding 4)
+local_partition_table()
+
 test_that("the pieces are derived with fs semantics, and never by partial matching", {
   expect_equal(
     derived_fills(list(file = "model/nonmem/1001.mod")),

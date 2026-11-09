@@ -12,10 +12,10 @@
 #' }
 cancel_slurm_job <- function(job_id, auto_confirm = FALSE) {
   job_id <- slurm_job_id(job_id)
-  current_user <- if (is.null(Sys.getenv("USER"))) {
-    Sys.info()["user"]
-  } else {
-    Sys.getenv("USER")
+  # an unset variable reads as "", never NULL, so the old is.null() test never fell back
+  current_user <- Sys.getenv("USER")
+  if (!nzchar(current_user)) {
+    current_user <- Sys.info()[["user"]]
   }
 
   jobs <- get_slurm_jobs(user = current_user)
@@ -53,11 +53,8 @@ cancel_slurm_job <- function(job_id, auto_confirm = FALSE) {
   }
 
   if (continue == "Y") {
-    result <- processx::run("scancel", args = c(as.character(job_id)))
-    if (result$status != 0) {
-      print(paste0("Stdout: ", result$stdout))
-      print(paste0("Stderr: ", result$stderr))
-    }
+    run_slurm("scancel", as.character(job_id)) # a failure is raised with scancel's own message
+    cli::cli_inform(c(v = "cancelled job {job_id}"))
   } else if (tolower(continue) == "n") {
     stop("Job NOT cancelled.")
   } else {

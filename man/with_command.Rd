@@ -21,8 +21,9 @@ a path, or a placeholder such as \code{"{{bbi}}"}. The program alone:
 \code{"Rscript sim.R"} is an error, its arguments go in \code{args}}
 
 \item{args}{character vector of arguments appended to the command, one
-word each, e.g. \code{c("nonmem", "run", "local", "{{file}}")}. An argument
-containing a space is quoted for the shell}
+word each, e.g. \code{c("nonmem", "run", "local", "{{file}}")}. Do not add
+quotes around a lone placeholder: its value is quoted for the shell when
+it is filled}
 
 \item{...}{zero or more \code{\link[=conditional]{conditional()}}s that switch the line between two
 forms, by position; none for a plain line}
@@ -38,9 +39,14 @@ the template with the command line added
 }
 \description{
 Appends the line that runs on the compute node, after the \verb{#SBATCH}
-header: \code{command} followed by \code{args}, one argument per element. An
-argument containing whitespace is quoted for bash, so it reaches the
-program as one word. \code{command} is a program name, a path, or a
+header: \code{command} followed by \code{args}, one argument per element. Each
+argument reaches the program as one word. An argument that is just a
+\code{"{{placeholder}}"} is single-quoted with \code{\link[base:shQuote]{base::shQuote()}} once its value is in
+place, so a path with a space, a \verb{;} or a \code{$} in the value arrives exactly
+as given. An argument with text of your own around a placeholder
+(\code{"--out={{out}}"}, \code{"{{file_stem}} done $SLURM_JOB_ID"}) is yours: it is
+double-quoted only when it has whitespace, so \verb{$SLURM_JOB_ID} and a \code{*}
+written there still work on the node. \code{command} is a program name, a path, or a
 \code{{{placeholder}}}. A bare name is resolved to an absolute path with
 \code{Sys.which()} when the template is built, so the script names the exact
 binary that will run and a missing tool fails here rather than on the

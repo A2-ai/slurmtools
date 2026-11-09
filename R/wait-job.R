@@ -49,7 +49,19 @@ wait_for_slurm_job <- function(job, poll = 10, timeout = Inf) {
   state <- "not in sacct yet"
   cli::cli_progress_step("job {name}: {state}", spinner = TRUE)
   repeat {
-    status <- slurm_job_status(id)
+    # one failed look-up (sacct's database restarting, say) ends the wait, but
+    # not the job: say so, and how to pick the wait back up. Deliberately no
+    # retries: they would hide a permanent failure and complicate the loop
+    status <- tryCatch(slurm_job_status(id), error = function(e) {
+      rlang::abort(
+        c(
+          sprintf("could not check job %s's status; the job itself is not affected", id),
+          x = conditionMessage(e),
+          i = "check with slurm_job_status(job), or call wait_for_slurm_job(job) again to resume"
+        ),
+        parent = e
+      )
+    })
     if (nrow(status) > 0) {
       name <- sprintf("%s (%s)", status$job_name[[1]], id)
       state <- status$state[[1]]

@@ -54,8 +54,9 @@ test_that("a job still running at the deadline is a timeout naming the last stat
 
 test_that("a job sacct never learns about is polled, then times out as 'not in sacct yet'", {
   calls <- stub_sacct_sequence("")
+  # a generous deadline: starting the stub takes tens of milliseconds on some machines
   expect_error(
-    suppressMessages(wait_for_slurm_job(a_job(), poll = 0.01, timeout = 0.05)),
+    suppressMessages(wait_for_slurm_job(a_job(), poll = 0.01, timeout = 0.5)),
     "last state: not in sacct yet"
   )
   expect_gt(sacct_calls(calls), 1)
@@ -68,4 +69,21 @@ test_that("wait_for_slurm_job checks its arguments", {
   expect_error(wait_for_slurm_job(a_job(), poll = "10"), "`poll` must be a positive number")
   expect_error(wait_for_slurm_job(a_job(), timeout = 0), "`timeout` must be a positive number")
   expect_error(wait_for_slurm_job(a_job(), timeout = NA), "`timeout` must be a positive number")
+})
+
+test_that("a failed status look-up ends the wait, says the job is unaffected and how to resume", {
+  # deep-review finding 8: no retries; sacct's own words, and a way back in
+  stub_dir <- withr::local_tempdir()
+  brio::write_file(
+    "#!/bin/bash\necho 'sacct: error: Problem talking to the database' >&2\nexit 1\n",
+    file.path(stub_dir, "sacct")
+  )
+  fs::file_chmod(file.path(stub_dir, "sacct"), "0755")
+  withr::local_path(stub_dir, action = "prefix")
+
+  err <- tryCatch(suppressMessages(wait_for_slurm_job(a_job(), poll = 0.01)), error = function(e) e)
+  expect_match(conditionMessage(err), "could not check job 2051's status; the job itself is not affected", fixed = TRUE)
+  expect_match(conditionMessage(err), "Problem talking to the database", fixed = TRUE)
+  expect_match(conditionMessage(err), "wait_for_slurm_job(job) again", fixed = TRUE)
+  expect_equal(err$parent$stderr, "sacct: error: Problem talking to the database\n")
 })

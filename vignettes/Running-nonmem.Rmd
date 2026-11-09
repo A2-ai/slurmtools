@@ -86,18 +86,17 @@ Here is an example of a template file that will call `bbi`:
 {{#account}}
 #SBATCH --account={{account}}
 {{/account}}
-#SBATCH --output={{log_path}}
 
 # submit_slurm_job uses the whisker package to populate template files
 # https://github.com/edwindj/whisker
 
 {{#parallel}}
-bbi nonmem run local {{model_path}}.mod --parallel --threads={{ncpu}} --config {{config_path}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --parallel --threads={{ncpu}} --config {{bbi_config_path}}
 {{/parallel}}
 
 
 {{^parallel}}
-bbi nonmem run local {{model_path}}.mod --config {{config_path}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --config {{bbi_config_path}}
 {{/parallel}}
 ```
 
@@ -107,7 +106,7 @@ This file will call `bbi` to run our supplied model (`{{model_path}}.mod`) if `n
 Sys.which("bbi")
 ```
 
-We will use a few different template files with different functionality so we'll inject those template file paths to `submit_slurm_job`. However, we'll use the `submission-log` directory for the output, so we'll set that option as well as `slurmtools.config_path` so `submit_slurm_job` defaults can be used. The slurm template files are saved in `~/model/nonmem/` Additionally, there is a simple NONMEM control stream in `1001.mod` in the same directory that we can use for testing.
+We will use a few different template files with different functionality so we'll inject those template file paths to `submit_slurm_job`. However, we'll use the `submission-log` directory for the output, so we'll set that option as well as `slurmtools.bbi_config_path` so `submit_slurm_job` defaults can be used. The slurm template files are saved in `~/model/nonmem/` Additionally, there is a simple NONMEM control stream in `1001.mod` in the same directory that we can use for testing.
 
 ```{r}
 library(bbr)
@@ -116,7 +115,7 @@ library(here)
 nonmem = file.path(here::here(), "vignettes", "model", "nonmem")
 
 options('slurmtools.submission_root' = file.path(nonmem, "submission-log"))
-options('slurmtools.config_path' = file.path(nonmem, "bbi.yaml"))
+options('slurmtools.bbi_config_path' = file.path(nonmem, "bbi.yaml"))
 ```
 
 To create the `bbr` model object, we need to have both `1001.mod` and `1001.yaml` which contains metadata about the model in the supplied directory (`./model/nonmem/`). We'll check for mod_number.yaml and if it exists, read in the model otherwise create it and then read it.
@@ -184,7 +183,6 @@ Here is a modified template file that adds a `JOBID=$SLURM_JOBID` and some ntfy 
 {{#account}}
 #SBATCH --account={{account}}
 {{/account}}
-#SBATCH --output={{log_path}}
 
 JOBID=$SLURM_JOBID
 
@@ -196,11 +194,11 @@ curl -d "Starting model run: {{job_name}} $JOBID" ntfy.sh/{{ntfy}}
 {{/ntfy}}
 
 {{#parallel}}
-bbi nonmem run local {{model_path}}.mod --parallel --threads={{ncpu}} --config {{config_path}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --parallel --threads={{ncpu}} --config {{bbi_config_path}}
 {{/parallel}}
 
 {{^parallel}}
-bbi nonmem run local {{model_path}}.mod --config {{config_path}}
+{{bbi_exe_path}} nonmem run local {{model_path}}.mod --config {{bbi_config_path}}
 {{/parallel}}
 
 {{#ntfy}}
