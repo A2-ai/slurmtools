@@ -29,6 +29,7 @@ export(with_post_run)
 export(with_pre_run)
 export(with_sbatch_flag)
 export(write_slurm_template)
+export(write_template)
 importFrom(brio,
   read_file,
   write_file

@@ -2,9 +2,12 @@
 % Please edit documentation in R/template.R
 \name{write_slurm_template}
 \alias{write_slurm_template}
+\alias{write_template}
 \title{Write a template to a file}
 \usage{
 write_slurm_template(template, path, overwrite = FALSE)
+
+write_template(template, path, overwrite = FALSE)
 }
 \arguments{
 \item{template}{a \code{\link[=Template]{Template()}}}
@@ -22,6 +25,13 @@ placeholders as \code{{{name}}} — to a plain bash file you own. Open it, edit 
 add whatever your workflow needs; slurmtools does not look inside it again
 except to fill the placeholders. Submit through it with
 \code{submit_slurm_job(file, slurm_job_template_path = path)}.
+
+A template without \code{--output} / \code{--error} lines gets the ones
+\code{\link[=submit_slurm_job]{submit_slurm_job()}} would have added for a Template,
+\verb{\{\{log_dir\}\}/\{\{job_name\}\}-\%j.out} and \code{.err}, so a job submitted through
+the file logs under the submission root like any other and
+\code{\link[=slurm_job_log]{slurm_job_log()}} can find it. Edit or delete those lines as you like.
+\code{write_template()} is the same function under a shorter name.
 }
 \examples{
 \dontrun{

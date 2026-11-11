@@ -4,7 +4,8 @@
 #' Writes [default_template()] with your command as a plain bash file, for the
 #' file form of [submit_slurm_job()]:
 #' `submit_slurm_job(file, slurm_job_template_path = path)`. The file carries
-#' the standard header, `#SBATCH --output={{log_path}}` and the command, with
+#' the standard header, `#SBATCH --output={{log_path}}`, the `--error` line
+#' [write_slurm_template()] adds, and the command, with
 #' the values the file form supplies left as `{{placeholders}}`: `file`,
 #' `job_name`, `partition`, `ncpu`, `parallel`, `account`, `log_path`, the
 #' [template_builtins], and anything given through `slurm_template_opts`.

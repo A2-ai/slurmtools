@@ -33,7 +33,8 @@ name is resolved to an absolute path now, so a missing tool fails here}
 Writes \code{\link[=default_template]{default_template()}} with your command as a plain bash file, for the
 file form of \code{\link[=submit_slurm_job]{submit_slurm_job()}}:
 \code{submit_slurm_job(file, slurm_job_template_path = path)}. The file carries
-the standard header, \verb{#SBATCH --output=\{\{log_path\}\}} and the command, with
+the standard header, \verb{#SBATCH --output=\{\{log_path\}\}}, the \code{--error} line
+\code{\link[=write_slurm_template]{write_slurm_template()}} adds, and the command, with
 the values the file form supplies left as \code{{{placeholders}}}: \code{file},
 \code{job_name}, \code{partition}, \code{ncpu}, \code{parallel}, \code{account}, \code{log_path}, the
 \link{template_builtins}, and anything given through \code{slurm_template_opts}.

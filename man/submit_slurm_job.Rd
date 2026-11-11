@@ -110,7 +110,7 @@ without a job name), and a template without \code{--output} or \code{--error} ge
 script and logs, named alike, and a refused submit leaves nothing behind.
 
 \strong{A file path}, the file form. The path is rendered into a whisker bash
-template's \code{{{file}}} along with \code{job_name} (the file's name), \code{partition},
+template's \code{{{file}}} along with \code{job_name} (the file's stem, \code{sim.R} -> \code{sim}), \code{partition},
 \code{ncpu}, \code{parallel}, \code{log_path}, \code{bbi_config_path}, the \link{template_builtins},
 and whatever \code{slurm_template_opts} adds, which also overrides any of those.
 The template is \code{slurm_job_template_path}, written once with

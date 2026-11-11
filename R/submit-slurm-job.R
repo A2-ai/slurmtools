@@ -25,7 +25,7 @@
 #' script and logs, named alike, and a refused submit leaves nothing behind.
 #'
 #' **A file path**, the file form. The path is rendered into a whisker bash
-#' template's `{{file}}` along with `job_name` (the file's name), `partition`,
+#' template's `{{file}}` along with `job_name` (the file's stem, `sim.R` -> `sim`), `partition`,
 #' `ncpu`, `parallel`, `log_path`, `bbi_config_path`, the [template_builtins],
 #' and whatever `slurm_template_opts` adds, which also overrides any of those.
 #' The template is `slurm_job_template_path`, written once with
@@ -228,7 +228,8 @@ submit_slurm_job <- function(
   partition <- validate_partition(partition)
   check_slurm_partitions(ncpu, partition)
 
-  job_name <- basename(file)
+  # the file's stem, as the Template route names its jobs: sim.R -> sim
+  job_name <- as.character(fs::path_ext_remove(fs::path_file(file)))
   builtin <- list(
     file = file,
     job_name = job_name,

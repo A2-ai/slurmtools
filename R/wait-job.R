@@ -56,7 +56,6 @@ wait_for_slurm_job <- function(job, poll = 10, timeout = Inf) {
       rlang::abort(
         c(
           sprintf("could not check job %s's status; the job itself is not affected", id),
-          x = conditionMessage(e),
           i = "check with slurm_job_status(job), or call wait_for_slurm_job(job) again to resume"
         ),
         parent = e

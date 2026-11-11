@@ -156,7 +156,7 @@ test_that("submitting renders the template with the file and slurm values", {
   expect_match(cmd$template_script, "#SBATCH --output=", fixed = TRUE)
   expect_match(
     cmd$template_script,
-    sprintf("--job-name=%s", basename(script)),
+    sprintf("--job-name=%s", script_stem(script)),
     fixed = TRUE
   )
 })
@@ -303,7 +303,7 @@ test_that("the worker writes and chmods the job script when not a dry run", {
   )
 
   expect_equal(res$job_id, "0")
-  script_file <- file.path(root, sprintf("%s-0.sh", basename(script)))
+  script_file <- file.path(root, sprintf("%s-0.sh", script_stem(script)))
   expect_true(fs::file_exists(script_file))
   expect_true(fs::file_access(script_file, mode = "execute"))
 })
@@ -324,7 +324,7 @@ test_that("submission_root defaults to submission-log under the calling director
   )
 
   expect_equal(res$job_id, "0")
-  expect_true(fs::file_exists(file.path("submission-log", "sim.R-0.sh")))
+  expect_true(fs::file_exists(file.path("submission-log", "sim-0.sh")))
 })
 
 test_that("errors on missing files", {
@@ -380,12 +380,14 @@ test_that("the file form returns the same record as a Template submit, and the f
     c("status", "stdout", "stderr", "timeout", "job_id", "job_name", "partition", "script", "output", "error")
   )
   expect_equal(res$job_id, "0")
-  expect_equal(res$job_name, basename(script))
+  expect_equal(res$job_name, script_stem(script))
   expect_equal(res$partition, "cpu2mem4gb")
-  expect_equal(res$script, file.path(root, sprintf("%s-0.sh", basename(script))))
-  expect_equal(res$output, file.path(root, sprintf("%s-0.out", basename(script))))
-  expect_true(is.na(res$error))
-  expect_match(brio::read_file(res$script), sprintf("--output=%s/%s-%%j.out", root, basename(script)), fixed = TRUE)
+  expect_equal(res$script, file.path(root, sprintf("%s-0.sh", script_stem(script))))
+  expect_equal(res$output, file.path(root, sprintf("%s-0.out", script_stem(script))))
+  # the scaffold's --error line, {{log_dir}}/{{job_name}}-%j.err, resolves the same way
+  expect_equal(res$error, file.path(root, sprintf("%s-0.err", script_stem(script))))
+  expect_match(brio::read_file(res$script), sprintf("--output=%s/%s-%%j.out", root, script_stem(script)), fixed = TRUE)
+  expect_match(brio::read_file(res$script), sprintf("--error=%s/%s-%%j.err", root, script_stem(script)), fixed = TRUE)
 
   calls <- stub_sacct_sequence(sacct_row("COMPLETED", id = "0"))
   expect_equal(suppressMessages(wait_for_slurm_job(res, poll = 0.01))$state, "COMPLETED")
@@ -428,7 +430,7 @@ test_that("each submit keeps its own script, named like its logs, and the plain 
                             slurm_template_opts = list(seed = 1))
   second <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb",
                              slurm_template_opts = list(seed = 2))
-  name <- basename(script)
+  name <- script_stem(script)
   expect_equal(first$script, file.path(root, sprintf("%s-101.sh", name)))
   expect_equal(second$script, file.path(root, sprintf("%s-102.sh", name)))
   expect_true(fs::file_exists(first$script))
@@ -492,7 +494,7 @@ test_that("the file form's log paths come from the rendered #SBATCH lines, not f
 
   res <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb")
   expect_true(is.na(res$output))
-  expect_equal(res$error, file.path(root, sprintf("%s-0.out.err", basename(script))))
+  expect_equal(res$error, file.path(root, sprintf("%s-0.out.err", script_stem(script))))
 })
 
 test_that("an #SBATCH line after the first command is a comment to Slurm, and to the result", {
@@ -520,5 +522,5 @@ test_that("a template that names its job with Slurm's short form -J is not overr
   # and one with no name at all gets the script's stem
   writeLines(c("#!/bin/bash", "#SBATCH --partition={{partition}}", "echo {{file}}"), template)
   cmd <- submit_slurm_job(script, slurm_job_template_path = template, partition = "cpu2mem4gb", dry_run = TRUE)
-  expect_true(sprintf("--job-name=%s", basename(script)) %in% cmd$args)
+  expect_true(sprintf("--job-name=%s", script_stem(script)) %in% cmd$args)
 })

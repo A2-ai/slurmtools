@@ -73,59 +73,69 @@ NULL
 #' @rdname with_flag
 #' @export
 with_job_name <- function(template, value = "{{job_name}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "job-name", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_partition <- function(template, value = "{{partition}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "partition", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_account <- function(template, value = "{{account}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "account", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_cpus_per_task <- function(template, value = "{{cpus_per_task}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "cpus-per-task", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_nodes <- function(template, value = "{{nodes}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "nodes", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_ntasks <- function(template, value = "{{ntasks}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "ntasks", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_ntasks_per_node <- function(template, value = "{{ntasks_per_node}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "ntasks-per-node", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_gres <- function(template, value = "{{gres}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "gres", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_output <- function(template, value = "{{output}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "output", value, optional)
 }
 
 #' @rdname with_flag
 #' @export
 with_error <- function(template, value = "{{error}}", optional = FALSE) {
+  check_template(template)
   with_sbatch_flag(template, "error", value, optional)
 }

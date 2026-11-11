@@ -159,11 +159,15 @@ Template <- S7::new_class(
 
 check_template <- function(template, arg = "template") {
   if (!S7::S7_inherits(template, Template)) {
-    rlang::abort(sprintf(
-      "`%s` must be a Template(), not a <%s>",
-      arg,
-      class(template)[[1]]
-    ))
+    msg <- sprintf("`%s` must be a Template(), not a <%s>", arg, class(template)[[1]])
+    # name the verb that was handed the wrong thing, and where the template
+    # goes: fill(t, with_job_name("x")) fails inside with_job_name(), not fill()
+    call <- rlang::caller_call()
+    fn <- if (!is.null(call)) rlang::call_name(call)
+    if (!is.null(fn)) {
+      msg <- c(msg, i = sprintf("the template goes first: %s(template, ...)", fn))
+    }
+    rlang::abort(msg, call = rlang::caller_env())
   }
   invisible(template)
 }
@@ -801,7 +805,7 @@ slurm_template_opts <- function(template) {
     resolved$ncpu <- 1
   }
   known <- c(resolved, derived_fills(resolved, template = template))
-  tibble::tibble(
+  out <- tibble::tibble(
     option = option,
     used_by = unname(used_by),
     # "required" means submit would stop if nothing more were given: an option
@@ -810,6 +814,30 @@ slurm_template_opts <- function(template) {
     value = unname(value),
     default = unname(default)
   )
+  # what the user owes comes first; the rest keeps the script's order
+  out[order(!out$required), ]
+}
+
+# the two lines print() adds under the script: the blanks the user must fill,
+# and the ones submit fills for them. Nothing when the template has neither
+needs_footer <- function(template) {
+  opts <- slurm_template_opts(template)
+  needs <- opts$option[opts$required]
+  defaults <- opts[!opts$required & is.na(opts$value) & !is.na(opts$default), ]
+  if (length(needs) == 0 && nrow(defaults) == 0) {
+    return(character())
+  }
+  lines <- ""
+  if (length(needs) > 0) {
+    lines <- c(lines, paste0("needs:    ", paste(needs, collapse = ", ")))
+  }
+  if (nrow(defaults) > 0) {
+    lines <- c(lines, paste0(
+      "defaults: ",
+      paste(sprintf("%s = %s", defaults$option, defaults$default), collapse = ", ")
+    ))
+  }
+  lines
 }
 
 #' Write a template to a file
@@ -820,6 +848,13 @@ slurm_template_opts <- function(template) {
 #' add whatever your workflow needs; slurmtools does not look inside it again
 #' except to fill the placeholders. Submit through it with
 #' `submit_slurm_job(file, slurm_job_template_path = path)`.
+#'
+#' A template without `--output` / `--error` lines gets the ones
+#' [submit_slurm_job()] would have added for a Template,
+#' `{{log_dir}}/{{job_name}}-%j.out` and `.err`, so a job submitted through
+#' the file logs under the submission root like any other and
+#' [slurm_job_log()] can find it. Edit or delete those lines as you like.
+#' `write_template()` is the same function under a shorter name.
 #'
 #' @param template a [Template()]
 #' @param path where to write the file, e.g. `"rscript.tmpl"`
@@ -841,13 +876,34 @@ write_slurm_template <- function(template, path, overwrite = FALSE) {
       i = "pass `overwrite = TRUE` to replace it"
     ))
   }
+  template <- add_default_logs(template)
   brio::write_file(paste(c(format(template), ""), collapse = "\n"), path)
   cli::cli_inform(c(
     "v" = "wrote {.path {path}}",
     "i" = "it is a plain bash script: edit it to fit your workflow",
+    "i" = "its --output and --error lines log under the submission root as <job name>-<job id>.out / .err",
     "i" = "submit through it with {.code submit_slurm_job(file, slurm_job_template_path = \"{path}\")}"
   ))
   invisible(path)
+}
+
+#' @rdname write_slurm_template
+#' @export
+write_template <- write_slurm_template
+
+# the log lines submit_template() adds to a Template at submit time, in the
+# form a template *file* can carry: `{{log_dir}}` and `{{job_name}}` are both
+# supplied by the file form of submit_slurm_job(), whatever the template's own
+# job-name placeholder is called
+add_default_logs <- function(template) {
+  stem <- "{{log_dir}}/{{job_name}}-%j"
+  if (is.null(sbatch_entry(template, "output"))) {
+    template <- with_output(template, paste0(stem, ".out"))
+  }
+  if (is.null(sbatch_entry(template, "error"))) {
+    template <- with_error(template, paste0(stem, ".err"))
+  }
+  template
 }
 
 #' @export
@@ -916,6 +972,6 @@ header_value <- function(x) {
 
 #' @export
 S7::method(print, Template) <- function(x, ...) {
-  cat(format(x), sep = "\n")
+  cat(c(format(x), needs_footer(x)), sep = "\n")
   invisible(x)
 }

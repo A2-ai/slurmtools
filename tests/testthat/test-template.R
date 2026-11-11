@@ -132,6 +132,39 @@ test_that("print shows the rendered header", {
   )
 })
 
+test_that("print ends with what the user owes and what submit fills in", {
+  tmpl <- default_template("echo", c("{{file}}", "--seed={{seed}}")) |> with_sbatch_flag("time")
+  out <- capture.output(print(tmpl))
+  expect_true("needs:    time, file, seed" %in% out)
+  defaults <- grep("^defaults: ", out, value = TRUE)
+  expect_length(defaults, 1)
+  expect_match(defaults, "job_name = the stem of `file`", fixed = TRUE)
+  expect_match(defaults, "ncpu = 1", fixed = TRUE)
+  expect_match(defaults, "partition = the first partition", fixed = TRUE)
+  expect_match(defaults, "account = left out", fixed = TRUE)
+  # filling what is owed drops the needs line; job_name still defaults
+  out <- capture.output(print(fill(tmpl, time = "01:00:00", file = "sim.R", seed = 1)))
+  expect_false(any(grepl("^needs:", out)))
+  expect_equal(grep("^defaults: ", out, value = TRUE), "defaults: job_name = the stem of `file`, ncpu = 1, partition = the first partition, account = left out")
+  # everything filled leaves no footer
+  out <- capture.output(print(fill(tmpl, time = "01:00:00", file = "sim.R", seed = 1, job_name = "sim", ncpu = 2, partition = "p", account = "a")))
+  expect_false(any(grepl("^needs:|^defaults:", out)))
+  # and a template with no blanks has no footer at all
+  expect_equal(capture.output(print(Template())), shebang_line)
+  # format() is the script alone: what write_slurm_template() writes
+  expect_false(any(grepl("^needs:|^defaults:", format(tmpl))))
+})
+
+test_that("a verb handed something other than a template names itself and where the template goes", {
+  err <- expect_error(with_job_name("hello_world"), "must be a Template")
+  expect_match(conditionMessage(err), "the template goes first: with_job_name(template, ...)", fixed = TRUE)
+  expect_equal(rlang::call_name(err$call), "with_job_name")
+  err <- expect_error(fill(Template(), with_job_name("x")), "must be a Template")
+  expect_equal(rlang::call_name(err$call), "with_job_name")
+  err <- expect_error(with_command("x", "echo"), "must be a Template")
+  expect_equal(rlang::call_name(err$call), "with_command")
+})
+
 # --- fill() -------------------------------------------------------------------
 
 test_that("fill renders a value in place and leaves the rest as placeholders", {
@@ -227,8 +260,28 @@ test_that("write_slurm_template writes the rendered lines, newline-terminated", 
   expect_identical(out, path)
   expect_equal(
     brio::read_file(path),
-    paste0(shebang_line, "\n#SBATCH --job-name={{job_name}}\n#SBATCH --partition=cpu2mem4gb\n")
+    paste0(
+      shebang_line,
+      "\n#SBATCH --job-name={{job_name}}\n#SBATCH --partition=cpu2mem4gb",
+      "\n#SBATCH --output={{log_dir}}/{{job_name}}-%j.out\n#SBATCH --error={{log_dir}}/{{job_name}}-%j.err\n"
+    )
   )
+})
+
+test_that("write_slurm_template keeps the template's own log lines and only adds the missing one", {
+  path <- withr::local_tempfile(fileext = ".tmpl")
+  tmpl <- Template() |> with_job_name() |> with_output("logs/{{job_name}}.log")
+  suppressMessages(write_slurm_template(tmpl, path))
+  lines <- readLines(path)
+  expect_true("#SBATCH --output=logs/{{job_name}}.log" %in% lines)
+  expect_true("#SBATCH --error={{log_dir}}/{{job_name}}-%j.err" %in% lines)
+  expect_equal(sum(grepl("^#SBATCH --output=", lines)), 1)
+  # the Template itself is untouched: the lines live in the file only
+  expect_null(sbatch_entry(tmpl, "error"))
+})
+
+test_that("write_template() is write_slurm_template()", {
+  expect_identical(write_template, write_slurm_template)
 })
 
 test_that("write_slurm_template refuses to overwrite unless asked", {
@@ -959,6 +1012,8 @@ test_that("slurm_template_opts() lists every placeholder with what it feeds and 
   opts <- slurm_template_opts(tmpl)
   expect_s3_class(opts, "tbl_df")
   expect_equal(names(opts), c("option", "used_by", "required", "value", "default"))
+  # what the user owes comes first, then the rest in the script's order
+  expect_true(all(diff(as.integer(!opts$required)) >= 0))
   row <- function(name) opts[opts$option == name, ]
   expect_equal(row("job_name")$used_by, "--job-name")
   expect_equal(row("job_name")$default, "the stem of `file`")
