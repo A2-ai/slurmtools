@@ -415,18 +415,22 @@ submit_template <- function(template, fills, submission_root, dry_run, ...) {
     res,
     job_name = job_name,
     partition = partition,
-    output = log_path(template, "output", res$job_id),
-    error = log_path(template, "error", res$job_id)
+    output = log_path(template, "output", res$job_id, submission_root),
+    error = log_path(template, "error", res$job_id, submission_root)
   )
 }
 
-# the log a flag points at once %j is known; NA if the flag was left unfilled
-log_path <- function(template, flag, job_id) {
+# the log a flag points at once %j is known; NA if the flag was left unfilled.
+# A value with `{{tags}}` inside it ("{{log_dir}}/{{job_name}}_job%j.out")
+# takes the same fills the script did, `log_dir` from the submission root
+log_path <- function(template, flag, job_id, submission_root = NULL) {
   value <- filled_flag(template, flag)
   if (is.null(value)) {
     return(NA_character_)
   }
-  sub("%j", job_id, fill_text(value), fixed = TRUE)
+  fills <- template_fills(template)
+  fills <- c(fills, derived_fills(fills, submission_root, template = template))
+  sub("%j", job_id, substitute_tags(fill_text(value), fills), fixed = TRUE)
 }
 
 # the filled value behind a flag, or NULL when the flag is absent or unfilled

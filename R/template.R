@@ -160,6 +160,11 @@ Template <- S7::new_class(
 check_template <- function(template, arg = "template") {
   if (!S7::S7_inherits(template, Template)) {
     msg <- sprintf("`%s` must be a Template(), not a <%s>", arg, class(template)[[1]])
+    # show a short value, so fill(t, with_job_name("nightly")) reads as
+    # with_job_name() having been given "nightly" where the template goes
+    if (is.atomic(template) && length(template) == 1 && !is.na(template)) {
+      msg <- c(msg, x = sprintf("got %s", deparse(template)))
+    }
     # name the verb that was handed the wrong thing, and where the template
     # goes: fill(t, with_job_name("x")) fails inside with_job_name(), not fill()
     call <- rlang::caller_call()
@@ -444,10 +449,20 @@ script_placeholders <- function(x, fills = list()) {
 
 # a template that writes a derived builtin takes `file` as well (see derived_fills())
 template_placeholders <- function(x) {
-  written <- script_placeholders(x)
+  written <- c(script_placeholders(x), header_value_placeholders(x))
   anchor <- if (any(file_builtins %in% written)) "file" else character()
   header <- vapply(x@sbatch, function(f) f@fill, character(1))
   unique(c(header, written, anchor))
+}
+
+# `{{tags}}` written inside a header value that was given as text, such as
+# `with_output("{{log_dir}}/{{job_name}}_job%j.out")`; a lone "{{tag}}" value
+# is the flag's own fill and not among them
+header_value_placeholders <- function(x, fills = list()) {
+  tags <- unlist(lapply(x@sbatch, function(f) {
+    if (is.character(f@value)) tag_names(f@value) else character()
+  }))
+  setdiff(unique(tags), names(fills))
 }
 
 # every placeholder that must have a value before the job can be submitted:
@@ -456,7 +471,7 @@ template_placeholders <- function(x) {
 # take is not among them
 required_placeholders <- function(x, fills = list()) {
   header <- vapply(x@sbatch, function(f) if (f@optional) NA_character_ else f@fill, character(1))
-  written <- script_placeholders(x, fills)
+  written <- c(script_placeholders(x, fills), header_value_placeholders(x, fills))
   # a derived builtin nobody filled directly takes `file`, so `file` is required too
   anchor <- if (any(file_builtins %in% setdiff(written, names(fills)))) "file" else character()
   unique(c(header[!is.na(header)], written, anchor))
@@ -918,11 +933,14 @@ S7::method(format, Template) <- function(x, ...) {
 # header flag still unfilled is dropped instead of left as a `{{#tag}}` section
 render_template <- function(x, submission_root = NULL, final = FALSE) {
   fills <- template_fills(x)
+  # the derived builtins are known to the header too: a value written as
+  # "{{log_dir}}/{{job_name}}_job%j.out" takes them at submit, the same as a
+  # script line would
+  fills <- c(fills, derived_fills(fills, submission_root, template = x))
   lines <- shebang()
   for (entry in x@sbatch) {
     lines <- c(lines, sbatch_line(entry, fills, final))
   }
-  fills <- c(fills, derived_fills(fills, submission_root, template = x))
   for (group in list(x@pre_run, x@body, x@post_run)) {
     rendered <- group_lines(group, fills)
     if (length(rendered) > 0) {
@@ -945,7 +963,10 @@ shebang <- function() {
 sbatch_line <- function(entry, fills, final = FALSE) {
   value <- fills[[entry@fill]]
   if (!is.null(value)) {
-    return(sprintf("#SBATCH --%s=%s", entry@flag, header_value(fill_text(value))))
+    # a value with `{{tags}}` inside it ("{{log_dir}}/{{job_name}}_job%j.out")
+    # takes the fills known now; an unknown tag stays, to be filled later
+    text <- substitute_tags(fill_text(value), fills)
+    return(sprintf("#SBATCH --%s=%s", entry@flag, header_value(text)))
   }
   if (entry@optional && final) {
     return(character())

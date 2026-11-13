@@ -157,6 +157,7 @@ test_that("print ends with what the user owes and what submit fills in", {
 
 test_that("a verb handed something other than a template names itself and where the template goes", {
   err <- expect_error(with_job_name("hello_world"), "must be a Template")
+  expect_match(conditionMessage(err), 'got "hello_world"', fixed = TRUE)
   expect_match(conditionMessage(err), "the template goes first: with_job_name(template, ...)", fixed = TRUE)
   expect_equal(rlang::call_name(err$call), "with_job_name")
   err <- expect_error(fill(Template(), with_job_name("x")), "must be a Template")
@@ -278,6 +279,27 @@ test_that("write_slurm_template keeps the template's own log lines and only adds
   expect_equal(sum(grepl("^#SBATCH --output=", lines)), 1)
   # the Template itself is untouched: the lines live in the file only
   expect_null(sbatch_entry(tmpl, "error"))
+})
+
+test_that("a header value with tags inside it is filled at submit, like a script line", {
+  local_partition_table()
+  tmpl <- Template() |>
+    with_job_name() |> with_partition() |>
+    with_output("{{log_dir}}/{{job_name}}_job%j.out") |>
+    with_command("echo", "{{file}}")
+  # before submit the tags are shown as tags, and are known placeholders
+  expect_true("#SBATCH --output={{log_dir}}/{{job_name}}_job%j.out" %in% format(tmpl))
+  opts <- slurm_template_opts(tmpl)
+  expect_true(all(c("log_dir", "job_name") %in% opts$option))
+  expect_false(opts$required[opts$option == "log_dir"])
+  expect_equal(opts$default[opts$option == "log_dir"], "the submission root")
+  # at submit they take the root and the job name
+  d <- submit_slurm_job(tmpl, dry_run = TRUE, submission_root = "logs/here",
+                        slurm_template_opts = list(file = "sim.R", partition = "cpu2mem4gb"))
+  expect_match(d$template_script, "#SBATCH --output=logs/here/sim_job%j.out", fixed = TRUE)
+  expect_no_match(d$template_script, "{{", fixed = TRUE)
+  # and the result knows where the log went
+  expect_equal(log_path(fill(tmpl, file = "sim.R", job_name = "sim"), "output", "7", submission_root = "logs/here"), "logs/here/sim_job7.out")
 })
 
 test_that("write_template() is write_slurm_template()", {
